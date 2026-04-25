@@ -30,7 +30,9 @@ done
 
 **Engineering**:
 - `project-bootstrap` — scaffold a new project (folder, .gitignore, README, LICENSE, git init, optional GitHub repo with topics)
+- `backend-build` — implement a backend from `BACKEND_DESIGN.md` (plugins, routes, migrations, tests)
 - `fastify-route` — scaffold a Fastify route matching project conventions
+- `code-review` — technical review of changed code (correctness, security, tests, error handling)
 - `test-plan` — name the cases that must pass before writing code
 
 **Writing craft**:

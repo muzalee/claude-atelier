@@ -1,33 +1,41 @@
 ---
 name: design
-description: Explicit-invocation-only orchestrator that runs the full design pipeline end-to-end with confirmation gates between every phase. Invoked ONLY when the user types /design or explicitly asks to "run the design pipeline" / "run the design orchestrator". DO NOT auto-trigger from adjacent talk about briefs, IA, tokens, tasks, frontend, backend, or reviews — those have their own skills, and `design-flow` handles the frontend-only sequence. This skill chains: grill-me → design-brief → backend-design → information-architecture → design-tokens → brief-to-tasks → frontend-design → design-review, passing each phase's output file path into the next.
+description: Explicit-invocation-only orchestrator that runs the full design → build → review pipeline end-to-end with confirmation gates between every phase. Invoked ONLY when the user types /design or explicitly asks to "run the design pipeline" / "run the design orchestrator". DO NOT auto-trigger from adjacent talk about briefs, IA, tokens, tasks, frontend, backend, or reviews — those have their own skills, and `design-flow` handles the frontend-only sequence. This skill chains: grill-me → design-brief → backend-design → information-architecture → design-tokens → brief-to-tasks → frontend-design → backend-build → code-review → design-review, passing each phase's output into the next.
 ---
 
-This skill is an orchestrator. It runs eight design phases in strict order and waits for the user to confirm before moving to the next. You are a guide, not a rusher. Each phase produces an artifact (or a shared understanding); the next phase reads it as input.
+This skill is an orchestrator. It runs ten phases in strict order — **design → build → review** — and waits for the user to confirm before moving to the next. You are a guide, not a rusher. Each phase produces an artifact (or a shared understanding); the next phase reads it as input.
 
-This is distinct from `design-flow`. Use this skill only when the user explicitly invokes `/design` or asks for the full pipeline including the backend phase.
+This is distinct from `design-flow`. Use this skill only when the user explicitly invokes `/design` or asks for the full pipeline including backend and code review.
 
 ## The Sequence
 
 ```
+── Design ──
 1. Grill Me                 → shared understanding
 2. Design Brief             → .design/<slug>/DESIGN_BRIEF.md
 3. Backend Design           → .design/<slug>/BACKEND_DESIGN.md
 4. Information Architecture → .design/<slug>/INFORMATION_ARCHITECTURE.md
 5. Design Tokens            → tokens file (CSS / Tailwind / theme)
 6. Brief to Tasks           → .design/<slug>/TASKS.md
-7. Frontend Design          → built code
-8. Design Review            → .design/<slug>/DESIGN_REVIEW.md + screenshots
+
+── Build ──
+7. Frontend Design          → frontend code
+8. Backend Build            → backend code (server, routes, tests)
+
+── Review ──
+9. Code Review              → .design/<slug>/CODE_REVIEW.md
+10. Design Review           → .design/<slug>/DESIGN_REVIEW.md + screenshots
 ```
 
 ## Operating Rules
 
-1. **Open with the map.** Tell the user the eight-phase sequence, name the artifacts each phase produces, and ask if any phase should be skipped. Common skips:
+1. **Open with the map.** Tell the user the ten-phase sequence grouped as design → build → review, name the artifacts each phase produces, and ask if any phase should be skipped. Common skips:
    - Already have a clear idea → skip grill-me
-   - Pure-frontend feature with no server work → skip backend-design
+   - Pure-frontend feature with no server work → skip backend-design AND backend-build
+   - Backend-only service → skip IA, tokens, frontend-design, design-review
    - Single component, not a full page → skip information-architecture
    - Existing project with an established token system → skip design-tokens
-   - Nothing built yet → skip design-review (run it later via `/design-review`)
+   - Nothing built yet → skip both reviews (run them later)
 
 2. **Announce each phase before entering it.** Format: "Phase N: [name]. This will [what it does] and produce [artifact]. Ready?" Wait for confirmation before starting.
 
@@ -93,17 +101,31 @@ Read `brief-to-tasks/SKILL.md` and follow it. Tell it to read `DESIGN_BRIEF.md`,
 
 ### Phase 7: Frontend Design
 
-Read `frontend-design/SKILL.md` and follow it. Work through `TASKS.md` in order. After each task, check it off in `TASKS.md` and confirm with the user before starting the next.
+Read `frontend-design/SKILL.md` and follow it. Work through the frontend tasks in `TASKS.md` in order. After each task, check it off in `TASKS.md` and confirm with the user before starting the next.
 - **Input**: `TASKS.md`, brief, IA, tokens.
-- **Produces**: built components and pages.
-- **Transition**: "Build is done. Last phase is the design review — capture screenshots and critique against the brief. Continue?"
+- **Produces**: built frontend components and pages.
+- **Transition**: "Frontend built. Next: implement the backend from `BACKEND_DESIGN.md`. Skip if there's no server work. Continue?"
 
-### Phase 8: Design Review
+### Phase 8: Backend Build
 
-Read `design-review/SKILL.md` and follow it. Tell it to compare against `DESIGN_BRIEF.md` and to use the philosophy and component inventory from there. The review captures screenshots via Playwright MCP, the Cursor IDE Browser, or by asking the user to provide them.
+Read `backend-build/SKILL.md` and follow it. Hand it the path to `BACKEND_DESIGN.md` so it implements exactly what the brief specified — plugin structure, routes, tests, migrations.
+- **Input**: `BACKEND_DESIGN.md`, existing codebase.
+- **Produces**: backend server code (routes, plugins, migrations, tests) — build + tests passing.
+- **Transition**: "Backend built and tests green. Next: code review. Continue?"
+
+### Phase 9: Code Review
+
+Read `code-review/SKILL.md` and follow it. Point it at the branch diff or the specific files produced in phases 7 and 8. Review focuses on correctness, security, tests, error handling — the technical layer.
+- **Input**: changed code from phases 7 and 8.
+- **Produces**: `.design/<slug>/CODE_REVIEW.md` with categorized findings (must-fix, should-fix, consider).
+- **Transition**: "Code review complete. Any must-fix items can be addressed now, or we move to the design review. Continue?"
+
+### Phase 10: Design Review
+
+Read `design-review/SKILL.md` and follow it. Tell it to compare against `DESIGN_BRIEF.md` and to use the philosophy and component inventory from there. The review captures screenshots via Playwright MCP, the Cursor IDE Browser, or by asking the user to provide them. This is the visual/aesthetic review — distinct from phase 9's technical review.
 - **Input**: built code + brief + tokens.
 - **Produces**: `.design/<slug>/DESIGN_REVIEW.md` + `.design/<slug>/screenshots/`.
-- **Transition**: "Review is done. Must-fix items can be addressed now, or you can revisit any phase by calling its skill directly."
+- **Transition**: "Both reviews done. Must-fix items can be addressed now, or you can revisit any phase by calling its skill directly."
 
 ## Project Files Structure
 
@@ -115,12 +137,13 @@ Read `design-review/SKILL.md` and follow it. Tell it to compare against `DESIGN_
     ├── INFORMATION_ARCHITECTURE.md  ← Phase 4
     ├── DESIGN_TOKENS.*              ← Phase 5 (or stack-appropriate location)
     ├── TASKS.md                     ← Phase 6
-    ├── DESIGN_REVIEW.md             ← Phase 8
-    └── screenshots/                 ← Phase 8
+    ├── CODE_REVIEW.md               ← Phase 9
+    ├── DESIGN_REVIEW.md             ← Phase 10
+    └── screenshots/                 ← Phase 10
 ```
 
 ## What This Skill Is Not
 
-- Not a replacement for `design-flow` — that one is the frontend-only auto-triggerable orchestrator. This one is explicit-invocation-only and includes the backend phase.
+- Not a replacement for `design-flow` — that one is the frontend-only auto-triggerable orchestrator. This one is explicit-invocation-only and covers design → build → review end-to-end.
 - Not a wrapper that simulates the sub-skills — it runs the actual SKILL.md of each phase in full.
 - Not a fire-and-forget — the confirmation gate between every phase is the point.
