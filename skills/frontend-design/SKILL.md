@@ -14,6 +14,14 @@ This skill guides creation of distinctive, production-grade frontend interfaces.
 
 ## Before You Write Any Code
 
+0. **Materialize a token spec if one exists but no token file does.** If `.design/<slug>/DESIGN_TOKENS.md` exists AND the project has no existing token file (no `tokens.css`, no populated `theme.extend`, no `theme.ts` populated from a prior pass), translate the spec into the project's stack-appropriate format first:
+   - Tailwind project → extend `tailwind.config.js|ts` under `theme.extend` AND write CSS variables to `globals.css` for anything that needs runtime theming.
+   - Plain CSS/HTML → write to `tokens.css`, imported by the root stylesheet.
+   - CSS-in-JS (Material UI / Chakra / Emotion) → write to `theme.ts` in the expected shape for the library.
+   - Default when unclear → CSS custom properties in `tokens.css`.
+
+   Read names, values, and roles directly from the spec — do not re-derive from the philosophy. Announce the file created before proceeding. (When invoked from `/build`, the orchestrator will have already flagged this step; still perform it if the file isn't there yet.)
+
 1. **Explore the existing codebase first.** Scan specifically for:
    - **Component directories**: `components/`, `ui/`, `shared/` and list every component by name and its props/API
    - **CSS variables / tokens**: files named `tokens.css`, `variables.css`, `theme.css`, or `:root` declarations with custom properties

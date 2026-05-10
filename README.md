@@ -1,6 +1,6 @@
 # claude-atelier
 
-A workshop of personal Claude Code skills — design, build, and writing craft.
+A workshop of personal Claude Code skills — design, build, review, and writing craft.
 
 ## Install
 
@@ -14,26 +14,50 @@ for s in skills/*/; do
 done
 ```
 
-## Skills
+## The pipeline
 
-**Design pipeline** (chain via `design` or `design-flow`):
+Four orchestrators run the show. Everything else is a phase skill callable directly.
+
+```
+/project-bootstrap → scaffold a new project
+        │
+        ▼
+/design  →  docs in .design/<slug>/  (no code)
+        │
+        ▼
+/build   →  reads those docs, writes code
+        │
+        ▼
+/review  →  reviews the code against the docs
+```
+
+## Orchestrators
+
+- `project-bootstrap` — scaffold a new project (folder, `.gitignore`, README, LICENSE, git init, optional GitHub repo with topics)
+- `design` — pure-design pipeline: grill-me → brief → backend-design → IA → tokens → tasks. Output is markdown only, saved to `.design/<slug>/`.
+- `build` — reads `.design/<slug>/` and implements: materializes the tokens spec, runs frontend-design against `TASKS.md`, then backend-build against `BACKEND_DESIGN.md`.
+- `review` — runs code-review + design-review against the built code, using the design docs as the yardstick. Reports back into `.design/<slug>/`.
+
+## Phase skills (callable directly)
+
+**Design phase:**
 - `grill-me` — stress-test a plan with relentless questions
 - `design-brief` — write a design brief through interview + codebase scan
-- `information-architecture` — structure, nav, flows before visuals
 - `backend-design` — data model, API, auth, scale, observability
-- `design-tokens` — CSS variables / Tailwind config for a chosen aesthetic
+- `information-architecture` — structure, nav, flows before visuals
+- `design-tokens` — colors, spacing, typography, motion as a `DESIGN_TOKENS.md` spec (not code)
 - `brief-to-tasks` — break a brief into vertical-slice tasks
-- `frontend-design` — build production-grade UI with strong aesthetics
-- `design-review` — structured critique against brief + code
-- `design` — orchestrator: full pipeline end-to-end
-- `design-flow` — orchestrator: frontend-only sequence
 
-**Engineering**:
-- `project-bootstrap` — scaffold a new project (folder, .gitignore, README, LICENSE, git init, optional GitHub repo with topics)
+**Build phase:**
+- `frontend-design` — build production-grade UI with strong aesthetics; materializes the token spec if needed
 - `backend-build` — implement a backend from `BACKEND_DESIGN.md` (plugins, routes, migrations, tests)
 - `fastify-route` — scaffold a Fastify route matching project conventions
-- `code-review` — technical review of changed code (correctness, security, tests, error handling)
 - `test-plan` — name the cases that must pass before writing code
 
-**Writing craft**:
+**Review phase:**
+- `code-review` — technical review of changed code (correctness, security, tests, error handling)
+- `design-review` — visual critique against the brief with screenshots at mobile/tablet/desktop
+
+## Writing craft
+
 - `keep-it-simple` — terse commits, PRs, comments, and docs
