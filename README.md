@@ -4,15 +4,42 @@ A workshop of personal Claude Code skills — design, build, review, and writing
 
 ## Install
 
-Symlink each skill into `~/.claude/skills/`:
+First, clone the repo somewhere durable:
 
 ```bash
-# from repo root
+git clone https://github.com/muzalee/claude-atelier.git ~/code/claude-atelier
+cd ~/code/claude-atelier
+```
+
+Then pick one of two install targets.
+
+### Option A — every Claude Code session on this machine (recommended)
+
+Symlinks into `~/.claude/skills/` so the skills are available in every project you open:
+
+```bash
 for s in skills/*/; do
   name=$(basename "$s")
   ln -sfn "$(pwd)/$s" "$HOME/.claude/skills/$name"
 done
 ```
+
+### Option B — one specific project only
+
+Symlinks into that project's `.claude/skills/`. Project-level skills override user-level ones with the same name and don't leak to other projects:
+
+```bash
+TARGET=/path/to/your-project
+mkdir -p "$TARGET/.claude/skills"
+for s in skills/*/; do
+  name=$(basename "$s")
+  ln -sfn "$(pwd)/$s" "$TARGET/.claude/skills/$name"
+done
+```
+
+Re-running either loop is safe — `-sfn` refreshes existing links and adds any new skills that have been added to the repo. Verify with `ls -l ~/.claude/skills/` (or `.claude/skills/` inside your project) — every entry should point back into the cloned repo.
+
+To pull updates later: `git pull` inside the cloned repo. The symlinks keep working.
 
 ## The pipeline
 
