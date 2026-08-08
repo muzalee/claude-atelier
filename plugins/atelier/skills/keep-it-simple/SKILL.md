@@ -25,7 +25,7 @@ Default to the shortest form that still conveys the point. Structure follows a c
 
 3. **PR descriptions** — short summary (1–3 bullets), short test plan (checklist). No essay. **Do NOT add "🤖 Generated with Claude Code" trailer.**
 
-4. **Code comments** — only write one when the *why* is non-obvious (a hidden constraint, a workaround for a specific bug, a subtle invariant). Never restate what the code does. Never write multi-line comment blocks.
+4. **Code comments** — necessity bar, not brevity bar. Write one when the *why* is non-obvious: a hidden constraint, a workaround for a specific bug, a subtle invariant, a landmine warning for future refactors. **Keep necessary comments fully** — a 3-line note explaining a real invariant earns its length; don't artificially cut it, later readers will pay the cost. **Ruthlessly cut redundant ones**: restating what the code obviously does, session context that will rot ("added for the current PR", "used by the flow above", "as discussed with the user"), fluff paragraphs that repeat the diff, decorative section banners. The test: if removing the comment wouldn't confuse a reader six months from now, delete it.
 
 5. **Docstrings** — one short line max. Skip entirely if the function name and signature already tell the story.
 
