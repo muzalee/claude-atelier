@@ -74,7 +74,7 @@ Four orchestrators run the show. Everything else is a phase skill callable direc
 ## Orchestrators
 
 - `project-bootstrap` — scaffold a new project (folder, `.gitignore`, README, LICENSE, git init, optional GitHub repo with topics)
-- `design` — pure-design pipeline: grill-me → brief → backend-design → IA → tokens → tasks. Output is markdown only, saved to `.design/<slug>/`.
+- `design` — pure-design pipeline: grill-me → brief → backend-design → IA → tokens → test-plan → tasks. Output is markdown only, saved to `.design/<slug>/`.
 - `build` — reads `.design/<slug>/` and implements: materializes the tokens spec, runs frontend-design against `TASKS.md`, then backend-build against `BACKEND_DESIGN.md`.
 - `review` — runs code-review + design-review against the built code, using the design docs as the yardstick. Reports back into `.design/<slug>/`.
 
@@ -86,13 +86,16 @@ Four orchestrators run the show. Everything else is a phase skill callable direc
 - `backend-design` — data model, API, auth, scale, observability
 - `information-architecture` — structure, nav, flows before visuals
 - `design-tokens` — colors, spacing, typography, motion as a `DESIGN_TOKENS.md` spec (not code)
-- `brief-to-tasks` — break a brief into vertical-slice tasks
+- `test-plan` — name the cases (unit / integration / e2e), what to assert, and what NOT to test
+- `brief-to-tasks` — break a brief (and test plan) into vertical-slice tasks
 
 **Build phase:**
 - `frontend-design` — build production-grade UI with strong aesthetics; materializes the token spec if needed
 - `backend-build` — implement a backend from `BACKEND_DESIGN.md` (plugins, routes, migrations, tests)
-- `fastify-route` — scaffold a Fastify route matching project conventions
-- `test-plan` — name the cases that must pass before writing code
+
+**Runtime discipline (callable anytime during design or build):**
+- `errors` — design typed errors with stable codes and cause chains, so a log line tells the full story
+- `logging` — emit structured, context-rich logs at the right level; pairs with `errors` for end-to-end debuggability
 
 **Review phase:**
 - `code-review` — technical review of changed code (correctness, security, tests, error handling)
@@ -100,4 +103,10 @@ Four orchestrators run the show. Everything else is a phase skill callable direc
 
 ## Writing craft
 
-- `keep-it-simple` — terse commits, PRs, comments, and docs
+- `keep-it-simple` — conventional commit format, PR titles/bodies, branch names, code comments (necessity bar, not brevity bar), and terse docs
+
+## atelier-typescript skills
+
+Install `atelier-typescript` in projects where you work with Fastify + Node:
+
+- `fastify-route` — scaffold a new Fastify route matching the project's existing conventions (schema strategy, auth pattern, error shape, test framework)
