@@ -1,7 +1,21 @@
 name: pr-checks
 
 on:
+  # Both triggers so every PR gets checks exactly once, regardless of author:
+  #   - `pull_request` covers human PRs (uses head-branch workflow file, safe).
+  #   - `pull_request_target` covers bot PRs like release-please, which GitHub
+  #     blocks from firing `pull_request` to prevent GITHUB_TOKEN recursion.
+  # Per-job `if:` guards route each PR to exactly one of the two so we don't
+  # double-run on humans.
+  #
+  # Safety: both jobs only read metadata (PR title, commit list). No repo code
+  # is executed. Do NOT add code-running steps (npm install, script exec) under
+  # `pull_request_target` without pinning to the base SHA — a fork PR could
+  # otherwise inject code that runs with base-branch secrets.
   pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches: [main]
+  pull_request_target:
     types: [opened, edited, synchronize, reopened]
     branches: [main]
 
@@ -13,6 +27,9 @@ jobs:
   title:
     name: PR title
     runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'pull_request' && !endsWith(github.actor, '[bot]')) ||
+      (github.event_name == 'pull_request_target' && endsWith(github.actor, '[bot]'))
     steps:
       - uses: amannn/action-semantic-pull-request@v5
         env:
@@ -36,6 +53,7 @@ jobs:
             ci
             docs
             release
+            main
           requireScope: false
           subjectPattern: ^[A-Za-z].+$
           subjectPatternError: |
@@ -45,10 +63,17 @@ jobs:
   commits:
     name: Conventional commits
     runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'pull_request' && !endsWith(github.actor, '[bot]')) ||
+      (github.event_name == 'pull_request_target' && endsWith(github.actor, '[bot]'))
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # For pull_request_target the default ref is base; explicitly pin to
+          # the PR head so commitlint sees the PR's commits. For pull_request
+          # the default already IS the PR head, so this pin is a no-op there.
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: wagoid/commitlint-github-action@v6
         with:
           configFile: .commitlintrc.json
