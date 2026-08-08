@@ -4,42 +4,55 @@ A workshop of personal Claude Code skills — design, build, review, and writing
 
 ## Install
 
-First, clone the repo somewhere durable:
+### Recommended — as Claude Code plugins
+
+One marketplace, two plugins:
+
+- **`atelier`** — the stack-agnostic core: design → build → review pipeline + writing-craft skills.
+- **`atelier-typescript`** — TS/Fastify-specific skills. Install only in projects where you work with Fastify.
+
+Inside Claude Code:
+
+```
+/plugin marketplace add muzalee/claude-atelier
+/plugin install atelier@atelier
+/plugin install atelier-typescript@atelier   # optional, TS/Fastify only
+```
+
+Skills are namespaced under each plugin, e.g. `/atelier:design`, `/atelier-typescript:fastify-route`.
+
+**Turn on auto-update** (third-party marketplaces default off): `/plugin` → **Marketplaces** → `atelier` → **Enable auto-update**. New versions land in the background; you'll be prompted to `/reload-plugins` when they do.
+
+Or, for zero-toggle install with auto-update on, drop this in `~/.claude/settings.json` (user-level) or a project's `.claude/settings.json` (project-scoped):
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "atelier": {
+      "source": { "source": "github", "repo": "muzalee/claude-atelier" },
+      "autoUpdate": true
+    }
+  },
+  "enabledPlugins": {
+    "atelier@atelier": true,
+    "atelier-typescript@atelier": true
+  }
+}
+```
+
+Drop `atelier-typescript@atelier` from `enabledPlugins` if you don't want the TS skills in that scope.
+
+### Alternative — symlinks (for hacking on the skills)
+
+Clone somewhere durable and link each skill into `~/.claude/skills/`:
 
 ```bash
 git clone https://github.com/muzalee/claude-atelier.git ~/code/claude-atelier
 cd ~/code/claude-atelier
+for s in skills/*/; do ln -sfn "$(pwd)/$s" "$HOME/.claude/skills/$(basename "$s")"; done
 ```
 
-Then pick one of two install targets.
-
-### Option A — every Claude Code session on this machine (recommended)
-
-Symlinks into `~/.claude/skills/` so the skills are available in every project you open:
-
-```bash
-for s in skills/*/; do
-  name=$(basename "$s")
-  ln -sfn "$(pwd)/$s" "$HOME/.claude/skills/$name"
-done
-```
-
-### Option B — one specific project only
-
-Symlinks into that project's `.claude/skills/`. Project-level skills override user-level ones with the same name and don't leak to other projects:
-
-```bash
-TARGET=/path/to/your-project
-mkdir -p "$TARGET/.claude/skills"
-for s in skills/*/; do
-  name=$(basename "$s")
-  ln -sfn "$(pwd)/$s" "$TARGET/.claude/skills/$name"
-done
-```
-
-Re-running either loop is safe — `-sfn` refreshes existing links and adds any new skills that have been added to the repo. Verify with `ls -l ~/.claude/skills/` (or `.claude/skills/` inside your project) — every entry should point back into the cloned repo.
-
-To pull updates later: `git pull` inside the cloned repo. The symlinks keep working.
+For a single project only, swap `$HOME/.claude/skills` for `/path/to/project/.claude/skills`. Re-run the loop after `git pull` to pick up new skills.
 
 ## The pipeline
 

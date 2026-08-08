@@ -1,0 +1,13 @@
+{
+  "name": "atelier",
+  "version": "0.1.0",
+  "description": "A workshop of personal Claude Code skills — design, build, review, and writing craft. Ships four orchestrators (project-bootstrap, design, build, review) plus phase skills callable directly.",
+  "author": {
+    "name": "muza",
+    "url": "https://github.com/muzalee"
+  },
+  "homepage": "https://github.com/muzalee/claude-atelier",
+  "repository": "https://github.com/muzalee/claude-atelier",
+  "license": "MIT",
+  "keywords": ["design", "build", "review", "orchestrator", "skills"]
+}

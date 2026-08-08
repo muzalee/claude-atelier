@@ -1,0 +1,25 @@
+{
+  "name": "atelier",
+  "owner": {
+    "name": "muza",
+    "url": "https://github.com/muzalee"
+  },
+  "plugins": [
+    {
+      "name": "atelier",
+      "source": "./plugins/atelier",
+      "description": "Design → build → review pipeline plus writing-craft skills. Stack-agnostic.",
+      "version": "0.1.0",
+      "category": "workflow",
+      "keywords": ["design", "build", "review", "orchestrator"]
+    },
+    {
+      "name": "atelier-typescript",
+      "source": "./plugins/atelier-typescript",
+      "description": "TypeScript / Fastify-specific skills. Install alongside atelier when working in a Fastify + Node codebase.",
+      "version": "0.1.0",
+      "category": "workflow",
+      "keywords": ["typescript", "fastify", "node", "backend"]
+    }
+  ]
+}
