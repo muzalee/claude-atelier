@@ -1,0 +1,12 @@
+{
+  "extends": ["@commitlint/config-conventional"],
+  "rules": {
+    "scope-enum": [
+      2,
+      "always",
+      ["atelier", "atelier-typescript", "marketplace", "ci", "docs", "release"]
+    ],
+    "scope-empty": [1, "never"],
+    "subject-case": [0]
+  }
+}
