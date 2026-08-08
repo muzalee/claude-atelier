@@ -14,7 +14,7 @@ This skill turns a design brief into an ordered, buildable task list. Each task 
 
 ## Process
 
-1. Read the design brief. Look for `.design/*/DESIGN_BRIEF.md`. If multiple subfolders exist, use the most recently modified one, or ask the user which feature they are working on. Also check for `INFORMATION_ARCHITECTURE.md` and a tokens file in the same subfolder. If none exist, ask the user to describe what they are building.
+1. Read the design brief. Look for `.design/*/DESIGN_BRIEF.md`. If multiple subfolders exist, use the most recently modified one, or ask the user which feature they are working on. Also check for `INFORMATION_ARCHITECTURE.md`, a tokens file, and `TEST_PLAN.md` in the same subfolder. If `TEST_PLAN.md` exists, its cases become test tasks alongside the implementation work — one task per meaningful assertion, grouped in the "Tests" section (see template below). If none exist, ask the user to describe what they are building.
 
 2. Explore the existing codebase to understand what is already built. Scan specifically for:
    - **Component directories**: `components/`, `ui/`, `shared/` and list every component by name
@@ -61,6 +61,12 @@ Date: [date]
 ## Responsive & Polish
 - [ ] **[Task name]**: [Description]. Breakpoints: [which ones].
 - [ ] **[Task name]**: Accessibility pass. [Specific checks from the brief].
+
+## Tests
+_Derived from `TEST_PLAN.md`. One task per case at the level named there (unit / integration / e2e). Skip this section if no test plan exists._
+- [ ] **[unit] [case name]**: [assertion in one line].
+- [ ] **[integration] [case name]**: [assertion in one line]. _Real dep: [Postgres / Redis / etc]._
+- [ ] **[e2e] [case name]**: [assertion in one line]. _Tooling: Playwright (or Claude Chrome extension for exploratory walk-through)._
 
 ## Review
 - [ ] **Design review**: Run /design-review against the brief.

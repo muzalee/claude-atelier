@@ -1,9 +1,9 @@
 ---
 name: design
-description: Explicit-invocation-only orchestrator that runs the pure-design phase end-to-end — grill → brief → backend-design → IA → tokens → tasks — with confirmation gates between every phase. Every output is a markdown doc saved to `.design/<slug>/`. NO CODE is written in this skill. Invoked ONLY when the user types /design or explicitly asks to "run the design pipeline" / "run the design orchestrator". After this, the user runs `/build` to implement and `/review` to check the result. DO NOT auto-trigger from adjacent talk about briefs, IA, tokens, tasks, or building — those have their own skills.
+description: Explicit-invocation-only orchestrator that runs the pure-design phase end-to-end — grill → brief → backend-design → IA → tokens → test-plan → tasks — with confirmation gates between every phase. Every output is a markdown doc saved to `.design/<slug>/`. NO CODE is written in this skill. Invoked ONLY when the user types /design or explicitly asks to "run the design pipeline" / "run the design orchestrator". After this, the user runs `/build` to implement and `/review` to check the result. DO NOT auto-trigger from adjacent talk about briefs, IA, tokens, tests, tasks, or building — those have their own skills.
 ---
 
-This skill is the **pure-design** orchestrator. It runs six phases in strict order and produces markdown docs only — no code. Everything lands in `.design/<slug>/` and becomes the input to `/build`.
+This skill is the **pure-design** orchestrator. It runs seven phases in strict order and produces markdown docs only — no code. Everything lands in `.design/<slug>/` and becomes the input to `/build`.
 
 The three-part pipeline:
 - `/design` — this skill. Produces docs.
@@ -18,19 +18,21 @@ The three-part pipeline:
 3. Backend Design           → .design/<slug>/BACKEND_DESIGN.md
 4. Information Architecture → .design/<slug>/INFORMATION_ARCHITECTURE.md
 5. Design Tokens            → .design/<slug>/DESIGN_TOKENS.md   (spec, not code)
-6. Brief to Tasks           → .design/<slug>/TASKS.md
+6. Test Plan                → .design/<slug>/TEST_PLAN.md
+7. Brief to Tasks           → .design/<slug>/TASKS.md           (includes test cases from phase 6)
 ```
 
 At the end, every artifact is markdown inside `.design/<slug>/`. Nothing has been implemented. The user then runs `/build`.
 
 ## Operating Rules
 
-1. **Open with the map.** Tell the user the six-phase sequence, name the artifact each phase produces, and ask if any phase should be skipped. Common skips:
+1. **Open with the map.** Tell the user the seven-phase sequence, name the artifact each phase produces, and ask if any phase should be skipped. Common skips:
    - Already have a clear idea → skip grill-me
    - Pure-frontend feature with no server work → skip backend-design
    - Backend-only service → skip IA + tokens
    - Single component, not a full page → skip information-architecture
    - Existing project with an established token system → skip design-tokens
+   - Trivial change (typo fix, one-line copy tweak, no logic) → skip test-plan
 
 2. **Announce each phase before entering it.** Format: "Phase N: [name]. This will [what it does] and produce [artifact]. Ready?" Wait for confirmation.
 
@@ -42,7 +44,8 @@ At the end, every artifact is markdown inside `.design/<slug>/`. Nothing has bee
    - Before phase 3, tell `backend-design` the brief is at `.design/<slug>/DESIGN_BRIEF.md`.
    - Before phase 4, tell `information-architecture` that both briefs are written; URLs and flows must reflect the API surface in `BACKEND_DESIGN.md`.
    - Before phase 5, name the philosophy from the brief so tokens derive from it.
-   - Before phase 6, point at brief + IA + tokens spec so tasks reflect every decision.
+   - Before phase 6, hand `test-plan` the brief + backend brief so it can name failure modes across the full stack.
+   - Before phase 7, point at brief + IA + tokens spec + test plan so tasks reflect every decision (including the test cases).
 
 6. **End each phase with a checkpoint.** Summarize the artifact filename, 2-3 key decisions, any open questions. Then ask: "Ready for the next phase?" Do not proceed until the user says yes.
 
@@ -50,7 +53,7 @@ At the end, every artifact is markdown inside `.design/<slug>/`. Nothing has bee
 
 8. **Resume on later invocations.** If `.design/<slug>/` already contains some artifacts, list what exists, ask which slug to continue, and offer to resume from the next incomplete phase rather than restart from grill-me.
 
-9. **Close the loop.** After phase 6, tell the user: "Design done. Everything is in `.design/<slug>/`. Run `/build` when you're ready to implement, then `/review` when the code is ready to be checked."
+9. **Close the loop.** After phase 7, tell the user: "Design done. Everything is in `.design/<slug>/`. Run `/build` when you're ready to implement, then `/review` when the code is ready to be checked."
 
 ## Phase Details
 
@@ -89,10 +92,17 @@ Read `design-tokens/SKILL.md` and follow it. Name the philosophy from `DESIGN_BR
 - **Produces**: `.design/<slug>/DESIGN_TOKENS.md`.
 - **Transition**: "Tokens spec ready. Next: break into tasks. Continue?"
 
-### Phase 6: Brief to Tasks
+### Phase 6: Test Plan
 
-Read `brief-to-tasks/SKILL.md` and follow it. Tell it to read brief + IA + tokens spec so tasks reflect every decision so far.
-- **Input**: brief + IA + tokens spec.
+Read `test-plan/SKILL.md` and follow it. Tell it to read `DESIGN_BRIEF.md` + `BACKEND_DESIGN.md` (if present) so failure modes are named across the whole stack, not just the surface. This is where testing decisions get made — level (unit / integration / e2e), what to assert, and what NOT to test. The plan feeds directly into the task list.
+- **Input**: brief + backend brief.
+- **Produces**: `.design/<slug>/TEST_PLAN.md`.
+- **Transition**: "Test plan ready. Next: break brief + tests into tasks. Continue?"
+
+### Phase 7: Brief to Tasks
+
+Read `brief-to-tasks/SKILL.md` and follow it. Tell it to read brief + IA + tokens spec + **test plan** so tasks reflect every decision so far — including the test cases, which become task line items alongside the implementation work.
+- **Input**: brief + IA + tokens spec + test plan.
 - **Produces**: `.design/<slug>/TASKS.md`.
 - **Transition**: "Tasks ready. Design phase complete. Run `/build` to implement, then `/review` to check the code."
 
@@ -105,7 +115,8 @@ Read `brief-to-tasks/SKILL.md` and follow it. Tell it to read brief + IA + token
     ├── BACKEND_DESIGN.md            ← Phase 3
     ├── INFORMATION_ARCHITECTURE.md  ← Phase 4
     ├── DESIGN_TOKENS.md             ← Phase 5 (spec, not code)
-    └── TASKS.md                     ← Phase 6
+    ├── TEST_PLAN.md                 ← Phase 6
+    └── TASKS.md                     ← Phase 7 (includes test cases from phase 6)
 ```
 
 Everything is markdown. No code files.
