@@ -4,7 +4,7 @@
     "scope-enum": [
       2,
       "always",
-      ["atelier", "atelier-typescript", "marketplace", "ci", "docs", "release"]
+      ["atelier", "atelier-typescript", "marketplace", "ci", "docs", "release", "main"]
     ],
     "scope-empty": [1, "never"],
     "subject-case": [0]

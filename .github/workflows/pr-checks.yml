@@ -1,7 +1,14 @@
 name: pr-checks
 
 on:
-  pull_request:
+  # pull_request_target so bot-authored PRs (release-please) also trigger checks.
+  # GITHUB_TOKEN doesn't recurse via `pull_request`, but `pull_request_target`
+  # runs in the base branch's context and fires for bot events too.
+  # Safe here: both jobs read metadata only (PR title, git log) — no PR code
+  # is checked out or executed. Do NOT add code-running steps to this workflow
+  # without switching back to `pull_request` (or explicitly pinning to the base
+  # SHA), or a fork PR could exfiltrate secrets.
+  pull_request_target:
     types: [opened, edited, synchronize, reopened]
     branches: [main]
 
@@ -36,6 +43,7 @@ jobs:
             ci
             docs
             release
+            main
           requireScope: false
           subjectPattern: ^[A-Za-z].+$
           subjectPatternError: |
@@ -49,6 +57,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # pull_request_target defaults to base ref; explicitly check out the
+          # PR's head so commitlint sees the PR commits, not just main's.
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: wagoid/commitlint-github-action@v6
         with:
           configFile: .commitlintrc.json
