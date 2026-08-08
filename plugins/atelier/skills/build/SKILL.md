@@ -1,9 +1,9 @@
 ---
 name: build
-description: Explicit-invocation-only orchestrator that reads a completed `.design/<slug>/` folder and implements the code — frontend + backend — with confirmation gates between phases. Invoked ONLY when the user types /build or explicitly asks to "build from the design", "implement the design", "code the feature from the brief", or "run the build pipeline". DO NOT auto-trigger from adjacent talk about writing frontend or backend code — those have their own skills. Requires a `.design/<slug>/` folder from a prior `/design` run.
+description: Explicit-invocation-only orchestrator that reads a completed `.design/<slug>/` folder and implements the code — frontend + backend — autonomously, without per-phase confirmation. All decisions were made in `/design`; this skill executes them. Invoked ONLY when the user types /build or explicitly asks to "build from the design", "implement the design", "code the feature from the brief", or "run the build pipeline". DO NOT auto-trigger from adjacent talk about writing frontend or backend code — those have their own skills. Requires a `.design/<slug>/` folder from a prior `/design` run.
 ---
 
-This skill is the **build** orchestrator. It takes the design docs produced by `/design` and turns them into working code. Two phases, both gated.
+This skill is the **build** orchestrator. It takes the design docs produced by `/design` and turns them into working code. Two phases, executed back-to-back without confirmation gates — the design phase was the interactive one, this phase just delivers.
 
 The three-part pipeline:
 - `/design` — produces docs in `.design/<slug>/`.
@@ -25,17 +25,19 @@ Skip either phase if the design didn't include it (e.g. no `BACKEND_DESIGN.md` �
 
 ## Operating Rules
 
-1. **Open with a scan.** Ask which feature slug to build (or infer from a single existing `.design/*/` folder). List the artifacts present in `.design/<slug>/` so the user sees exactly what's going to drive the build. Ask which phases to run.
+1. **Open with a scan, then proceed.** Auto-detect the slug: if exactly one folder exists under `.design/`, use it; if several, ask once which one. List the artifacts present in `.design/<slug>/` and state which phases will run (frontend if `TASKS.md` exists, backend if `BACKEND_DESIGN.md` exists — skip absent ones). Do not ask permission — the user asked for a build.
 
-2. **Announce each phase before entering it.** Format: "Phase N: [name]. This will [what it does]. Ready?" Wait for confirmation.
+2. **Announce each phase as you enter it, then execute.** Format: "Phase N: [name]. Building now." No wait, no confirmation.
 
 3. **Run each phase by reading its SKILL.md and following it in full.** Do not paraphrase.
 
 4. **Thread the design docs into each phase.** Explicitly hand file paths so the sub-skill doesn't hunt for context.
 
-5. **End each phase with a checkpoint.** Summarize files created, tests added, anything deferred. Then ask: "Ready for the next phase?"
+5. **End each phase with a one-line status.** "Phase N done: N files, tests green." Then move to the next phase without asking.
 
-6. **Close the loop.** After the last phase, tell the user: "Build done. Run `/review` to check the code against the design."
+6. **Only stop on real blockers.** A blocker is: the design docs contradict the codebase in a way the brief didn't resolve, a required dependency isn't available and the fallback isn't obvious, a migration would be destructive to existing data, or a check fails and the fix isn't within scope. Chatty check-ins are not blockers — the design phase already answered "should we do this?".
+
+7. **Close the loop.** After the last phase, one summary: what was built, tests status, anything deferred. Then: "Build done. Run `/review` to check the code against the design."
 
 ## Phase Details
 
@@ -50,9 +52,9 @@ If `.design/<slug>/DESIGN_TOKENS.md` exists AND the project has no existing toke
 - CSS-in-JS (Material UI / Chakra / Emotion) → write to `theme.ts` or `theme.js` in the expected shape for the library.
 - Default when unclear → CSS custom properties in `tokens.css`.
 
-Read the token names, values, and semantic roles directly from `DESIGN_TOKENS.md`. Do not re-derive from the philosophy — the spec already made those decisions. Announce the file created and let the user confirm before proceeding.
+Read the token names, values, and semantic roles directly from `DESIGN_TOKENS.md`. Do not re-derive from the philosophy — the spec already made those decisions. Announce the file created in one line, then proceed.
 
-Then read `frontend-design/SKILL.md` and follow it. Work through the frontend tasks in `TASKS.md` in order. After each task, check it off in `TASKS.md` and confirm with the user before starting the next.
+Then read `frontend-design/SKILL.md` and follow it. Work through the frontend tasks in `TASKS.md` in order. After each task, check it off in `TASKS.md` and continue to the next without asking.
 
 - **Input**: `TASKS.md`, `DESIGN_BRIEF.md`, `INFORMATION_ARCHITECTURE.md`, materialized token file.
 - **Produces**: frontend components + pages + (if materialized this pass) the token file.
@@ -71,4 +73,4 @@ Read `backend-build/SKILL.md` and follow it. Hand it `.design/<slug>/BACKEND_DES
 - Not a designer — this skill writes code. `/design` produces the docs it consumes.
 - Not a reviewer — `/review` does the technical + visual review after the build.
 - Not a wrapper — it runs the actual SKILL.md of each phase in full.
-- Not a fire-and-forget — the confirmation gate between every phase is the point.
+- Not a chatty pipeline — decisions were made in `/design`. This orchestrator executes, only stopping on real blockers (see rule 6).

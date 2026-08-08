@@ -32,13 +32,13 @@ Turn a `BACKEND_DESIGN.md` brief into a working backend. Read the brief first, f
    - Existing DB connection, migration setup, test framework
    - `.env` / `env.example` for existing config keys
 
-3. **Confirm the build plan** before writing code. State back:
+3. **State the build plan** in one message, then proceed. Include:
    - Files you'll create / modify (as a short list)
    - New dependencies needed (and why)
    - Migration(s) that will be generated
    - Build order (foundations → auth → routes → tests)
-   
-   Wait for confirmation.
+
+   Do not wait for confirmation — the brief already settled these decisions. Only pause for the blockers in "When to stop and ask" below.
 
 4. **Build in this order** (skip any step already handled by the codebase):
    1. **Server entry** — Fastify instance, logger config, `setErrorHandler`, `setNotFoundHandler`, graceful shutdown, `listen`.
