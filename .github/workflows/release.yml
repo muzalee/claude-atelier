@@ -1,10 +1,14 @@
 name: release
 
-# Requires repo setting: Settings → Actions → General → Workflow permissions →
-# "Allow GitHub Actions to create and approve pull requests" must be checked.
-# Without it, release-please fails with: "GitHub Actions is not permitted to
-# create or approve pull requests." (This is a repo-level toggle, not a
-# workflow-level one, so it can't be set from this file.)
+# Uses a fine-grained PAT (RELEASE_PLEASE_TOKEN) instead of GITHUB_TOKEN so
+# that pr-checks fires on the release PRs release-please opens. GitHub's
+# security model does not trigger further workflows for PRs opened by
+# GITHUB_TOKEN — without the PAT, release PRs sit with "no checks reported"
+# and can only be merged via admin bypass.
+#
+# Required PAT permissions on this repo: Contents: read/write,
+# Pull requests: read/write, Issues: read/write (for auto-close on release).
+# Store as repository secret RELEASE_PLEASE_TOKEN.
 
 on:
   push:
@@ -21,5 +25,6 @@ jobs:
     steps:
       - uses: googleapis/release-please-action@v4
         with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
