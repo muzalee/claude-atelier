@@ -1,5 +1,11 @@
 name: release
 
+# Requires repo setting: Settings → Actions → General → Workflow permissions →
+# "Allow GitHub Actions to create and approve pull requests" must be checked.
+# Without it, release-please fails with: "GitHub Actions is not permitted to
+# create or approve pull requests." (This is a repo-level toggle, not a
+# workflow-level one, so it can't be set from this file.)
+
 on:
   push:
     branches: [main]
