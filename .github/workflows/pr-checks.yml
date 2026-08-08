@@ -1,13 +1,20 @@
 name: pr-checks
 
 on:
-  # pull_request_target so bot-authored PRs (release-please) also trigger checks.
-  # GITHUB_TOKEN doesn't recurse via `pull_request`, but `pull_request_target`
-  # runs in the base branch's context and fires for bot events too.
-  # Safe here: both jobs read metadata only (PR title, git log) — no PR code
-  # is checked out or executed. Do NOT add code-running steps to this workflow
-  # without switching back to `pull_request` (or explicitly pinning to the base
-  # SHA), or a fork PR could exfiltrate secrets.
+  # Both triggers so every PR gets checks exactly once, regardless of author:
+  #   - `pull_request` covers human PRs (uses head-branch workflow file, safe).
+  #   - `pull_request_target` covers bot PRs like release-please, which GitHub
+  #     blocks from firing `pull_request` to prevent GITHUB_TOKEN recursion.
+  # Per-job `if:` guards route each PR to exactly one of the two so we don't
+  # double-run on humans.
+  #
+  # Safety: both jobs only read metadata (PR title, commit list). No repo code
+  # is executed. Do NOT add code-running steps (npm install, script exec) under
+  # `pull_request_target` without pinning to the base SHA — a fork PR could
+  # otherwise inject code that runs with base-branch secrets.
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches: [main]
   pull_request_target:
     types: [opened, edited, synchronize, reopened]
     branches: [main]
@@ -20,6 +27,9 @@ jobs:
   title:
     name: PR title
     runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'pull_request' && !endsWith(github.actor, '[bot]')) ||
+      (github.event_name == 'pull_request_target' && endsWith(github.actor, '[bot]'))
     steps:
       - uses: amannn/action-semantic-pull-request@v5
         env:
@@ -53,12 +63,16 @@ jobs:
   commits:
     name: Conventional commits
     runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'pull_request' && !endsWith(github.actor, '[bot]')) ||
+      (github.event_name == 'pull_request_target' && endsWith(github.actor, '[bot]'))
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # pull_request_target defaults to base ref; explicitly check out the
-          # PR's head so commitlint sees the PR commits, not just main's.
+          # For pull_request_target the default ref is base; explicitly pin to
+          # the PR head so commitlint sees the PR's commits. For pull_request
+          # the default already IS the PR head, so this pin is a no-op there.
           ref: ${{ github.event.pull_request.head.sha }}
       - uses: wagoid/commitlint-github-action@v6
         with:
