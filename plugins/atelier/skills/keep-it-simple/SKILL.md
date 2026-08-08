@@ -1,6 +1,6 @@
 ---
 name: keep-it-simple
-description: Apply to all written output — commit messages, PR titles/descriptions, code comments, documentation, and explanations. Enforces conventional-commit format for git (feat/fix/chore/etc. + scope + short subject), matches project convention if `.commitlintrc.*` is present, keeps everything short and why-focused, and never adds "Co-Authored-By Claude" or "Generated with Claude Code" trailers. Trigger on any writing task, especially git commit, gh pr create, adding comments/docstrings, or writing README/docs.
+description: Apply to all written output — commit messages, PR titles/descriptions, branch names, code comments, documentation, and explanations. Enforces conventional-commit format for git (feat/fix/chore/etc. + scope + short subject) with matching branch prefix (`feat/`, `fix/`, etc.), respects project convention if `.commitlintrc.*` is present, keeps everything short and why-focused, and never adds "Co-Authored-By Claude" or "Generated with Claude Code" trailers. Trigger on any writing task, especially git commit, gh pr create, git checkout -b, adding comments/docstrings, or writing README/docs.
 ---
 
 Default to the shortest form that still conveys the point. Structure follows a convention where one exists; tone stays terse everywhere.
@@ -35,6 +35,9 @@ Default to the shortest form that still conveys the point. Structure follows a c
 
 ## Git mechanics
 
+- **Branch names** use the same conventional-commit prefix as the commit that will merge them: `<type>/<short-kebab-desc>`. Type matches the leading commit type (`feat`, `fix`, `chore`, `docs`, `ci`, `refactor`, `test`, `build`, `perf`, `revert`). Description is kebab-case, ≤50 chars, no trailing issue number.
+  - Good: `feat/test-plan-in-design`, `fix/expired-token-401`, `ci/rename-release-workflow`
+  - Bad: `my-branch`, `stuff`, `feat-test-plan-in-design` (hyphen instead of slash), `feature/adds-a-new-thing-that-does-lots-of-stuff` (`feature` isn't a conventional-commit type; also too long)
 - **Pick one type + one scope per commit.** If the diff spans multiple concerns, split into multiple commits rather than forcing them into one.
 - **Use HEREDOC for multi-line messages** to preserve formatting:
 
