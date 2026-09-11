@@ -1,6 +1,6 @@
 ---
 name: flutter-conventions
-description: House conventions for Flutter and Dart — feature-first project structure, layering inside a feature, state management boundaries, widget composition, and testing. Use this skill whenever writing, refactoring, or reviewing Flutter or Dart code, when deciding where a new file belongs in a Flutter project, when scaffolding a Flutter app, and whenever `/build` or `/bootstrap` works in a Flutter repo. Also use when the user asks about feature-first structure, Riverpod/Bloc placement, or where to put a repository, model, or widget.
+description: House conventions for Flutter and Dart — project structure, layering, state management boundaries, widget composition, and testing. Use this skill whenever writing, refactoring, or reviewing Flutter or Dart code, when deciding where a new file belongs in a Flutter project, when scaffolding a Flutter app, and whenever `/build` or `/bootstrap` works in a Flutter repo. Also use when the user asks where a repository, ViewModel, model, or widget belongs, or where to put a repository, model, or widget.
 ---
 
 Conventions for Flutter work in this house style. The structural decisions are the ones that matter most here — Flutter projects go wrong at the folder level long before they go wrong at the widget level, and by then moving files means touching every import.
@@ -27,40 +27,36 @@ This skill owns what those do not: the structure this house uses and the handful
 
 Say it once, then continue with this skill's conventions. Do not stall waiting for an install, do not repeat the suggestion later in the same session, and do not run the command yourself — installing third-party skills is the user's call.
 
-## Project structure: feature-first
+## Project structure
 
-Organize by **feature**, not by layer. A layer-first tree (`lib/models/`, `lib/widgets/`, `lib/services/`) looks tidy on day one and then makes every real task a scavenger hunt — adding a field to checkout means opening four folders, and deleting a feature means finding its fragments in each.
+**Use the structure from the official `flutter-apply-architecture-best-practices` skill.** It is maintained by the Flutter team, and a second competing layout in this file would be the worse of the two the moment they diverge. Read it before scaffolding; what follows is the shape it defines and the reasoning worth keeping in mind while working in it.
 
-Feature-first keeps everything one feature needs in one place, which is the unit people actually work in, hand off, and delete.
+It is a **hybrid**: UI grouped by feature, data and domain grouped by type.
 
 ```
 lib/
-├── main.dart                      # entry point, nothing else
-└── src/
-    ├── features/
-    │   ├── auth/
-    │   │   ├── data/              # repositories, data sources, DTOs
-    │   │   ├── domain/            # models, entities, value objects
-    │   │   ├── application/       # services, use cases (only when needed)
-    │   │   └── presentation/      # screens, widgets, controllers
-    │   └── checkout/
-    │       └── ...
-    ├── common/                    # widgets and helpers used by 2+ features
-    ├── routing/                   # route table, guards
-    ├── localization/
-    ├── theme/
-    └── constants/
-
-test/                              # mirrors lib/src/ exactly
+├── data/
+│   ├── models/         # API models
+│   ├── repositories/   # repository implementations — the single source of truth
+│   └── services/       # API clients, local storage wrappers
+├── domain/
+│   ├── models/         # clean domain models
+│   └── use_cases/      # optional; only for logic that clutters a ViewModel or spans repositories
+└── ui/
+    ├── core/           # shared widgets, themes, typography
+    └── features/
+        └── [feature_name]/
+            ├── view_models/
+            └── views/
 ```
 
-**The layers inside a feature depend inward.** `presentation` may use `application` and `domain`; `data` may use `domain`; `domain` depends on nothing. A model that imports a widget is the signal that the direction has broken, and it is what makes a feature impossible to test without a UI.
+Why the split rather than pure feature-first: repositories and services are genuinely shared infrastructure — several features read the same user, the same auth token, the same cache. Filing them under one feature makes every other feature import across a boundary that says it owns them. The UI has the opposite property: a screen belongs to exactly one feature and nothing else should touch it, so grouping views by feature is what keeps them deletable.
 
-**`application/` is optional.** When a controller calls one repository and does nothing else, a service layer is a file that forwards a call. Add it when there is real logic that does not belong to a single repository — an operation spanning two of them, a transaction, a policy.
+**`domain/use_cases/` stays empty until it earns its keep.** A use case that forwards one call to one repository is a file that adds a hop. Create one when logic clutters a ViewModel, or when two ViewModels need the same rule.
 
-**`common/` earns its contents by actual reuse.** Two features using a widget moves it there; one feature plus an expectation does not. A `common/` folder that accumulates speculative shared code becomes the layer-first tree you were avoiding, wearing a different name.
+**`ui/core/` earns its contents by actual reuse.** Two features using a widget moves it there; one feature plus an expectation does not. Themes and typography live there from the start, being shared by definition.
 
-**A feature that grows too large splits into features**, not into deeper folders. If `auth/` has thirty files, there is probably a `profile/` or `onboarding/` inside it wanting out.
+**Dependencies run one way: `ui` → `domain` → `data`.** A repository that imports a widget, or a domain model that knows about a screen, has broken the direction — and that is precisely what makes a feature impossible to test without pumping a widget tree.
 
 ## State management
 
@@ -92,9 +88,9 @@ Follow the `errors` skill for typed errors and cause chains, and `logging` for s
 
 ## Testing
 
-`test/` mirrors `lib/src/` so a file's test is always findable at the same path.
+`test/` mirrors `lib/` so a file's test is always findable at the same path.
 
-- **Unit tests** for `domain` and `application` — no widget pumping needed, and these should be the majority. `dart-add-unit-test` covers the mechanics, `dart-generate-test-mocks` the dependencies.
+- **Unit tests** for `domain`, repositories, and ViewModels — no widget pumping needed, and these should be the majority. `dart-add-unit-test` covers the mechanics, `dart-generate-test-mocks` the dependencies.
 - **Widget tests** for anything with conditional rendering, and use `flutter-add-widget-test` from the official collection for the mechanics.
 - **Integration tests** for the flows that would embarrass you if broken — login, checkout, the one thing the app exists to do. See `flutter-add-integration-test`.
 
@@ -102,9 +98,9 @@ Test behavior through the public surface. A test asserting a private controller 
 
 ## Anti-patterns
 
-- **Layer-first folders** (`lib/models/`, `lib/widgets/`, `lib/services/`) — the structure this skill exists to prevent.
+- **Flat `lib/` with everything at the top level** — `lib/models/`, `lib/widgets/`, `lib/screens/`. This is what `flutter create` leaves you with, and what the structure above replaces.
 - **`setState` in a large widget** as the app's state management. It works until two widgets need the same value, and the fix at that point is a rewrite.
 - **`BuildContext` stored in a field or passed into a service.** Context is valid for one build of one widget; keeping it outlives its validity.
-- **A god `providers.dart` or `services.dart`** listing every dependency in the app. Register per feature.
+- **A god `providers.dart` listing every dependency in the app.** Register alongside the thing being registered.
 - **Business logic in a `StatefulWidget`'s `initState`.** It cannot be tested, reused, or called again.
 - **Ignoring analyzer warnings.** Dart's analyzer is unusually good; a warning it raises is nearly always a real defect. `dart-run-static-analysis` runs it and applies the mechanical fixes.

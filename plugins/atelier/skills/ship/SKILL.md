@@ -23,12 +23,13 @@ Where `/build` stops at working code and `/review` stops at a report, this close
 
 1. **Unattended means unattended.** Announce each stage in one line as you enter it, then do it. No "Ready?", no checkpoints, no summaries between stages. The user chose this skill over `/build` + `/review` precisely to avoid those.
 
-2. **Stop only on a real blocker.** Exactly three things halt the run:
+2. **Stop only on a real blocker.** Exactly four things halt the run:
    - A `/build` blocker under its own rule 6 (docs contradict the codebase, a destructive migration, an unavailable dependency with no obvious fallback).
    - A failing test you cannot fix within the scope of the task.
    - A **must-fix finding from `security-review`**. Security findings are not "note it in the PR" material.
+   - **A stage asking for a human decision.** Unattended means you do not interrupt for progress reports; it does not mean you guess at a question that was put to you. If the build stops and asks something, that question is the blocker.
 
-   When you stop, leave the PR as a draft, push what exists, and say exactly which stage stopped it and why. A halted run that pushed its work is recoverable; one that discarded it is not.
+   When you stop, always: **push what exists**, leave the PR as a draft, and say which stage stopped it, the exact question or failure, and what you would do if told to proceed. A halted run that pushed its work is recoverable; one that discarded it is not.
 
 3. **Everything else gets fixed or written down.** A finding you cannot fix cleanly goes in the PR description under "Known findings", with its id. Silently dropping a finding is the one outcome worse than leaving it open.
 
@@ -49,7 +50,7 @@ Branch type follows `keep-it-simple`: `feat/`, `fix/`, `chore/`. Derive the slug
 
 ## Stage 2: First build phase, then the draft PR
 
-Run the first build phase, commit it, push, and open the PR as a draft immediately. Opening it early rather than at the end means the work is visible while it happens, and a run that halts later still leaves something to look at.
+Run the first build phase — in a terminal, by the procedure in [Stage 3](#stage-3-remaining-build-phases) — commit it, push, and open the PR as a draft immediately. Opening it early rather than at the end means the work is visible while it happens, and a run that halts later still leaves something to look at.
 
 ```bash
 git push -u origin <branch>
@@ -60,14 +61,57 @@ The PR body is written now and updated as the run proceeds. Follow `keep-it-simp
 
 ## Stage 3: Remaining build phases
 
-Read `build/SKILL.md` and follow it for every remaining phase. Hand it:
+The build runs in its own terminal rather than inline, so a long build does not occupy this session and its state is observable from outside. Hand it:
 
 - the design folder path,
 - the house conventions it must load (its own House Conventions section lists them),
 - the no-historical-comments rule, restated — comments describe the code as it is, never how it got here,
 - the instruction to commit at the end of each phase.
 
-Push when the phases are done.
+### Spawning it
+
+Use an **interactive** session, not `claude -p`. Print mode cannot ask a question — it either finishes or fails — which throws away the signal this whole arrangement exists to detect.
+
+```bash
+orca terminal create --worktree active --command "claude" --json     # returns a handle
+orca terminal send --terminal <handle> --text "<the build instruction>" --enter
+```
+
+**Without Orca, ship still works — it just runs the build inline.** Check `command -v orca`, and that `orca status --json` reports the runtime reachable (if Orca is installed but closed, `orca open` first). If either check fails, follow `build/SKILL.md` directly in this session, say so in one line, and skip the state-detection procedure below entirely — there is no separate session to inspect, so "finished, errored, or waiting" is simply whatever you observe as you go. Everything else in the pipeline is unchanged: same stages, same blockers, same PR.
+
+The terminal is an optimization, not a dependency. It buys isolation and lets a long build run without occupying this session; it is not what makes ship correct.
+
+### Telling finished from errored from waiting (terminal mode only)
+
+This is the part that goes wrong if rushed. A terminal that has stopped producing output is *either* done, *or* asking you something, *or* wedged — and they look identical until you read it.
+
+```bash
+orca terminal wait --terminal <h> --for exit --timeout-ms 600000 --json
+```
+
+- **Returns with exit code 0** → the phase finished. Read the tail to confirm what it did, then continue.
+- **Returns with a non-zero exit code** → it failed. Read the output, and treat it as a blocker unless the failure is something you can fix inside the task's scope.
+- **Times out** → not finished. Do not assume either way. Check whether it is idle:
+
+```bash
+orca terminal wait --terminal <h> --for tui-idle --timeout-ms 60000 --json
+orca terminal read --terminal <h> --cursor <n> --json
+```
+
+**`tui-idle` is not "done" and it is not "stuck" — it is "stopped producing output", and only reading the tail distinguishes them.** Treating idle as done is how a run reports success on a build that never started, so read before deciding:
+
+| The tail shows | It means | Do |
+| -------------- | -------- | -- |
+| A question, a prompt, a permission request, a menu | It is waiting on a human | **Blocker.** Push, keep the PR draft, quote the question verbatim, ask, wait. |
+| A completion summary, "done", a clean exit message | It finished without exiting the session | Continue. |
+| An error, a stack trace, a failed command | It failed | Read it; fix if in scope, otherwise blocker. |
+| Nothing new since the last cursor, and no prompt | Wedged | Blocker. Say it produced no output for N minutes rather than claiming it failed — you do not know that it did. |
+
+Track the cursor from each `terminal read` and pass it to the next so you read only new output. Poll rather than waiting one long blind timeout: a phase that has been silent for ten minutes is worth reporting even if the timeout was thirty.
+
+**Never answer a question the build asks you.** It stopped because the answer was not derivable from the design docs — which is exactly the situation where guessing produces code that looks agreed and is not. Rule 2 applies: that question is the blocker.
+
+When the phases are done, close the terminal (`orca terminal close --terminal <h>`) and push.
 
 ## Stage 4: Functional browser test
 

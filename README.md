@@ -126,7 +126,7 @@ Five orchestrators run the show. Everything else is a phase skill callable direc
 
 Install `atelier-flutter` in Flutter projects:
 
-- `flutter-conventions` — feature-first structure (`lib/src/features/<feature>/{data,domain,presentation}`), inward-depending layers, widget and state rules. Defers to the Flutter team's official skills for framework detail and recommends installing them if missing.
+- `flutter-conventions` — the official Flutter layout (`lib/{data,domain,ui}` — UI by feature, data/domain by type), one-way layer dependencies, widget and state rules. Defers to the Flutter team's official skills for framework detail and recommends installing them if missing.
 
 ## atelier-typescript skills
 

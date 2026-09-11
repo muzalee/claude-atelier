@@ -16,32 +16,43 @@ Assumes the shared rules in `../SKILL.md`. Match the existing codebase over anyt
 
 ## Folder structure
 
-Organize by **feature**, not by file type. A type-first tree (`components/`, `hooks/`, `types/`, `utils/`) looks tidy empty and turns every real task into a scavenger hunt — touching checkout means opening four folders, and deleting a feature means hunting its fragments in each.
+Follow the [bulletproof-react](https://github.com/alan2207/bulletproof-react) layout. Organize by **feature**, not by file type: a type-first tree (`components/`, `hooks/`, `types/`, `utils/` holding everything) looks tidy empty and turns every real task into a scavenger hunt — touching checkout means opening four folders, and deleting a feature means hunting its fragments in each.
 
 ```
 src/
-├── app/                      # Next.js App Router: routes and layouts ONLY
-│   └── checkout/page.tsx     # thin — imports from features/, renders
-├── features/
-│   ├── checkout/
-│   │   ├── components/       # used only by checkout
-│   │   ├── hooks/
-│   │   ├── api.ts            # this feature's server calls
-│   │   ├── schema.ts         # its zod/valibot schemas
-│   │   └── types.ts
-│   └── auth/
-├── components/ui/            # design-system primitives: Button, Input, Dialog
-├── lib/                      # genuinely cross-cutting: db client, fetcher, utils
-└── styles/
+├── app/              # application layer — routes/pages, providers, router config
+├── assets/           # static files
+├── components/       # shared components used across the whole app
+├── config/           # global config, exported env vars
+├── features/         # feature modules (see below)
+├── hooks/            # shared hooks
+├── lib/              # reusable libraries preconfigured for this app
+├── stores/           # global state stores
+├── testing/          # test utilities and mocks
+├── types/            # shared types
+└── utils/            # shared utility functions
 ```
 
-**Route files stay thin.** A `page.tsx` composes and fetches; the logic lives in the feature. That keeps the routing tree readable as a map of the app rather than as a pile of implementations.
+Each feature mirrors that shape at its own scope:
 
-**`components/ui/` is for primitives with no domain knowledge** — a Button that knows about orders is a checkout component. The test is whether it could move to another product unchanged.
+```
+src/features/checkout/
+├── api/              # request declarations and hooks for this feature
+├── assets/
+├── components/       # components scoped to this feature
+├── hooks/
+├── stores/
+├── types/
+└── utils/
+```
+
+**Dependencies flow one way: shared → features → app.** Shared code can be used anywhere; a feature may depend on shared code but **not on another feature**; the app layer may import from both. A feature importing from a sibling feature is the single rule worth enforcing with a lint boundary, because it is invisible in review and it is what turns two features into one that cannot be deleted separately.
+
+**Route files stay thin.** A `page.tsx` composes and fetches; the logic lives in the feature. That keeps the routing tree readable as a map of the app rather than a pile of implementations.
+
+**Create only the folders a feature actually needs.** A `checkout/` with `components/` and `api/` is finished; adding empty `stores/` and `utils/` to match the diagram is the type-first habit creeping back in one level down.
 
 **Promote to shared only on the second real consumer.** One feature plus an expectation is not reuse, and a `lib/` that fills with speculative helpers becomes the type-first tree you were avoiding under a different name.
-
-**A feature that grows too large splits into features**, not into deeper folders.
 
 ## Server and client boundaries
 

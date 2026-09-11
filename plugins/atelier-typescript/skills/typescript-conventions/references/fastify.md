@@ -21,18 +21,22 @@ Fastify's encapsulation is the architecture, not a detail. Every `register` crea
 
 **`fastify-plugin` (`fp`) breaks encapsulation deliberately** — it hoists the plugin's additions into the parent scope. Use it for genuinely cross-cutting infrastructure that everything needs: the database handle, the logger config, the auth decorator. Do **not** use it for a domain plugin. Wrapping everything in `fp` flattens the app into one global scope and throws away the property that made the structure worth having.
 
-Shape that holds up:
+Shape that holds up — the encapsulation boundaries and the folders are the same lines:
 
 ```
 src/
 ├── app.ts                 # builds the instance, registers plugins in order
 ├── server.ts              # listen + graceful shutdown, nothing else
-├── plugins/               # fp-wrapped infrastructure: db, auth, config, cors
-└── modules/<domain>/
-    ├── routes.ts          # plain plugin (not fp) — encapsulated
-    ├── service.ts         # business logic, no Fastify types
-    └── schema.ts
+├── plugins/               # fp-wrapped infrastructure, shared by everything:
+│   ├── db.ts              #   db handle, auth decorator, config, cors
+│   └── auth.ts
+└── modules/<domain>/      # one domain per folder, each an encapsulated plugin
+    ├── routes.ts          # plain plugin (NOT fp) — its hooks stay inside
+    ├── service.ts         # business logic, no Fastify types, unit-testable
+    └── schema.ts          # request/response schemas for this domain
 ```
+
+**Dependencies run one way: `plugins/` → `modules/`.** Infrastructure knows nothing about a domain; a domain may use any plugin. A module importing from a sibling module means the shared piece belongs in `plugins/` or in its own module — the same rule the frontend applies to features, for the same reason.
 
 Keep `server.ts` free of application logic. An `app.ts` that returns a configured instance without listening is what makes integration tests possible — they build an app and call `inject`, no port, no teardown race.
 

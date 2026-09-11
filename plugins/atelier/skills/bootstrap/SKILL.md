@@ -36,9 +36,9 @@ Bootstrap a new project end-to-end. Ask the small handful of things you actually
 
    | Stack | Structure from | Shape |
    | ----- | -------------- | ----- |
-   | React / Next.js | `typescript-conventions` → `references/react.md` | feature-first: `src/features/<feature>/`, routes thin, `components/ui/` for primitives |
+   | React / Next.js | `typescript-conventions` → `references/react.md` | bulletproof-react: `src/{app,components,config,features,hooks,lib,stores,types,utils}`, features self-contained, deps flow shared → features → app |
    | Node / Fastify | `typescript-conventions` → `references/fastify.md` | `src/plugins/` for infrastructure, `src/modules/<domain>/` per domain, `app.ts` separate from `server.ts` |
-   | Flutter | `flutter-conventions` (from `atelier-flutter`) | feature-first: `lib/src/features/<feature>/{data,domain,presentation}`, `test/` mirrors `lib/src/` |
+   | Flutter | `flutter-conventions` (from `atelier-flutter`) | official Flutter layout: `lib/{data,domain,ui}`, UI by feature, data/domain by type, `test/` mirrors `lib/` |
    | Python / Go / static | no house structure — use the ecosystem default and say so | |
 
    If the stack's plugin is not installed, say so in one line, use the ecosystem default, and continue.
