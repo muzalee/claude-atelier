@@ -12,10 +12,11 @@ If a task maps to an atelier skill, use it — don't reinvent it in freeform:
 - Implementing from a completed `.design/<slug>/` → `/atelier:build`
 - Reviewing built code against the design → `/atelier:review`
 - Taking a design all the way to a review-ready PR, unattended → `/atelier:ship`
-- Scaffolding a fresh repo → `/atelier:project-bootstrap`
+- Scaffolding a fresh repo → `/atelier:bootstrap`
 - Writing just a brief / tokens spec / IA / tasks → the matching phase skill (`design-brief`, `design-tokens`, `information-architecture`, `brief-to-tasks`)
 - Terse commits, PRs, docs, comments → `keep-it-simple`
 - Writing or reviewing TypeScript / React / Fastify → `typescript-conventions` (from `atelier-typescript`)
+- Writing or reviewing Flutter / Dart → `flutter-conventions` (from `atelier-flutter`)
 
 State which skill you're about to run before running it, so the user can redirect. If the ask is adjacent but not exact ("just sketch a plan real quick"), do the adjacent thing — don't force a full orchestrator.
 
@@ -51,7 +52,7 @@ If `docs/prd/` holds a PRD for the initiative, it is the scope contract. `.desig
 
 `/build` and any fix pass load the conventions that apply before writing code: `errors` and `logging` always, `keep-it-simple` for commits and comments, and `typescript-conventions` when the repo is TypeScript and `atelier-typescript` is installed. These are the standards `/review` measures against, so ignoring them means writing the code twice.
 
-Where a convention and the existing codebase disagree, the codebase wins — say so in one line and match what is there.
+A project's own `.claude/rules/` outranks all of them — `/bootstrap` writes the chosen folder structure there when the repo is created. Where a convention and the existing codebase disagree, the codebase wins: say so in one line and match what is there.
 
 ## 8. Baseline knowledge fills the gaps
 

@@ -1,0 +1,13 @@
+{
+  "name": "atelier-flutter",
+  "version": "0.1.0",
+  "description": "Flutter-specific skills from the atelier — feature-first project structure and house conventions. Install alongside `atelier` in a Flutter codebase.",
+  "author": {
+    "name": "muza",
+    "url": "https://github.com/muzalee"
+  },
+  "homepage": "https://github.com/muzalee/claude-atelier",
+  "repository": "https://github.com/muzalee/claude-atelier",
+  "license": "MIT",
+  "keywords": ["flutter", "dart", "mobile", "conventions"]
+}

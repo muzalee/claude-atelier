@@ -9,7 +9,8 @@ A workshop of personal Claude Code skills — design, build, review, and writing
 One marketplace, two plugins:
 
 - **`atelier`** — the stack-agnostic core: design → build → review pipeline + writing-craft skills.
-- **`atelier-typescript`** — TS/Fastify-specific skills. Install only in projects where you work with Fastify.
+- **`atelier-typescript`** — TypeScript skills (React + Fastify conventions, route scaffolding). Install in TypeScript projects.
+- **`atelier-flutter`** — Flutter skills (feature-first structure and conventions). Install in Flutter projects.
 
 Inside Claude Code:
 
@@ -59,7 +60,7 @@ For a single project only, swap `$HOME/.claude/skills` for `/path/to/project/.cl
 Five orchestrators run the show. Everything else is a phase skill callable directly.
 
 ```
-/project-bootstrap → scaffold a new project
+/bootstrap → scaffold a new project
         │
         ▼
 /prd     →  scope contract in docs/prd/NNNN-<slug>.md   (optional, project-level)
@@ -81,7 +82,7 @@ Five orchestrators run the show. Everything else is a phase skill callable direc
 
 ## Orchestrators
 
-- `project-bootstrap` — scaffold a new project (folder, `.gitignore`, README, LICENSE, git init, optional GitHub repo with topics)
+- `bootstrap` — scaffold a new project: folder, stack starter, the right folder structure for that stack written to `.claude/rules/0001-structure.md` + CLAUDE.md, `.gitignore`, README, LICENSE, git init, optional GitHub repo with topics
 - `design` — pure-design pipeline: grill-me → brief → backend-design → IA → tokens → test-plan → tasks. Output is markdown only, saved to `.design/<slug>/`.
 - `build` — reads `.design/<slug>/` and implements: materializes the tokens spec, runs frontend-design against `TASKS.md`, then backend-build against `BACKEND_DESIGN.md`.
 - `review` — runs code-review + security-review + design-review against the built code, using the design docs as the yardstick. Reports back into `.design/<slug>/`.
@@ -120,6 +121,12 @@ Five orchestrators run the show. Everything else is a phase skill callable direc
 ## Writing craft
 
 - `keep-it-simple` — conventional commit format, PR titles/bodies, branch names, code comments (necessity bar, not brevity bar), and terse docs
+
+## atelier-flutter skills
+
+Install `atelier-flutter` in Flutter projects:
+
+- `flutter-conventions` — feature-first structure (`lib/src/features/<feature>/{data,domain,presentation}`), inward-depending layers, widget and state rules. Defers to the Flutter team's official skills for framework detail and recommends installing them if missing.
 
 ## atelier-typescript skills
 

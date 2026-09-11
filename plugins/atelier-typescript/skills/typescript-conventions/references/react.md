@@ -14,6 +14,35 @@ Assumes the shared rules in `../SKILL.md`. Match the existing codebase over anyt
 - [Accessibility](#accessibility)
 - [Anti-patterns](#anti-patterns)
 
+## Folder structure
+
+Organize by **feature**, not by file type. A type-first tree (`components/`, `hooks/`, `types/`, `utils/`) looks tidy empty and turns every real task into a scavenger hunt — touching checkout means opening four folders, and deleting a feature means hunting its fragments in each.
+
+```
+src/
+├── app/                      # Next.js App Router: routes and layouts ONLY
+│   └── checkout/page.tsx     # thin — imports from features/, renders
+├── features/
+│   ├── checkout/
+│   │   ├── components/       # used only by checkout
+│   │   ├── hooks/
+│   │   ├── api.ts            # this feature's server calls
+│   │   ├── schema.ts         # its zod/valibot schemas
+│   │   └── types.ts
+│   └── auth/
+├── components/ui/            # design-system primitives: Button, Input, Dialog
+├── lib/                      # genuinely cross-cutting: db client, fetcher, utils
+└── styles/
+```
+
+**Route files stay thin.** A `page.tsx` composes and fetches; the logic lives in the feature. That keeps the routing tree readable as a map of the app rather than as a pile of implementations.
+
+**`components/ui/` is for primitives with no domain knowledge** — a Button that knows about orders is a checkout component. The test is whether it could move to another product unchanged.
+
+**Promote to shared only on the second real consumer.** One feature plus an expectation is not reuse, and a `lib/` that fills with speculative helpers becomes the type-first tree you were avoiding under a different name.
+
+**A feature that grows too large splits into features**, not into deeper folders.
+
 ## Server and client boundaries
 
 In an App Router project, **server components are the default** and `'use client'` is an opt-out you push as far down the tree as possible. A `'use client'` at the top of a page drags the entire subtree into the bundle, including components that had no interactivity and no reason to ship.

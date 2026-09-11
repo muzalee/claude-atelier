@@ -31,6 +31,19 @@
         "node",
         "conventions"
       ]
+    },
+    {
+      "name": "atelier-flutter",
+      "source": "./plugins/atelier-flutter",
+      "description": "Flutter skills: feature-first project structure and house conventions. Install alongside atelier in a Flutter codebase.",
+      "version": "0.1.0",
+      "category": "workflow",
+      "keywords": [
+        "flutter",
+        "dart",
+        "mobile",
+        "conventions"
+      ]
     }
   ]
 }

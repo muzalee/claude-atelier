@@ -1,6 +1,6 @@
 ---
-name: project-bootstrap
-description: Scaffold a new project from scratch — folder, .gitignore, README, LICENSE, git init + first commit, and (if gh is authed) create the GitHub repo with description, topics, and visibility. Use when user says "start a new project", "bootstrap", "new repo", "scaffold X", or asks to set up a fresh codebase.
+name: bootstrap
+description: Scaffold a new project from scratch — folder, stack starter, the right folder structure for that stack, CLAUDE.md, `.claude/rules/`, .gitignore, README, LICENSE, git init + first commit, and (if gh is authed) the GitHub repo with description, topics, and visibility. Use when the user says "start a new project", "bootstrap", "new repo", "scaffold X", or asks to set up a fresh codebase.
 ---
 
 Bootstrap a new project end-to-end. Ask the small handful of things you actually need, then build it. Don't over-configure — a bootstrap is a starting point, not a finished template.
@@ -17,7 +17,7 @@ Bootstrap a new project end-to-end. Ask the small handful of things you actually
 
 1. **Ask 4 questions max** (batch them if you can, but respect the user's preference — they may want one at a time):
    - **Name + one-line purpose** (used for folder name, README title, repo description)
-   - **Stack** (Node/Fastify, Next.js, Vite/React, Python, Go, static HTML, or "empty" for language-agnostic)
+   - **Stack** (Node/Fastify, Next.js, Vite/React, Flutter, Python, Go, static HTML, or "empty" for language-agnostic)
    - **License** (MIT default, or "none" to skip)
    - **GitHub**: create a repo now? public/private? topics (comma-separated, e.g. `fastify,api,typescript`)?
 
@@ -30,15 +30,44 @@ Bootstrap a new project end-to-end. Ask the small handful of things you actually
    - `LICENSE` file if requested (MIT by default — pull from stack template).
    - Stack-appropriate starter files (see below). Keep to the *minimum* — no test framework, no linter config, no CI unless user asks. This is a bootstrap, not a full kit.
 
-4. **`git init`** and make the first commit. Message format: `Initial commit — <one-line purpose>`. **Do NOT add `Co-Authored-By: Claude` trailer.**
+4. **Lay out the folder structure for the stack, and write it down.** A structure chosen now and recorded is a structure the next fifty files follow; one chosen now and left implicit is one that drifts by the third feature.
 
-5. **GitHub (if requested)**:
+   Get the structure from the stack's conventions skill rather than inventing one:
+
+   | Stack | Structure from | Shape |
+   | ----- | -------------- | ----- |
+   | React / Next.js | `typescript-conventions` → `references/react.md` | feature-first: `src/features/<feature>/`, routes thin, `components/ui/` for primitives |
+   | Node / Fastify | `typescript-conventions` → `references/fastify.md` | `src/plugins/` for infrastructure, `src/modules/<domain>/` per domain, `app.ts` separate from `server.ts` |
+   | Flutter | `flutter-conventions` (from `atelier-flutter`) | feature-first: `lib/src/features/<feature>/{data,domain,presentation}`, `test/` mirrors `lib/src/` |
+   | Python / Go / static | no house structure — use the ecosystem default and say so | |
+
+   If the stack's plugin is not installed, say so in one line, use the ecosystem default, and continue.
+
+   Create the directories, with a `.gitkeep` in any that would otherwise be empty — an empty folder is invisible to git, so the structure you just designed would not survive the first clone.
+
+   Then record the decision in two places:
+
+   - **`.claude/rules/0001-structure.md`** — the full convention: the tree, what belongs in each folder, and the rule for when something gets promoted to shared. Numbered so later rules (`0002-`, `0003-`) sit beside it in order, the same way `docs/prd/` numbers PRDs. This is what `/build` reads before writing a file.
+   - **`CLAUDE.md`** — a short section pointing at it, because `CLAUDE.md` is what Claude Code loads automatically every session:
+
+     ```markdown
+     ## Project structure
+
+     Feature-first. See `.claude/rules/0001-structure.md` for the full convention.
+     New code goes in `src/features/<feature>/`; promote to shared only on the second real consumer.
+     ```
+
+   Keep `CLAUDE.md` to what is true on day one — the stack, how to run it, the structure pointer. Do not pad it with aspirations. For auditing and growing it later, point the user at the `claude-md-improver` skill rather than doing that work now; there is nothing to audit in a repo with four files.
+
+5. **`git init`** and make the first commit. Message format: `Initial commit — <one-line purpose>`. **Do NOT add `Co-Authored-By: Claude` trailer.**
+
+6. **GitHub (if requested)**:
    - Check `gh auth status` first. If not authed, print the exact `gh auth login` command and skip repo creation.
    - Run `gh repo create <name> --description "<purpose>" --public|--private --source=. --remote=origin --push`
    - Add topics: `gh repo edit --add-topic <topic1> --add-topic <topic2> ...`
    - Print the repo URL.
 
-6. **Summarize** in ~3 lines: what was created, git status, GitHub URL (if made). Nothing more.
+7. **Summarize** in ~3 lines: what was created, git status, GitHub URL (if made). Nothing more.
 
 ## Stack starters
 
@@ -53,6 +82,9 @@ Delegate to `npx create-next-app@latest <name> --typescript --app --tailwind --e
 
 ### Vite / React
 `npm create vite@latest <name> -- --template react-ts`. Then add README + topics.
+
+### Flutter
+`flutter create <name> --org com.<yourorg> --platforms ios,android`. Then restructure `lib/` feature-first per `flutter-conventions` — `flutter create` produces a single `main.dart`, which is the layer-first default this house does not use. Recommend the official Flutter skills if they are not installed.
 
 ### Python
 Files: `pyproject.toml` (or `requirements.txt`), `src/<name>/__init__.py`, `README.md`.
