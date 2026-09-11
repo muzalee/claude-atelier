@@ -11,6 +11,7 @@ If a task maps to an atelier skill, use it — don't reinvent it in freeform:
 - Checking whether an existing plan still matches the repo → `/atelier:preflight`
 - Implementing from a completed `.design/<slug>/` → `/atelier:build`
 - Reviewing built code against the design → `/atelier:review`
+- Taking a design all the way to a review-ready PR, unattended → `/atelier:ship`
 - Scaffolding a fresh repo → `/atelier:project-bootstrap`
 - Writing just a brief / tokens spec / IA / tasks → the matching phase skill (`design-brief`, `design-tokens`, `information-architecture`, `brief-to-tasks`)
 - Terse commits, PRs, docs, comments → `keep-it-simple`

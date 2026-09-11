@@ -56,7 +56,7 @@ For a single project only, swap `$HOME/.claude/skills` for `/path/to/project/.cl
 
 ## The pipeline
 
-Four orchestrators run the show. Everything else is a phase skill callable directly.
+Five orchestrators run the show. Everything else is a phase skill callable directly.
 
 ```
 /project-bootstrap → scaffold a new project
@@ -75,6 +75,8 @@ Four orchestrators run the show. Everything else is a phase skill callable direc
         │
         ▼
 /review  →  reviews the code against the docs
+
+/ship    →  all of the above, unattended, ending in a review-ready PR
 ```
 
 ## Orchestrators
@@ -82,7 +84,8 @@ Four orchestrators run the show. Everything else is a phase skill callable direc
 - `project-bootstrap` — scaffold a new project (folder, `.gitignore`, README, LICENSE, git init, optional GitHub repo with topics)
 - `design` — pure-design pipeline: grill-me → brief → backend-design → IA → tokens → test-plan → tasks. Output is markdown only, saved to `.design/<slug>/`.
 - `build` — reads `.design/<slug>/` and implements: materializes the tokens spec, runs frontend-design against `TASKS.md`, then backend-build against `BACKEND_DESIGN.md`.
-- `review` — runs code-review + design-review against the built code, using the design docs as the yardstick. Reports back into `.design/<slug>/`.
+- `review` — runs code-review + security-review + design-review against the built code, using the design docs as the yardstick. Reports back into `.design/<slug>/`.
+- `ship` — the unattended loop: branch off main, draft PR, build committing per phase, functional browser test (Orca or Claude-in-Chrome), warm review, fix, cold review in a fresh session against the whole PR, fix, flip to ready.
 
 `/prd` is not part of the `/design` pipeline — it sits above it. One PRD covers an initiative; several `.design/<slug>/` folders can hang off it. When design or build discovers a requirement is wrong, they stop and offer to amend the PRD rather than quietly diverging from it.
 

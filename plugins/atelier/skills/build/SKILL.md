@@ -64,6 +64,8 @@ Load these before writing code. Each is a real skill — read its `SKILL.md` and
 | `tsconfig.json` present, or `.ts`/`.tsx` files in the repo, **and** the `atelier-typescript` plugin is installed | `typescript-conventions` — then the React half for frontend work, the Fastify half for backend work |
 | Fastify in `package.json` and you are adding an endpoint | `fastify-route` for the route's shape |
 
+**A note on the `security-guidance` plugin.** If it is installed, it runs a `PreToolUse` hook on every `Edit`/`Write` and warns about injection, XSS, and unsafe patterns as you write them. There is nothing to invoke — but the warnings are real findings arriving at the cheapest possible moment, and working past one silently means the same issue comes back as a review finding later. Address it or say why it does not apply.
+
 If the repo is TypeScript but `atelier-typescript` is not installed, say so once in the opening scan — "TypeScript repo, but `atelier-typescript` isn't installed, so I'm building without the house TS conventions" — and continue. Do not stall on it, and do not invent the conventions from memory.
 
 Where a skill's convention and the existing codebase disagree, **the codebase wins** and you say so in one line. One consistent idiom beats one correct idiom plus one legacy idiom, because every future reader then has to know which files follow which.
