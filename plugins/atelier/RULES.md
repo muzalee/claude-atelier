@@ -8,6 +8,7 @@ If a task maps to an atelier skill, use it — don't reinvent it in freeform:
 
 - Defining what an initiative is and is not (scope, requirements, success metrics) → `/atelier:prd`
 - Planning a new feature end-to-end → `/atelier:design`
+- Checking whether an existing plan still matches the repo → `/atelier:preflight`
 - Implementing from a completed `.design/<slug>/` → `/atelier:build`
 - Reviewing built code against the design → `/atelier:review`
 - Scaffolding a fresh repo → `/atelier:project-bootstrap`

@@ -68,6 +68,9 @@ Four orchestrators run the show. Everything else is a phase skill callable direc
 /design  →  docs in .design/<slug>/  (no code)
         │
         ▼
+/preflight → checks the plan still matches the repo   (optional, before building)
+        │
+        ▼
 /build   →  reads those docs, writes code
         │
         ▼
@@ -90,6 +93,7 @@ Four orchestrators run the show. Everything else is a phase skill callable direc
 
 **Design phase:**
 - `grill-me` — stress-test a plan with relentless questions
+- `preflight` — check a plan's claims against the actual repo (files, symbols, signatures, deps, scripts) before building it
 - `design-brief` — write a design brief through interview + codebase scan
 - `backend-design` — data model, API, auth, scale, observability
 - `information-architecture` — structure, nav, flows before visuals
