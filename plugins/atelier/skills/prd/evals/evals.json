@@ -1,0 +1,62 @@
+{
+  "skill_name": "prd",
+  "evals": [
+    {
+      "id": 0,
+      "name": "new-initiative-from-scratch",
+      "prompt": "we keep getting asked for shared team workspaces - right now Cadence is one flat schedule per company and bigger customers (the 20-30 seat ones) keep emailing support asking to split it by department because the sales team schedule is drowning out engineering. i want to write up the scope properly before anyone touches code. can you do that? assume i'm the only one deciding, target is end of Q1.",
+      "expected_output": "A numbered PRD at docs/prd/0002-<slug>.md with explicit non-goals, numbered testable requirements, measurable success metrics with baseline+target, and phased scope. Should not contain schemas, endpoints, or component names.",
+      "files": [
+        "fixtures/saas-app"
+      ],
+      "assertions": [
+        "Creates exactly one new PRD file at docs/prd/0002-<slug>.md (correct next number, 4-digit, lowercase-hyphen slug)",
+        "Leaves the existing docs/prd/0001-enterprise-tier.md untouched",
+        "Has a ## Non-Goals section with at least 2 concrete, specific exclusions (not 'TBD' or generic filler)",
+        "Functional requirements are numbered with FR-N IDs and carry MUST/SHOULD/MAY priorities",
+        "Success metrics include a real baseline AND a target number, not placeholder brackets",
+        "Has a ## Scope by Phase section where phase 1 is a genuinely shippable smallest version",
+        "Contains no implementation detail: no SQL/DDL, no API endpoint paths, no component or file names",
+        "YAML front matter present with prd, title, status, owner, created, updated",
+        "Whole PRD is under 400 lines (scope stayed one initiative)",
+        "Assumptions the agent made on the user's behalf are stated explicitly in the reply"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "amend-cut-requirement",
+      "prompt": "ok change of plan on enterprise. SCIM is dead for this year, we're not doing it - the two design partners both said manual invites are fine at their size. also legal came back and says the audit log has to be kept 7 years not 90 days, thats non negotiable now. update the doc.",
+      "expected_output": "docs/prd/0001-enterprise-tier.md edited in place: FR-2 (SCIM) removed from requirements or marked cut and moved to Non-Goals, audit log 7-year retention added as a requirement, updated: date bumped, and two new Changelog rows with reasons. Filename and prd number unchanged. No new PRD file created.",
+      "files": [
+        "fixtures/saas-app"
+      ],
+      "assertions": [
+        "Edits docs/prd/0001-enterprise-tier.md in place \u2014 filename, prd number, and created date unchanged",
+        "Creates no new file under docs/prd/",
+        "SCIM is no longer a MUST requirement: removed from the FR table or explicitly moved to Non-Goals",
+        "7-year audit log retention is captured as a requirement or NFR with the 7-year figure",
+        "Front matter updated: field is bumped to 2026-09-11",
+        "At least 2 new Changelog rows dated 2026-09-11, each with a stated reason (design-partner feedback, legal)",
+        "Scope by Phase table no longer schedules the cut SCIM requirement",
+        "Body reads as current truth \u2014 no strikethrough, no 'EDIT:'/'UPDATE:' inline annotations left in sections",
+        "Flags the downstream impact (that .design/enterprise-tier/ may now contradict the PRD)"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "scope-too-small",
+      "prompt": "write me a PRD for adding a dark mode toggle in the settings page",
+      "expected_output": "Names the cheaper path first (the real work is de-hardcoding colors / a token layer, not the toggle) in about a sentence, then writes a SHORT PRD anyway \u2014 core sections only, no Stakeholders, no Rollout, no phases. Invents no metrics or stakeholders; an unknown baseline is written as 'unknown \u2014 how to get it'.",
+      "files": [
+        "fixtures/saas-app"
+      ],
+      "assertions": [
+        "Writes docs/prd/0002-<slug>.md \u2014 does not refuse, since the user asked for the doc",
+        "Doc is short (roughly under 100 lines) and omits the extended sections: no Stakeholders, no Rollout, no Dependencies, no Scope by Phase",
+        "Names the cheaper/real path up front (token layer or de-hardcoding colors is the actual work, not the toggle)",
+        "Fabricates nothing: any missing baseline is written as unknown with how to get it, and no stakeholder is invented for a solo decider",
+        "Captures the decisions that actually get argued later (light/dark/system default, where the preference is stored, app-wide vs one page)"
+      ]
+    }
+  ]
+}

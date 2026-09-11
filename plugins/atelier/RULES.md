@@ -6,6 +6,7 @@ Runtime rules for Claude when the `atelier` plugin is active. Governs how Claude
 
 If a task maps to an atelier skill, use it — don't reinvent it in freeform:
 
+- Defining what an initiative is and is not (scope, requirements, success metrics) → `/atelier:prd`
 - Planning a new feature end-to-end → `/atelier:design`
 - Implementing from a completed `.design/<slug>/` → `/atelier:build`
 - Reviewing built code against the design → `/atelier:review`
@@ -39,12 +40,16 @@ The user chose `/design` when they wanted to think, and `/build` when they wante
 
 On re-invocation of an orchestrator, if `.design/<slug>/` already contains artifacts, list what exists and offer to resume from the next incomplete phase. Never restart from phase 1 without asking.
 
-## 6. Baseline knowledge fills the gaps
+## 6. The PRD outranks the design docs on scope
+
+If `docs/prd/` holds a PRD for the initiative, it is the scope contract. `.design/<slug>/` decides *how*; the PRD decides *what* and *whether*. When design or build discovers that a requirement is wrong, infeasible, or newly out of scope, amend the PRD (`prd` skill, Amend mode) rather than letting the brief quietly disagree with it. Two documents claiming to define scope is worse than one imperfect one.
+
+## 7. Baseline knowledge fills the gaps
 
 Atelier does not replace everything. For anything a skill does not cover — a language-specific bug, a stdlib question, a git command, a one-off script, a config tweak — use your own knowledge. Do not invent a skill or force an ill-fitting one.
 
 Rule of thumb: **skill for the named workflows above, baseline knowledge for everything else.**
 
-## 7. Ambient talk ≠ invocation
+## 8. Ambient talk ≠ invocation
 
 The user can discuss design, briefs, tokens, IA, tasks without triggering `/design`. Only fire an orchestrator on explicit invocation (`/design`, "run the design pipeline", etc.). This mirrors each orchestrator's own `description` gating.

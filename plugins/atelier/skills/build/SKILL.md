@@ -37,7 +37,9 @@ Skip either phase if the design didn't include it (e.g. no `BACKEND_DESIGN.md` �
 
 6. **Only stop on real blockers.** A blocker is: the design docs contradict the codebase in a way the brief didn't resolve, a required dependency isn't available and the fallback isn't obvious, a migration would be destructive to existing data, or a check fails and the fix isn't within scope. Chatty check-ins are not blockers — the design phase already answered "should we do this?".
 
-7. **Close the loop.** After the last phase, one summary: what was built, tests status, anything deferred. Then: "Build done. Run `/review` to check the code against the design."
+7. **The PRD is scope, not a suggestion.** If `.design/<slug>/` or `docs/prd/` names a PRD, read it. When the build has to deviate from a stated requirement — a MUST turns out to be infeasible, a non-goal turns out to be unavoidable — that is a real blocker under rule 6. Stop, name the requirement ID, and offer to amend the PRD (read `prd/SKILL.md`, Amend mode). Shipping code that contradicts the PRD is how the document dies.
+
+8. **Close the loop.** After the last phase, one summary: what was built, tests status, anything deferred. Then: "Build done. Run `/review` to check the code against the design."
 
 ## Phase Details
 

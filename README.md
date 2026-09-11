@@ -62,6 +62,9 @@ Four orchestrators run the show. Everything else is a phase skill callable direc
 /project-bootstrap → scaffold a new project
         │
         ▼
+/prd     →  scope contract in docs/prd/NNNN-<slug>.md   (optional, project-level)
+        │
+        ▼
 /design  →  docs in .design/<slug>/  (no code)
         │
         ▼
@@ -78,7 +81,12 @@ Four orchestrators run the show. Everything else is a phase skill callable direc
 - `build` — reads `.design/<slug>/` and implements: materializes the tokens spec, runs frontend-design against `TASKS.md`, then backend-build against `BACKEND_DESIGN.md`.
 - `review` — runs code-review + design-review against the built code, using the design docs as the yardstick. Reports back into `.design/<slug>/`.
 
+`/prd` is not part of the `/design` pipeline — it sits above it. One PRD covers an initiative; several `.design/<slug>/` folders can hang off it. When design or build discovers a requirement is wrong, they stop and offer to amend the PRD rather than quietly diverging from it.
+
 ## Phase skills (callable directly)
+
+**Scope:**
+- `prd` — product requirements doc: problem, users, requirements, success metrics, non-goals, phases, dependencies, risks. Numbered files in `docs/prd/`, amended in place with a changelog.
 
 **Design phase:**
 - `grill-me` — stress-test a plan with relentless questions

@@ -53,7 +53,11 @@ At the end, every artifact is markdown inside `.design/<slug>/`. Nothing has bee
 
 8. **Resume on later invocations.** If `.design/<slug>/` already contains some artifacts, list what exists, ask which slug to continue, and offer to resume from the next incomplete phase rather than restart from grill-me.
 
-9. **Close the loop.** After phase 7, tell the user: "Design done. Everything is in `.design/<slug>/`. Run `/build` when you're ready to implement, then `/review` when the code is ready to be checked."
+9. **Respect the PRD if one exists.** Check `docs/prd/` at the start. If a PRD covers this initiative, read it before phase 1 and treat its requirements and non-goals as the scope contract — the design decides *how*, not *whether*. Name the PRD file in the opening map, and put `> PRD: docs/prd/NNNN-<slug>.md` at the top of `DESIGN_BRIEF.md`.
+
+10. **Design can change requirements — but say so out loud.** Design routinely reveals that a requirement was wrong, impossible, or more expensive than it looked. When that happens, stop, tell the user which PRD requirement is affected, and offer to amend the PRD (read `prd/SKILL.md`, Amend mode) before continuing. A design that silently contradicts its PRD leaves two documents claiming to be the scope, and the team then argues about which one counts.
+
+11. **Close the loop.** After phase 7, tell the user: "Design done. Everything is in `.design/<slug>/`. Run `/build` when you're ready to implement, then `/review` when the code is ready to be checked."
 
 ## Phase Details
 
