@@ -21,14 +21,15 @@
     {
       "name": "atelier-typescript",
       "source": "./plugins/atelier-typescript",
-      "description": "TypeScript / Fastify-specific skills. Install alongside atelier when working in a Fastify + Node codebase.",
+      "description": "TypeScript skills: house conventions for React + Fastify, and route scaffolding. Install alongside atelier in a TypeScript codebase.",
       "version": "0.1.0",
       "category": "workflow",
       "keywords": [
         "typescript",
+        "react",
         "fastify",
         "node",
-        "backend"
+        "conventions"
       ]
     }
   ]

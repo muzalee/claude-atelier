@@ -13,6 +13,7 @@ If a task maps to an atelier skill, use it — don't reinvent it in freeform:
 - Scaffolding a fresh repo → `/atelier:project-bootstrap`
 - Writing just a brief / tokens spec / IA / tasks → the matching phase skill (`design-brief`, `design-tokens`, `information-architecture`, `brief-to-tasks`)
 - Terse commits, PRs, docs, comments → `keep-it-simple`
+- Writing or reviewing TypeScript / React / Fastify → `typescript-conventions` (from `atelier-typescript`)
 
 State which skill you're about to run before running it, so the user can redirect. If the ask is adjacent but not exact ("just sketch a plan real quick"), do the adjacent thing — don't force a full orchestrator.
 
@@ -44,12 +45,18 @@ On re-invocation of an orchestrator, if `.design/<slug>/` already contains artif
 
 If `docs/prd/` holds a PRD for the initiative, it is the scope contract. `.design/<slug>/` decides *how*; the PRD decides *what* and *whether*. When design or build discovers that a requirement is wrong, infeasible, or newly out of scope, amend the PRD (`prd` skill, Amend mode) rather than letting the brief quietly disagree with it. Two documents claiming to define scope is worse than one imperfect one.
 
-## 7. Baseline knowledge fills the gaps
+## 7. House conventions bind the code
+
+`/build` and any fix pass load the conventions that apply before writing code: `errors` and `logging` always, `keep-it-simple` for commits and comments, and `typescript-conventions` when the repo is TypeScript and `atelier-typescript` is installed. These are the standards `/review` measures against, so ignoring them means writing the code twice.
+
+Where a convention and the existing codebase disagree, the codebase wins — say so in one line and match what is there.
+
+## 8. Baseline knowledge fills the gaps
 
 Atelier does not replace everything. For anything a skill does not cover — a language-specific bug, a stdlib question, a git command, a one-off script, a config tweak — use your own knowledge. Do not invent a skill or force an ill-fitting one.
 
 Rule of thumb: **skill for the named workflows above, baseline knowledge for everything else.**
 
-## 8. Ambient talk ≠ invocation
+## 9. Ambient talk ≠ invocation
 
 The user can discuss design, briefs, tokens, IA, tasks without triggering `/design`. Only fire an orchestrator on explicit invocation (`/design`, "run the design pipeline", etc.). This mirrors each orchestrator's own `description` gating.

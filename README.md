@@ -107,6 +107,7 @@ Four orchestrators run the show. Everything else is a phase skill callable direc
 
 **Review phase:**
 - `code-review` — technical review of changed code (correctness, security, tests, error handling)
+- Claude Code's built-in `security-review` runs as its own phase inside `/review` — a dedicated pass, not a duplicate of the checklist above
 - `design-review` — visual critique against the brief with screenshots at mobile/tablet/desktop
 
 ## Writing craft
@@ -115,6 +116,7 @@ Four orchestrators run the show. Everything else is a phase skill callable direc
 
 ## atelier-typescript skills
 
-Install `atelier-typescript` in projects where you work with Fastify + Node:
+Install `atelier-typescript` in projects where you work with TypeScript — React on the front, Node/Fastify on the back:
 
+- `typescript-conventions` — house TS rules (type discipline, module shape, async, validation boundaries) plus `references/react.md` and `references/fastify.md`. `/build` detects a TypeScript repo and loads the relevant half automatically.
 - `fastify-route` — scaffold a new Fastify route matching the project's existing conventions (schema strategy, auth pattern, error shape, test framework)

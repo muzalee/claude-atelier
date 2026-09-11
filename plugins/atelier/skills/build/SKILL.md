@@ -31,7 +31,7 @@ Skip either phase if the design didn't include it (e.g. no `BACKEND_DESIGN.md` �
 
 3. **Run each phase by reading its SKILL.md and following it in full.** Do not paraphrase.
 
-4. **Thread the design docs into each phase.** Explicitly hand file paths so the sub-skill doesn't hunt for context.
+4. **Thread the design docs and the conventions into each phase.** Explicitly hand file paths so the sub-skill doesn't hunt for context, and name which house conventions apply — a sub-skill that isn't told will build to its own defaults.
 
 5. **End each phase with a one-line status.** "Phase N done: N files, tests green." Then move to the next phase without asking.
 
@@ -39,7 +39,34 @@ Skip either phase if the design didn't include it (e.g. no `BACKEND_DESIGN.md` �
 
 7. **The PRD is scope, not a suggestion.** If `.design/<slug>/` or `docs/prd/` names a PRD, read it. When the build has to deviate from a stated requirement — a MUST turns out to be infeasible, a non-goal turns out to be unavoidable — that is a real blocker under rule 6. Stop, name the requirement ID, and offer to amend the PRD (read `prd/SKILL.md`, Amend mode). Shipping code that contradicts the PRD is how the document dies.
 
-8. **Close the loop.** After the last phase, one summary: what was built, tests status, anything deferred. Then: "Build done. Run `/review` to check the code against the design."
+8. **House conventions bind the code you write.** Before writing anything, load the conventions that apply to this repo (see [House Conventions](#house-conventions) below) and follow them. They are not suggestions to weigh against convenience — they are the standards the review phase measures against, so code that ignores them comes back as findings and gets written twice.
+
+9. **No historical comments.** Comments describe what the code does now, never how it got here. No `// changed from X`, no `// previously did Y`, no `// added per review feedback`, no commented-out old implementation left "just in case". Git already records history accurately and searchably; a comment claiming it is unverifiable, and it starts rotting the moment someone edits nearby. This matters most when `/ship` or a review-fix pass is driving the build, because that is exactly when the temptation to annotate the change is strongest.
+
+10. **Close the loop.** After the last phase, one summary: what was built, tests status, anything deferred. Then: "Build done. Run `/review` to check the code against the design."
+
+## House Conventions
+
+Load these before writing code. Each is a real skill — read its `SKILL.md` and follow it, do not work from the summary here.
+
+**Always, in every repo:**
+
+| Skill | Applies to |
+| ----- | ---------- |
+| `errors` | Every error you throw, wrap, or handle. Typed errors with stable codes and cause chains, thrown not returned. |
+| `logging` | Every log line. Structured, carrying trace-id and operation name, correct level, no secrets or PII. |
+| `keep-it-simple` | Commit messages, branch names, code comments, and any docs written along the way. |
+
+**When the stack matches**, detect and load the stack-specific conventions:
+
+| Detect | Load |
+| ------ | ---- |
+| `tsconfig.json` present, or `.ts`/`.tsx` files in the repo, **and** the `atelier-typescript` plugin is installed | `typescript-conventions` — then the React half for frontend work, the Fastify half for backend work |
+| Fastify in `package.json` and you are adding an endpoint | `fastify-route` for the route's shape |
+
+If the repo is TypeScript but `atelier-typescript` is not installed, say so once in the opening scan — "TypeScript repo, but `atelier-typescript` isn't installed, so I'm building without the house TS conventions" — and continue. Do not stall on it, and do not invent the conventions from memory.
+
+Where a skill's convention and the existing codebase disagree, **the codebase wins** and you say so in one line. One consistent idiom beats one correct idiom plus one legacy idiom, because every future reader then has to know which files follow which.
 
 ## Phase Details
 

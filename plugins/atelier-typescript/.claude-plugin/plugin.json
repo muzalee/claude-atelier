@@ -1,7 +1,7 @@
 {
   "name": "atelier-typescript",
   "version": "0.1.0",
-  "description": "TypeScript / Fastify-specific skills from the atelier. Install alongside `atelier` when you work in a Fastify + Node codebase.",
+  "description": "TypeScript-specific skills from the atelier \u2014 house conventions for React and Fastify, plus route scaffolding. Install alongside `atelier` in any TypeScript codebase.",
   "author": {
     "name": "muza",
     "url": "https://github.com/muzalee"
@@ -9,5 +9,11 @@
   "homepage": "https://github.com/muzalee/claude-atelier",
   "repository": "https://github.com/muzalee/claude-atelier",
   "license": "MIT",
-  "keywords": ["typescript", "fastify", "node", "backend"]
+  "keywords": [
+    "typescript",
+    "react",
+    "fastify",
+    "node",
+    "conventions"
+  ]
 }

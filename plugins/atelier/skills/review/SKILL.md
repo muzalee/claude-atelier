@@ -3,7 +3,7 @@ name: review
 description: Explicit-invocation-only orchestrator that runs code review + design review against the built code, using `.design/<slug>/` as the source of intent. Invoked ONLY when the user types /review or explicitly asks to "run the review pipeline", "review the build", or "check the feature". For a single technical review only, use `code-review` directly. For a single visual review only, use `design-review` directly. DO NOT auto-trigger from adjacent talk about reviewing code — those have their own skills.
 ---
 
-This skill is the **review** orchestrator. It runs the two reviews — technical, then visual — against the code produced by `/build`, using the docs from `.design/<slug>/` as the yardstick.
+This skill is the **review** orchestrator. It runs three reviews — technical, security, then visual — against the code produced by `/build`, using the docs from `.design/<slug>/` as the yardstick.
 
 The three-part pipeline:
 - `/design` — produces docs in `.design/<slug>/`.
@@ -21,15 +21,16 @@ If there's no design folder, tell the user to run `/design` first (or point at a
 ## The Sequence
 
 ```
-1. Code Review    → .design/<slug>/CODE_REVIEW.md            (correctness / security / tests / clarity)
-2. Design Review  → .design/<slug>/DESIGN_REVIEW.md + screenshots  (visual / aesthetic / responsive)
+1. Code Review      → .design/<slug>/CODE_REVIEW.md              (correctness / tests / clarity)
+2. Security Review  → .design/<slug>/SECURITY_REVIEW.md          (dedicated security pass)
+3. Design Review    → .design/<slug>/DESIGN_REVIEW.md + screenshots  (visual / aesthetic / responsive)
 ```
 
-Both phases read from the same `.design/<slug>/` folder and write their reports back into it.
+All three phases read from the same `.design/<slug>/` folder and write their reports back into it.
 
 ## Operating Rules
 
-1. **Open with a scan.** Ask (or infer) which feature slug this review is for. List what's in `.design/<slug>/`. Show a git diff summary (files changed, lines added/removed). Ask which phases to run — usually both, but code-only or design-only is fine.
+1. **Open with a scan.** Ask (or infer) which feature slug this review is for. List what's in `.design/<slug>/`. Show a git diff summary (files changed, lines added/removed). Ask which phases to run — usually all three, but any subset is fine.
 
 2. **Announce each phase before entering it.** Format: "Phase N: [name]. This checks [what]. Ready?" Wait for confirmation.
 
@@ -41,7 +42,9 @@ Both phases read from the same `.design/<slug>/` folder and write their reports 
 
 5. **End each phase with a checkpoint.** Summarize the report filename, count of findings by severity, and the biggest single issue. Then ask: "Address any must-fix items now, or continue?"
 
-6. **Close the loop.** After phase 2, tell the user: "Both reviews saved to `.design/<slug>/`. Address must-fix items now, or capture them as follow-ups."
+6. **Never silently skip the security phase.** If `security-review` is unavailable, say so plainly — "the `security-review` skill isn't available here, so this ran without a dedicated security pass" — and tell the user to update Claude Code or enable it. A review that quietly omits security reads identical to one that ran it and found nothing, which is the worst possible outcome for the reader.
+
+7. **Close the loop.** After the last phase, tell the user: "Reviews saved to `.design/<slug>/`. Address must-fix items now, or capture them as follow-ups."
 
 ## Phase Details
 
@@ -50,9 +53,18 @@ Both phases read from the same `.design/<slug>/` folder and write their reports 
 Read `code-review/SKILL.md` and follow it. Point it at the branch diff (or uncommitted changes, or user-named files). Give it the brief + backend brief for context so it can flag both bugs AND drift from spec.
 - **Input**: git diff + `.design/<slug>/DESIGN_BRIEF.md` + `.design/<slug>/BACKEND_DESIGN.md` (if present).
 - **Produces**: `.design/<slug>/CODE_REVIEW.md` with categorized findings (must-fix, should-fix, consider).
-- **Transition**: "Code review done. Address any must-fix items now, or move on to the design review?"
+- **Transition**: "Code review done. Next: the dedicated security pass."
 
-### Phase 2: Design Review
+### Phase 2: Security Review
+
+Run Claude Code's built-in `security-review` skill against the same changes. This is a **dedicated pass, not a duplicate** of phase 1: `code-review`'s security checklist is a generalist sweep performed by a reviewer also thinking about naming and tests, while `security-review` looks at nothing else. The two find different things, and the overlap is cheap.
+
+- **Input**: the same diff phase 1 reviewed — pending changes on the current branch.
+- **Produces**: `.design/<slug>/SECURITY_REVIEW.md`. Save the findings there even though the skill reports inline, so the report sits with the others and a later fix pass can work from a file.
+- **If the skill is unavailable**: do not substitute your own security opinion for it and do not skip quietly. Report it under rule 6, note that phase 1's security checklist was the only coverage, and continue.
+- **Transition**: "Security review done. Next: the design review?"
+
+### Phase 3: Design Review
 
 Read `design-review/SKILL.md` and follow it. Tell it to compare against `DESIGN_BRIEF.md` and to use the philosophy + component inventory from there, plus the tokens spec. Screenshots via Playwright MCP, Cursor IDE Browser, or by asking the user.
 - **Input**: built code + `DESIGN_BRIEF.md` + `DESIGN_TOKENS.md` + `INFORMATION_ARCHITECTURE.md`.
@@ -70,8 +82,9 @@ Read `design-review/SKILL.md` and follow it. Tell it to compare against `DESIGN_
     ├── DESIGN_TOKENS.md             ← from /design (spec)
     ├── TASKS.md                     ← from /design
     ├── CODE_REVIEW.md               ← Phase 1
-    ├── DESIGN_REVIEW.md             ← Phase 2
-    └── screenshots/                 ← Phase 2
+    ├── SECURITY_REVIEW.md           ← Phase 2
+    ├── DESIGN_REVIEW.md             ← Phase 3
+    └── screenshots/                 ← Phase 3
 ```
 
 ## What This Skill Is Not
