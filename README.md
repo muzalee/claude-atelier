@@ -76,8 +76,14 @@ Five orchestrators run the show. Everything else is a phase skill callable direc
         │
         ▼
 /review  →  reviews the code against the docs
+```
 
-/ship    →  all of the above, unattended, ending in a review-ready PR
+`/ship` replaces the last two steps. Given a finished `.design/<slug>/`, it runs
+build → browser test → review → fix → cold review → fix unattended, and leaves a
+review-ready PR behind. It does not design anything — `/design` still comes first.
+
+```
+.design/<slug>/  →  /ship  →  a PR you only have to read
 ```
 
 ## Orchestrators
@@ -86,7 +92,7 @@ Five orchestrators run the show. Everything else is a phase skill callable direc
 - `design` — pure-design pipeline: grill-me → brief → backend-design → IA → tokens → test-plan → tasks. Output is markdown only, saved to `.design/<slug>/`.
 - `build` — reads `.design/<slug>/` and implements: materializes the tokens spec, runs ui-build against `TASKS.md`, then backend-build against `BACKEND_DESIGN.md`.
 - `review` — runs code-review + security-review + design-review against the built code, using the design docs as the yardstick. Reports back into `.design/<slug>/`.
-- `ship` — the unattended loop: branch off main, draft PR, build committing per phase, functional browser test (Orca or Claude-in-Chrome), warm review, fix, cold review in a fresh session against the whole PR, fix, flip to ready.
+- `ship` — `/build` + `/review` run unattended, ending in a PR: branch off main, draft PR, build committing per phase, functional browser test (Orca or Claude-in-Chrome), warm review, fix, cold review in a fresh session against the whole PR, fix, flip to ready. Needs a finished `.design/<slug>/` — it builds, it does not design.
 
 `/prd` is not part of the `/design` pipeline — it sits above it. One PRD covers an initiative; several `.design/<slug>/` folders can hang off it. When design or build discovers a requirement is wrong, they stop and offer to amend the PRD rather than quietly diverging from it.
 
