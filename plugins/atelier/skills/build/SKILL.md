@@ -41,9 +41,57 @@ Skip either phase if the design didn't include it (e.g. no `BACKEND_DESIGN.md` �
 
 8. **House conventions bind the code you write.** Before writing anything, load the conventions that apply to this repo (see [House Conventions](#house-conventions) below) and follow them. They are not suggestions to weigh against convenience — they are the standards the review phase measures against, so code that ignores them comes back as findings and gets written twice.
 
-9. **No historical comments.** Comments describe what the code does now, never how it got here. No `// changed from X`, no `// previously did Y`, no `// added per review feedback`, no commented-out old implementation left "just in case". Git already records history accurately and searchably; a comment claiming it is unverifiable, and it starts rotting the moment someone edits nearby. This matters most when `/ship` or a review-fix pass is driving the build, because that is exactly when the temptation to annotate the change is strongest.
+9. **Record what you implemented in `TASKS.md` as you go.** Checking a box says a task is done; it does not say what was built, where it lives, or what you decided along the way. Under each task you complete, add an `Implemented` line naming the files, and a `Note` line for anything a reader could not infer from the diff — a decision the brief did not settle, a deviation and its reason, something deferred.
 
-10. **Close the loop.** After the last phase, one summary: what was built, tests status, anything deferred. Then: "Build done. Run `/review` to check the code against the design."
+   ```markdown
+   - [x] 2. Profile section: display name input + save, inline validation on empty
+         **Implemented:** `src/features/settings/ProfileCard.tsx`, `src/app/api/settings/route.ts`
+         **Note:** cancel restores the saved name — the brief did not say, and platform
+         convention is the smaller state model. Reverse in one line if wrong.
+   ```
+
+   This is the record `/review` measures against, the context the cold review in `/ship` cannot get any other way, and the answer to "why is this like that" six weeks out. Write it as each task closes, not in a sweep at the end — by then the reasons have evaporated and you will write what the code does, which the code already said.
+
+   Keep it to what the diff cannot say. `Implemented:` plus a line or two of real decision. Not a summary of the code, and never a history of how it changed — rule 10 applies here too.
+
+   **A fix pass is a build pass.** When you are fixing review findings rather than working a fresh task — `/review` handed you must-fix items, or `/ship` is at stage 6 or 8 — the same rule applies: record the finding id you addressed and what changed, against the task the fix belongs to. A fix that lands with no record is the fastest way for the next review to re-find the same thing, or for a reader to see code that no task explains.
+
+   ```markdown
+   - [x] 3. Notifications section: digest toggle, persists on change
+         **Implemented:** `src/features/settings/DigestToggle.tsx`
+         **Note:** CR-4 — moved behind an explicit save button; immediate persist raced
+         the profile save. Description in PR #42 updated to match.
+   ```
+
+10. **No historical comments.** Comments describe what the code does now, never how it got here. No `// changed from X`, no `// previously did Y`, no `// added per review feedback`, no commented-out old implementation left "just in case". Git already records history accurately and searchably; a comment claiming it is unverifiable, and it starts rotting the moment someone edits nearby. This matters most when `/ship` or a review-fix pass is driving the build, because that is exactly when the temptation to annotate the change is strongest.
+
+11. **Close the loop.** After the last phase, one summary: what was built, tests status, anything deferred. Then: "Build done. Run `/review` to check the code against the design."
+
+## Two ways in
+
+**From `TASKS.md`** — the normal path. Work the tasks in order, as the phases below describe.
+
+**From a review report** — `/review` produced findings, or `/ship` is at its fix stage. Same skill, same conventions, different input:
+
+1. Read the report — `CODE_REVIEW.md`, `SECURITY_REVIEW.md`, `DESIGN_REVIEW.md`, `COLD_REVIEW.md`, or findings handed to you directly.
+2. Fix must-fix and should-fix findings. Consider-level ones are optional; take the cheap ones.
+3. **Report against every finding by id.** Each one is fixed, or not fixed with a one-line reason. A finding you silently skip gets re-found by the next review, which is the most expensive way to learn you skipped it.
+4. Record the fix in `TASKS.md` against the task it belongs to, per rule 9 — including the finding id.
+5. Commit as `fix:` per `keep-it-simple`, and re-run the tests.
+
+A finding you disagree with is not a finding you ignore. Say why you think it is wrong, in one line, and leave it unfixed — that is a position the user can overrule. Silence is not.
+
+## Reading the test plan
+
+If `.design/<slug>/TEST_PLAN.md` exists, read it before writing any tests. It already names the cases, the level each belongs at, what to break to prove them, and — as usefully — what not to test. Writing tests without it means re-deriving all of that from the brief, badly, and usually over-covering the easy paths while missing the failure modes somebody already thought through.
+
+Where `TASKS.md` attaches cases to tasks, those are the same cases: `brief-to-tasks` carried them over. Read the plan anyway for the "what NOT to test" section, which does not survive that trip.
+
+## Reading the preflight report
+
+If `.design/<slug>/PREFLIGHT.md` exists, read it before the first task. `/preflight` fixes what it can and asks the user about the rest, so that file holds decisions the plan itself may not show — a gate the user answered, an assumption they confirmed, a step it rewrote and why.
+
+Where it and `TASKS.md` disagree, the plan file wins: preflight edits the plan, so a live disagreement means the report is describing an edit that did not land, and that is worth saying out loud before building on it.
 
 ## House Conventions
 
@@ -90,7 +138,7 @@ If `.design/<slug>/DESIGN_TOKENS.md` exists AND the project has no existing toke
 
 Read the token names, values, and semantic roles directly from `DESIGN_TOKENS.md`. Do not re-derive from the philosophy — the spec already made those decisions. Announce the file created in one line, then proceed.
 
-Then read `ui-build/SKILL.md` and follow it. Work through the frontend tasks in `TASKS.md` in order. After each task, check it off in `TASKS.md` and continue to the next without asking.
+Then read `ui-build/SKILL.md` and follow it. Work through the frontend tasks in `TASKS.md` in order. After each task, check it off in `TASKS.md`, add its `Implemented` / `Note` lines per rule 9, and continue to the next without asking.
 
 - **Input**: `TASKS.md`, `DESIGN_BRIEF.md`, `INFORMATION_ARCHITECTURE.md`, materialized token file.
 - **Produces**: frontend components + pages + (if materialized this pass) the token file.
@@ -110,3 +158,12 @@ Read `backend-build/SKILL.md` and follow it. Hand it `.design/<slug>/BACKEND_DES
 - Not a reviewer — `/review` does the technical + visual review after the build.
 - Not a wrapper — it runs the actual SKILL.md of each phase in full.
 - Not a chatty pipeline — decisions were made in `/design`. This orchestrator executes, only stopping on real blockers (see rule 6).
+
+## Done when
+
+- Every task in `TASKS.md` is implemented, checked off, and carries its `Implemented` / `Note` lines
+- Build passes and tests are green, or you named exactly which are not and why
+- The house conventions were loaded and followed
+- Nothing was left half-done without saying so
+
+**Then hand off.** Say: "Build done: N files, tests green." Name anything deferred, then: "Next: **`/atelier:review`** to check the code against the design." 

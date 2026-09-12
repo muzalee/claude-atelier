@@ -192,3 +192,16 @@ Base grid: [4px / 8px]. Rationale: [why this base fits the philosophy].
 ## Output
 
 Write to `.design/<slug>/DESIGN_TOKENS.md`. State the philosophy the tokens derive from and note any deviations or judgment calls at the top of the file. Do **not** write a `tokens.css`, `tailwind.config.js`, or `theme.ts` — that's `/build`'s job.
+
+## Read before writing
+
+Where `.design/<slug>/` exists, read `DESIGN_BRIEF.md` for the aesthetic direction the tokens must express, and `INFORMATION_ARCHITECTURE.md` for what the system actually has to cover — the page types, the density of the busiest screen, the states the navigation needs. A token set derived from a philosophy alone tends to be beautiful and short of exactly the semantic roles the real screens turn out to need.
+
+## Done when
+
+- The spec is saved at `.design/<slug>/DESIGN_TOKENS.md`
+- Every token has a name, a value, and a semantic role — a value with no role is a hex code, not a token
+- Light and dark are both covered
+- It is still a markdown spec. No `.css`, no `tailwind.config` — `/build` materializes it
+
+**Then hand off.** Say: "Token spec saved to `.design/<slug>/DESIGN_TOKENS.md` — spec only, not yet code." Then: "Next: **`/atelier:test-plan`** to name what has to pass before any of this gets built." 

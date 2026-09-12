@@ -298,3 +298,12 @@ Unresolved decisions with an owner and a by-when. Move each into the body once a
 - **Non-goals do the heaviest lifting.** Most scope disputes are resolved by what the PRD refused, not by what it asked for. Spend real interview time there.
 - **Do not design in the PRD.** No schemas, no component names, no endpoints, no library choices. Those belong in `backend-design` and `design-brief`. A PRD that specifies implementation removes the room those skills need and goes stale the moment the code disagrees. Referencing an existing file as a *constraint* ("seats are metered in `src/billing.ts` and that does not change") is fine — that is scope, not design.
 - **Write for the person reading it in six weeks**, mid-argument, skimming for one answer. Tables over prose for anything enumerable; that is why this template leans on them.
+
+## Done when
+
+- The PRD is saved at `docs/prd/NNNN-<slug>.md` with the next unused number
+- Non-goals, success metrics, and functional requirements are specific enough to settle an argument
+- Every assumption you made on the user's behalf is stated in your reply, mapped to the requirement it lands in
+- In Amend mode: the body reads as current truth, cut requirement ids are retired not renumbered, `updated:` is bumped, and the Changelog has a row per logical change
+
+**Then hand off.** Say: "PRD `NNNN` saved to `docs/prd/NNNN-<slug>.md`." Name the 2-3 decisions most likely to be contested later, then: "Next: **`/atelier:design`** to design the first feature under it." 

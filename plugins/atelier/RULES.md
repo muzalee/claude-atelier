@@ -67,6 +67,17 @@ Atelier does not replace everything. For anything a skill does not cover — a l
 
 Rule of thumb: **skill for the named workflows above, baseline knowledge for everything else.**
 
-## 10. Ambient talk ≠ invocation
+## 10. Always end by naming the next step
+
+Every atelier skill has a `## Done when` section: the criteria that mean it is finished, and the handoff line to say afterwards. Follow both.
+
+Stopping without naming what comes next leaves the user to remember a seven-phase pipeline on their own, and leaves you guessing whether you were finished or merely out of obvious moves. The exit criteria are what make that difference checkable rather than a feeling.
+
+Two rules about the handoff:
+
+- **Name the actual command**, namespaced — `/atelier:build`, not "you could build it now". A named command is one keystroke away; a hint is a lookup.
+- **Suggest what fits the state you are in.** A preflight that came back Blocked should not suggest building. A review with three must-fix findings should suggest fixing them, not shipping.
+
+## 11. Ambient talk ≠ invocation
 
 The user can discuss design, briefs, tokens, IA, tasks without triggering `/design`. Only fire an orchestrator on explicit invocation (`/design`, "run the design pipeline", etc.). This mirrors each orchestrator's own `description` gating.

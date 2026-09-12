@@ -240,3 +240,11 @@ Explicit non-goals. Things this brief does not cover so the build stays bounded.
 
 Anything still unresolved that needs a decision before or during the build.
 ```
+
+## Done when
+
+- The brief is saved at `.design/<slug>/BACKEND_DESIGN.md`
+- Entities, API surface, and auth model are concrete enough to implement without asking again
+- Every open question has an owner and a by-when, or it is not open, it is undecided
+
+**Then hand off.** Say: "Backend brief saved to `.design/<slug>/BACKEND_DESIGN.md`." Then: "Next: **`/atelier:information-architecture`** to map structure and flows against this API surface." 

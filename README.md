@@ -43,6 +43,31 @@ Or, for zero-toggle install with auto-update on, drop this in `~/.claude/setting
 
 Drop `atelier-typescript@atelier` from `enabledPlugins` if you don't want the TS skills in that scope.
 
+#### Install scope
+
+Plugins install at one of three scopes. The CLI takes `--scope`; the default is `user`.
+
+| Scope | Written to | Who gets it |
+| ----- | ---------- | ----------- |
+| `user` (default) | `~/.claude/settings.json` | you, in every project |
+| `project` | `<repo>/.claude/settings.json` | anyone who clones the repo — commit this file |
+| `local` | `<repo>/.claude/settings.local.json` | just you, in that repo — gitignored |
+
+```bash
+claude plugin install atelier@atelier                          # everywhere
+cd ~/my-flutter-app
+claude plugin install atelier-flutter@atelier --scope project  # this repo, and everyone who clones it
+```
+
+Keeping `atelier` at user scope and the stack plugins wherever suits you both work — `/build` detects the stack *and* whether the plugin is installed, so a missing one makes it say so and carry on rather than fail. Project scope earns its keep for shared repos, where committing `.claude/settings.json` gives teammates the same skills without being told, and for bulky collections you only want in one kind of repo.
+
+To update everything already installed:
+
+```bash
+claude plugin marketplace update atelier
+claude plugin update atelier@atelier          # restart to apply
+```
+
 ### Alternative — symlinks (for hacking on the skills)
 
 Clone somewhere durable and link each skill into `~/.claude/skills/`:

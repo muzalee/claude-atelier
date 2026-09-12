@@ -17,7 +17,9 @@ Where `/build` stops at working code and `/review` stops at a report, this close
 
 - `.design/<slug>/` with at minimum `DESIGN_BRIEF.md` and `TASKS.md`. Without them there is nothing to build — stop and tell the user to run `/design` first.
 - A clean working tree. Uncommitted changes would end up in the PR attributed to this run. Stop and ask.
-- `gh` authenticated (`gh auth status`). Without it, run everything else and stop before the PR step, telling the user what is left.
+- `gh` authenticated (`gh auth status`), **and a remote configured** (`git remote -v`). These fail independently: `gh` can be authenticated in a repo that has no remote at all.
+  - **No remote** — `git fetch origin` fails in stage 1 too, not just the PR step. Branch off local `main`, say so in one line, and run everything except the push and the PR.
+  - **No `gh`** — run everything else and stop before the PR step, telling the user what is left.
 
 ## Operating rules
 
@@ -26,7 +28,7 @@ Where `/build` stops at working code and `/review` stops at a report, this close
 2. **Stop only on a real blocker.** Exactly four things halt the run:
    - A `/build` blocker under its own rule 6 (docs contradict the codebase, a destructive migration, an unavailable dependency with no obvious fallback).
    - A failing test you cannot fix within the scope of the task.
-   - A **must-fix finding from `security-review`**. Security findings are not "note it in the PR" material.
+   - A **must-fix finding from `security-review` that you cannot fix within the task's scope.** A fixable one goes through stage 6 like any other finding; an unfixable one halts, because security findings are never "note it in the PR and ship anyway" material. Unfixable means the repo lacks what the fix needs — no auth layer, no user model — not that the fix is tedious.
    - **A stage asking for a human decision.** Unattended means you do not interrupt for progress reports; it does not mean you guess at a question that was put to you. If the build stops and asks something, that question is the blocker.
 
    When you stop, always do all five of these. A halted run that preserved its work is recoverable; one that discarded it is not.
@@ -83,7 +85,9 @@ orca terminal create --worktree active --command "claude" --json     # returns a
 orca terminal send --terminal <handle> --text "<the build instruction>" --enter
 ```
 
-**Without Orca, ship still works — it just runs the build inline.** Check `command -v orca`, and that `orca status --json` reports the runtime reachable (if Orca is installed but closed, `orca open` first). If either check fails, follow `build/SKILL.md` directly in this session, say so in one line, and skip the state-detection procedure below entirely — there is no separate session to inspect, so "finished, errored, or waiting" is simply whatever you observe as you go. Everything else in the pipeline is unchanged: same stages, same blockers, same PR.
+**Without Orca, ship still works — it just runs the build inline.** Check `command -v orca`, that `orca status --json` reports the runtime reachable (if Orca is installed but closed, `orca open` first), **and that `orca terminal create` actually succeeds.** A reachable runtime is not the same as a usable terminal: Orca scopes terminals to worktrees it manages, so `terminal create` returns `selector_not_found` in any directory outside one — with `status` reporting perfectly healthy. Treat a failure from `terminal create` exactly like Orca being absent.
+
+If any of the three fails, follow `build/SKILL.md` directly in this session, say so in one line, and skip the state-detection procedure below entirely — there is no separate session to inspect, so "finished, errored, or waiting" is simply whatever you observe as you go. Everything else in the pipeline is unchanged: same stages, same blockers, same PR.
 
 The terminal is an optimization, not a dependency. It buys isolation and lets a long build run without occupying this session; it is not what makes ship correct.
 
@@ -163,15 +167,20 @@ Read and follow, in order, against the changes on this branch:
 
 Run the three skills directly rather than the `/review` orchestrator — it gates on confirmation between phases, which is correct for interactive use and wrong here.
 
+Two things that go wrong in an unattended run:
+
+- **`design-review` will try to stop and ask for screenshots** when it cannot drive a browser — correct interactively, wrong here. If no driver worked in stage 4, or the app will not start, **skip the design review and record why**. It is not a rule 2 blocker; it is the same skip stage 4 already took, for the same reason.
+- **`security-review` resolves its own diff, and can resolve the wrong one.** Confirm the findings it returns are about files in this branch before trusting them — a review of some other tree reads exactly like a clean one. If it targeted the wrong repository, run the security pass against the correct diff yourself and say in the report that you substituted.
+
 This review is **warm**: you built this, so you know what every line was meant to do. That is worth something on intent and worth nothing on blind spots, which is what stage 7 is for.
 
-**Give every finding a stable id** — `CR-1`, `SEC-1`, `DR-1` — so the fix pass can report against them one by one and the PR can name what is still open.
+**Every finding carries a stable id** — `CR-n` from `code-review`, `DR-n` from `design-review`, and `SEC-n` which you assign as you save the security findings, since `security-review` does not number its own. The fix pass reports against them one by one, and the PR names what is still open by id.
 
 ## Stage 6: Fix the warm findings
 
-Fix must-fix and should-fix findings. Consider-level findings are optional; take the cheap ones.
+Read `build/SKILL.md` and follow its **"from a review report"** path — fixing findings is a build pass, and it carries the same conventions, the same ban on historical comments, and the same duty to record what changed in `TASKS.md` against the task the fix belongs to.
 
-The conventions still apply while fixing — `errors`, `logging`, `typescript-conventions`, and **no historical comments**. A fix is ordinary code, not an annotation on a review.
+Fix must-fix and should-fix findings. Consider-level ones are optional; take the cheap ones. A finding you disagree with is not one you ignore: say why in a line and leave it, which is a position the user can overrule.
 
 Commit the fixes (`fix:` per `keep-it-simple`), re-run the tests, and push. Report each finding as fixed, or as not-fixed with a one-line reason. Anything not fixed goes to the PR's Known findings.
 
@@ -181,7 +190,7 @@ The point of a cold review is that it has no idea what you meant. A reviewer who
 
 **Spawn a subagent with no context from this conversation.** Give it only:
 
-- the **full PR diff** — every change in the PR, not just the most recent phase. **Paste the output of `gh pr diff <number>` into the instruction** rather than telling the agent to run it. An agent with a shell will also reach `git log`, the commit messages, and the warm `CODE_REVIEW.md` sitting in the same design folder — and arrives warm, having defeated the entire stage. Tell it explicitly not to read git history or the rest of `.design/<slug>/`.
+- the **full PR diff** — every change in the PR, not just the most recent phase. **Paste the output of `gh pr diff <number>` into the instruction** rather than telling the agent to run it. Where no PR exists (no remote), paste `git diff main...HEAD` instead — the point is the complete set of changes, not the transport. An agent with a shell will also reach `git log`, the commit messages, and the warm `CODE_REVIEW.md` sitting in the same design folder — and arrives warm, having defeated the entire stage. Tell it explicitly not to read git history or the rest of `.design/<slug>/`.
 - the **PR title and description**, labelled as *an unverified claim about the code, not a specification*. That label is what stops the reviewer "fixing" correct code to match a stale sentence.
 - the design brief as the statement of intent, and the PRD if one exists — say so plainly when there is none rather than implying it is required.
 - the instruction to read `code-review/SKILL.md` and follow it, then run `security-review`.
@@ -194,15 +203,17 @@ Do not tell it what you built, what you already fixed, or which parts you think 
 
 **`design-review` is deliberately not part of this stage.** A reviewer working from a diff cannot see the rendered page, and stage 5 already covered the visual pass with a running app in front of it.
 
-**It reviews the PR text too, not only the code.** A title that describes something other than what shipped, or a description that no longer matches the diff, is a finding — it is what every future reader sees first, and a wrong one sends them into the code with the wrong model. Findings get ids `CCR-1`, `CSEC-1`.
+Findings from this stage are numbered `CCR-n` and `CSEC-n` — the cold prefix keeps them distinct from stage 5's, so "CR-3 and CCR-3" are two findings rather than one confusingly renumbered.
+
+**It reviews the PR text too, not only the code.** A title that describes something other than what shipped, or a description that no longer matches the diff, is a finding — it is what every future reader sees first, and a wrong one sends them into the code with the wrong model. 
 
 Save to `.design/<slug>/COLD_REVIEW.md`.
 
 ## Stage 8: Fix the cold findings, then flip to ready
 
-Same rules as stage 6, one pass. Then:
+Same rules as stage 6, one pass, working from `COLD_REVIEW.md` — hand it to `build`'s "from a review report" path exactly as stage 6 did with the warm findings. Then:
 
-1. Update the PR description: what the run did, what the browser test exercised, and every finding left open with its id and why.
+1. Update the PR description: what the run did, what the browser test exercised (from `FUNCTIONAL_TEST.md` — the reader wants to know which interactions were actually driven, not that a test "ran"), and every finding left open with its id and why.
 2. `gh pr ready <number>`.
 3. Report: branch, PR link, commits, browser test result, finding counts per review, and what is still open.
 
@@ -214,3 +225,15 @@ If a security must-fix appeared in the cold review and could not be fixed, **lea
 - Not a merge. It hands over a PR for a human to read; it never merges and never pushes to main.
 - Not a replacement for `/build` or `/review` alone — reach for those when you want to stop after one of them.
 - Not a wrapper. Every stage runs the real `SKILL.md` of the skill it names, in full.
+
+## Done when
+
+- The PR exists, is no longer a draft, and its description matches what actually shipped
+- Every review ran and every finding is either fixed or listed in the PR under Known findings
+- `COLD_REVIEW.md` was acted on, not just saved — a report written and never read is the same as not running the stage
+- The browser test ran, or you said plainly why it could not
+- Tests are green on the final commit
+
+**Then hand off.** Say: "PR #N is ready: `<url>`." Give commits, browser test result, finding counts per review, and what is still open with its id. Then stop — **a human reads the PR from here. Never merge it.**
+
+If the run halted instead, say which stage stopped it and what you need, and leave the PR as a draft.

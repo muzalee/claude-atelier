@@ -58,6 +58,8 @@ This skill runs a structured design review of what has been built, measured agai
       - Ask the user to paste/attach the images directly in chat, or to save them into the `screenshots/` folder themselves.
       - **Do not skip the visual review.** Wait for the user to provide screenshots before proceeding with the checklist.
 
+      **Exception — an unattended run.** When `/ship` or another orchestrator is driving and there is nobody to ask, waiting is not an option: it would stall the whole pipeline on a phase that is not blocking. In that case skip the visual review, record in the report that it did not run and which driver was missing or why the app would not start, and let the run continue. Saying the review was skipped is honest; a checklist filled in from reading the code is not.
+
    ### Screenshot Save Location
 
    All screenshots MUST be saved to a `screenshots/` subfolder inside the feature's `.design/` directory — the same folder where `DESIGN_BRIEF.md` and other design flow files live.
@@ -254,7 +256,19 @@ Date: [date]
 
 1. **[Issue]**: [Description]. _Suggestion: [idea]._
 
+## Finding ids
+
+Number every finding `DR-1`, `DR-2`, in the order you found them, never reused within a review. `/ship` and any fix pass report against them one by one, and a follow-up review can say "DR-3 is still there" instead of re-describing it. A finding without an id cannot be tracked through a fix, which is how findings quietly get lost.
+
 ## What Works Well
 
 [Note the strongest aspects of the implementation. This is not padding. Designers need to know what to keep doing.]
 ```
+
+## Done when
+
+- Screenshots exist at mobile, tablet, and desktop, saved under `.design/<slug>/screenshots/`
+- Every finding carries a `DR-n` id and is measured against the brief and the token spec, not against taste
+- The report is saved to `.design/<slug>/DESIGN_REVIEW.md`
+
+**Then hand off.** Say: "Design review done: N findings, screenshots in `.design/<slug>/screenshots/`." Then: "Next: fix the must-fix items, then re-run this to confirm." 

@@ -37,7 +37,7 @@ All three phases read from the same `.design/<slug>/` folder and write their rep
 3. **Run each phase by reading its SKILL.md and following it in full.**
 
 4. **Thread the design docs into each phase.**
-   - Before phase 1, hand `code-review` the brief and backend brief so it can flag drift from spec (e.g. an endpoint shape that doesn't match the API surface in `BACKEND_DESIGN.md`).
+   - Before phase 1, hand `code-review` the brief, backend brief, `TASKS.md`, `TEST_PLAN.md`, and the PRD, so it can flag drift from spec (an endpoint shape that doesn't match `BACKEND_DESIGN.md`), plan gaps (a task ticked with nothing implementing it), and plan drift (code no task asked for).
    - Before phase 2, hand `design-review` the brief and tokens spec so it can measure the built UI against the named philosophy and token roles.
 
 5. **End each phase with a checkpoint.** Summarize the report filename, count of findings by severity, and the biggest single issue. Then ask: "Address any must-fix items now, or continue?"
@@ -51,7 +51,7 @@ All three phases read from the same `.design/<slug>/` folder and write their rep
 ### Phase 1: Code Review
 
 Read `code-review/SKILL.md` and follow it. Point it at the branch diff (or uncommitted changes, or user-named files). Give it the brief + backend brief for context so it can flag both bugs AND drift from spec.
-- **Input**: git diff + `.design/<slug>/DESIGN_BRIEF.md` + `.design/<slug>/BACKEND_DESIGN.md` (if present).
+- **Input**: git diff + `.design/<slug>/DESIGN_BRIEF.md` + `BACKEND_DESIGN.md` + `TASKS.md` + `TEST_PLAN.md` (whichever exist) + the PRD if `docs/prd/` has one. `TASKS.md` matters as much as the diff here — its checkboxes and `Implemented` lines are what gaps and drift are measured against.
 - **Produces**: `.design/<slug>/CODE_REVIEW.md` with categorized findings (must-fix, should-fix, consider).
 - **Transition**: "Code review done. Next: the dedicated security pass."
 
@@ -60,7 +60,7 @@ Read `code-review/SKILL.md` and follow it. Point it at the branch diff (or uncom
 Run Claude Code's built-in `security-review` skill against the same changes. This is a **dedicated pass, not a duplicate** of phase 1: `code-review`'s security checklist is a generalist sweep performed by a reviewer also thinking about naming and tests, while `security-review` looks at nothing else. The two find different things, and the overlap is cheap.
 
 - **Input**: the same diff phase 1 reviewed — pending changes on the current branch.
-- **Produces**: `.design/<slug>/SECURITY_REVIEW.md`. Save the findings there even though the skill reports inline, so the report sits with the others and a later fix pass can work from a file.
+- **Produces**: `.design/<slug>/SECURITY_REVIEW.md`. Save the findings there even though the skill reports inline, so the report sits with the others and a later fix pass can work from a file. **Number them `SEC-1`, `SEC-2` as you save** — `security-review` does not assign ids, and a fix pass needs them for the same reason `CR-n` and `DR-n` exist.
 - **If the skill is unavailable**: do not substitute your own security opinion for it and do not skip quietly. Report it under rule 6, note that phase 1's security checklist was the only coverage, and continue.
 - **Transition**: "Security review done. Next: the design review?"
 
@@ -92,3 +92,12 @@ Read `design-review/SKILL.md` and follow it. Tell it to compare against `DESIGN_
 - Not a designer or builder — those are `/design` and `/build`.
 - Not a substitute for running `code-review` or `design-review` alone when you only need one of them.
 - Not a wrapper — it runs the actual SKILL.md of each phase in full.
+
+## Done when
+
+- Every phase the user did not skip produced its report in `.design/<slug>/`
+- The plan was checked against the code both ways — nothing the plan asked for is missing, nothing built went unasked
+- The security phase ran, or you said plainly that it could not
+- Nothing was edited — this skill reports only
+
+**Then hand off.** Say: "Reviews saved to `.design/<slug>/`." Give the finding counts per report and the single biggest issue, then: "Next: address the must-fix items, or capture them as follow-ups." 

@@ -57,3 +57,14 @@ Add a new Fastify route to an existing project. Match what's already there — d
 - Writing a giant fat handler that hits the DB, transforms data, and formats a response inline. Split into a service.
 - Duplicating a schema in the handler when it's already declared in `schema:` — Fastify's compiled validator is the source of truth.
 - Adding `try/catch` around the whole handler to log and re-throw. The error handler already logs.
+
+## Done when
+
+- The route exists with its schema attached in the `schema:` option, including a response schema
+- Business logic sits in a service function that imports no Fastify types
+- The route is registered, or dropped in the autoload folder
+- Tests cover the happy path, one validation failure, and one auth failure if the route is protected
+- No new dependency was added without asking
+
+**Then hand off.** Say: "`METHOD /path` added — route, service, tests, registered." Then: "Next: **`/atelier:code-review`** on the diff, or add the next route."
+

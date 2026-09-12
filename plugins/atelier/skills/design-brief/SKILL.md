@@ -118,3 +118,12 @@ Minimum requirements for this interface. Include contrast ratios, keyboard navig
 
 Things this brief explicitly does not cover. Be specific. This prevents scope creep during build.
 ```
+
+## Done when
+
+- The brief is saved at `.design/<slug>/DESIGN_BRIEF.md`
+- The `<slug>` is locked — every later phase writes into this same folder
+- Out of Scope is specific, not "polish and extras"
+- The aesthetic direction names something concrete enough to build from
+
+**Then hand off.** Say: "Brief saved to `.design/<slug>/DESIGN_BRIEF.md`." Then: "Next: **`/atelier:backend-design`** if this needs server work, otherwise **`/atelier:information-architecture`**." 

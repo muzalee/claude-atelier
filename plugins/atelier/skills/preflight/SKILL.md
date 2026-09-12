@@ -1,13 +1,13 @@
 ---
 name: preflight
-description: Check a plan against the actual repository before anyone builds it — verify every file, symbol, dependency, command, and assumption the plan names really exists in the shape the plan expects, and report what would break. Use this skill whenever the user has a plan, task list, TASKS.md, PRD, design doc, migration plan, or issue breakdown and wants to know if it is still accurate, will actually run, or has gone stale — and whenever they say "check this plan", "can this run", "is this plan still valid", "sanity check this before I build", or hand over a plan written in an earlier session.
+description: Check a plan against the actual repository before anyone builds it and drive it to a buildable state — verify every file, symbol, dependency, command, and assumption the plan names, fix what has one right answer, ask about what has several, and stop only at decisions that are genuinely the user's. Use this skill whenever the user has a plan, task list, TASKS.md, PRD, design doc, migration plan, or issue breakdown and wants to know if it is still accurate, will actually run, or has gone stale — and whenever they say "check this plan", "can this run", "is this plan still valid", "sanity check this before I build", or hand over a plan written in an earlier session.
 ---
 
 A plan is a set of claims about a repository: this file exists, that function takes these arguments, this dependency is installed, this command runs. Every one of those claims is checkable, and a plan is only as good as the claims it got right.
 
 This skill checks them, and reports what would break — before a build hits the wrong assumption at step 4 and quietly improvises the rest. That improvisation is the failure this exists to prevent: the plan was reviewed and agreed, the code that shipped was something else, and nobody saw the divergence because it happened mid-execution.
 
-**This skill reports. It does not build, and it does not fix.** Reporting and fixing in one pass means the reader cannot tell which problems you found from which you introduced.
+**This skill fixes the plan; it never touches the code.** It corrects what has one right answer, asks about what has several, and stops only at decisions that are genuinely the user's — so what comes out the other side is a plan `/build` can run, not a list of chores handed back.
 
 ## Example prompts
 
@@ -86,16 +86,38 @@ The **Verified** section is not padding — it tells the reader which claims you
 
 When the plan lives in a `.design/<slug>/` folder, save the report as `.design/<slug>/PREFLIGHT.md` alongside the others. Otherwise report inline — a standalone plan check does not need a file nobody will open twice.
 
-## Step 5: Offer the next step
+## Step 5: Drive the plan to Ready
 
-Close with the smallest useful next action: "Fix the plan?" for mechanical problems, or name the specific decision needed for a blocking one. Do not start fixing — the user may want to change the approach rather than patch the step.
+A verdict of "Ready with fixes" that stops there hands the user a list of chores and makes them come back. The point of this skill is a plan that can be built, so keep going until it is one — or until the only thing left is genuinely the user's to decide.
+
+Work in this order, because each step is cheaper than the next:
+
+**1. Apply the mechanical fixes yourself.** A renamed symbol, a wrong path, a script that is now called something else, a step that assumes a field which already exists — these have exactly one correct answer, sitting in the repo. Edit the plan file, and list each edit in your report so the user sees what moved. Asking permission for a corrected path is just a slower way of getting the same edit.
+
+**2. Ask about everything with more than one defensible answer.** Batch the questions — one round, not a trickle — and for each one give the evidence from the repo, your recommended answer, and the consequence of choosing otherwise. Then apply the answers to the plan. Most "Blocked" verdicts collapse here: a step is unrunnable because a decision was never made, and making it takes one sentence from the user.
+
+**3. Re-verify what you changed.** A fixed step can break a later one — a renamed function is used in three steps, not one. Re-check the claims your edits touched before declaring Ready.
+
+**4. Stop for a real gate.** Some decisions are not yours no matter how obvious they look:
+
+- It changes scope — a PRD requirement, a stated non-goal, what ships in v1
+- It costs money, touches production data, or changes the security or auth model
+- It is irreversible, or expensive to reverse
+- Two approaches are genuinely equal and the choice depends on something you cannot see — team plans, a customer conversation, a roadmap
+
+For these, say plainly that it is a gate, give both options and their consequences, and wait. A gate is not a failure of the skill; guessing past one is.
+
+**Update the plan file itself**, not just the report. A plan that stays wrong while a separate document records that it is wrong has two sources of truth, and `/build` reads the wrong one. Where a fix changes what a step does rather than how it is worded, say so in the step so the change is visible to whoever agreed the original.
+
+Then restate the verdict. If it is now Ready, say so and hand off.
 
 ## Rules
 
 - **Verify, do not assume.** If a claim cannot be checked from the repo — "the design team will provide assets" — mark it unverifiable rather than guessing. An unverifiable claim is itself worth reporting.
 - **A missing file is not automatically a finding.** Plans create files. Check whether the plan says it creates this one before flagging it.
 - **Do not review the plan's judgement.** Whether the approach is wise is a different question, and mixing it in dilutes the factual findings. Stick to whether it will run. If the approach looks genuinely wrong, say so in one line at the end, clearly separated.
-- **Do not fix anything.** Not the plan, not the code. Report and offer.
+- **Fix the plan, never the code.** Mechanical corrections to the plan are the job (step 5). Touching the implementation is not — that is `/build`, and a preflight that starts coding has stopped being a check.
+- **Never fix silently.** Every edit you make to the plan appears in the report. The user agreed to the original; they are entitled to see what changed without diffing it themselves.
 - **Say when you ran out of road.** A plan referencing an external service, another team's API, or a machine you cannot see has claims you cannot check. Name them; do not quietly treat unchecked as verified.
 
 ## When to stop and ask
@@ -103,3 +125,15 @@ Close with the smallest useful next action: "Fix the plan?" for mechanical probl
 - The plan is very large (50+ steps). Offer to check the first phase, or the steps touching a named area, rather than burning a full pass on all of it.
 - You cannot find the plan, or several candidates look equally plausible.
 - The plan is written against a different repository or a branch that is not checked out.
+
+## Done when
+
+- Every claim the plan makes has been checked against the repo, or marked unverifiable with the reason
+- Mechanical problems are fixed in the plan file, and every edit is listed in the report
+- Everything with more than one defensible answer was asked in one batched round and applied
+- What remains is only genuine gates — scope, money, production data, security, irreversibility
+- The plan re-verifies clean after your edits, including the steps they touched
+- Findings carry `PF-n` ids, and the Verified section lists what you actually checked
+
+**Then hand off.** **Ready** → "Plan checks out — N claims verified, M fixed." List the edits, then: "Next: **`/atelier:build`**, or **`/atelier:ship`** to build, test, review and open a PR unattended."
+**Blocked on a gate** → name the gate, give both options and their consequences, and say the plan is Ready apart from it. Do not suggest building until it is answered.
