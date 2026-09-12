@@ -80,7 +80,7 @@ Example: "Progressive disclosure over upfront complexity" or "Confidence over sp
 
 ## Aesthetic Direction
 
-- **Philosophy**: [Named philosophy or described vibe. See /frontend-design skill for reference.]
+- **Philosophy**: [Named philosophy or described vibe. See /ui-build skill for reference.]
 - **Tone**: [Emotional register]
 - **Reference points**: [Existing products, sites, or styles this should feel like]
 - **Anti-references**: [What this should NOT feel like]

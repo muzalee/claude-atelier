@@ -79,7 +79,7 @@ Where a skill's convention and the existing codebase disagree, **the codebase wi
 
 ### Phase 1: Frontend Build
 
-**Before running `frontend-design`, materialize the token spec if needed.**
+**Before running `ui-build`, materialize the token spec if needed.**
 
 If `.design/<slug>/DESIGN_TOKENS.md` exists AND the project has no existing token file (no `tokens.css`, no populated `theme.extend`, no `theme.ts` from a prior pass), translate the spec into the project's stack-appropriate format:
 
@@ -90,7 +90,7 @@ If `.design/<slug>/DESIGN_TOKENS.md` exists AND the project has no existing toke
 
 Read the token names, values, and semantic roles directly from `DESIGN_TOKENS.md`. Do not re-derive from the philosophy — the spec already made those decisions. Announce the file created in one line, then proceed.
 
-Then read `frontend-design/SKILL.md` and follow it. Work through the frontend tasks in `TASKS.md` in order. After each task, check it off in `TASKS.md` and continue to the next without asking.
+Then read `ui-build/SKILL.md` and follow it. Work through the frontend tasks in `TASKS.md` in order. After each task, check it off in `TASKS.md` and continue to the next without asking.
 
 - **Input**: `TASKS.md`, `DESIGN_BRIEF.md`, `INFORMATION_ARCHITECTURE.md`, materialized token file.
 - **Produces**: frontend components + pages + (if materialized this pass) the token file.

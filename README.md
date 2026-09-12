@@ -84,7 +84,7 @@ Five orchestrators run the show. Everything else is a phase skill callable direc
 
 - `bootstrap` — scaffold a new project: folder, stack starter, the right folder structure for that stack written to `.claude/rules/0001-structure.md` + CLAUDE.md, `.gitignore`, README, LICENSE, git init, optional GitHub repo with topics
 - `design` — pure-design pipeline: grill-me → brief → backend-design → IA → tokens → test-plan → tasks. Output is markdown only, saved to `.design/<slug>/`.
-- `build` — reads `.design/<slug>/` and implements: materializes the tokens spec, runs frontend-design against `TASKS.md`, then backend-build against `BACKEND_DESIGN.md`.
+- `build` — reads `.design/<slug>/` and implements: materializes the tokens spec, runs ui-build against `TASKS.md`, then backend-build against `BACKEND_DESIGN.md`.
 - `review` — runs code-review + security-review + design-review against the built code, using the design docs as the yardstick. Reports back into `.design/<slug>/`.
 - `ship` — the unattended loop: branch off main, draft PR, build committing per phase, functional browser test (Orca or Claude-in-Chrome), warm review, fix, cold review in a fresh session against the whole PR, fix, flip to ready.
 
@@ -106,7 +106,7 @@ Five orchestrators run the show. Everything else is a phase skill callable direc
 - `brief-to-tasks` — break a brief (and test plan) into vertical-slice tasks
 
 **Build phase:**
-- `frontend-design` — build production-grade UI with strong aesthetics; materializes the token spec if needed
+- `ui-build` — build the frontend from `TASKS.md` with strong aesthetics; materializes the token spec if needed. Renamed from `frontend-design` to avoid colliding with Anthropic's official plugin of that name.
 - `backend-build` — implement a backend from `BACKEND_DESIGN.md` (plugins, routes, migrations, tests)
 
 **Runtime discipline (callable anytime during design or build):**
