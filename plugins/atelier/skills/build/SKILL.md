@@ -73,13 +73,19 @@ Skip either phase if the design didn't include it (e.g. no `BACKEND_DESIGN.md` �
 
 **From a review report** — `/review` produced findings, or `/ship` is at its fix stage. Same skill, same conventions, different input:
 
-1. Read the report — `CODE_REVIEW.md`, `SECURITY_REVIEW.md`, `DESIGN_REVIEW.md`, or findings handed to you directly.
+1. Read the report — `CODE_REVIEW.md`, `SECURITY_REVIEW.md`, `DESIGN_REVIEW.md`, `COLD_REVIEW.md`, or findings handed to you directly.
 2. Fix must-fix and should-fix findings. Consider-level ones are optional; take the cheap ones.
 3. **Report against every finding by id.** Each one is fixed, or not fixed with a one-line reason. A finding you silently skip gets re-found by the next review, which is the most expensive way to learn you skipped it.
 4. Record the fix in `TASKS.md` against the task it belongs to, per rule 9 — including the finding id.
 5. Commit as `fix:` per `keep-it-simple`, and re-run the tests.
 
 A finding you disagree with is not a finding you ignore. Say why you think it is wrong, in one line, and leave it unfixed — that is a position the user can overrule. Silence is not.
+
+## Reading the test plan
+
+If `.design/<slug>/TEST_PLAN.md` exists, read it before writing any tests. It already names the cases, the level each belongs at, what to break to prove them, and — as usefully — what not to test. Writing tests without it means re-deriving all of that from the brief, badly, and usually over-covering the easy paths while missing the failure modes somebody already thought through.
+
+Where `TASKS.md` attaches cases to tasks, those are the same cases: `brief-to-tasks` carried them over. Read the plan anyway for the "what NOT to test" section, which does not survive that trip.
 
 ## Reading the preflight report
 

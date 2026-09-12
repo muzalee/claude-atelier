@@ -85,6 +85,7 @@ Turn a `BACKEND_DESIGN.md` brief into a working backend. Read the brief first, f
 
 - Every route in the API table exists with its schema, and the tests for them pass
 - `TASKS.md` records what each task produced: an `Implemented` line naming the files, and a `Note` line for any decision the diff cannot explain
+- Tests cover the cases named in `TEST_PLAN.md`, and nothing it listed as not worth testing
 - Migrations run and are reversible
 - Errors and logging follow the `errors` and `logging` skills, not a local pattern
 - No historical comments anywhere in the code

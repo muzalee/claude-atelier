@@ -211,9 +211,9 @@ Save to `.design/<slug>/COLD_REVIEW.md`.
 
 ## Stage 8: Fix the cold findings, then flip to ready
 
-Same rules as stage 6, one pass. Then:
+Same rules as stage 6, one pass, working from `COLD_REVIEW.md` — hand it to `build`'s "from a review report" path exactly as stage 6 did with the warm findings. Then:
 
-1. Update the PR description: what the run did, what the browser test exercised, and every finding left open with its id and why.
+1. Update the PR description: what the run did, what the browser test exercised (from `FUNCTIONAL_TEST.md` — the reader wants to know which interactions were actually driven, not that a test "ran"), and every finding left open with its id and why.
 2. `gh pr ready <number>`.
 3. Report: branch, PR link, commits, browser test result, finding counts per review, and what is still open.
 
@@ -230,6 +230,7 @@ If a security must-fix appeared in the cold review and could not be fixed, **lea
 
 - The PR exists, is no longer a draft, and its description matches what actually shipped
 - Every review ran and every finding is either fixed or listed in the PR under Known findings
+- `COLD_REVIEW.md` was acted on, not just saved — a report written and never read is the same as not running the stage
 - The browser test ran, or you said plainly why it could not
 - Tests are green on the final commit
 
