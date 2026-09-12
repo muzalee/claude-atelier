@@ -9,7 +9,7 @@
       "name": "atelier",
       "source": "./plugins/atelier",
       "description": "Design → build → review pipeline plus writing-craft skills. Stack-agnostic.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "workflow",
       "keywords": [
         "design",
@@ -22,7 +22,7 @@
       "name": "atelier-typescript",
       "source": "./plugins/atelier-typescript",
       "description": "TypeScript skills: house conventions for React + Fastify, and route scaffolding. Install alongside atelier in a TypeScript codebase.",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "category": "workflow",
       "keywords": [
         "typescript",
