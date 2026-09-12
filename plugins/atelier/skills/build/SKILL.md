@@ -41,9 +41,22 @@ Skip either phase if the design didn't include it (e.g. no `BACKEND_DESIGN.md` �
 
 8. **House conventions bind the code you write.** Before writing anything, load the conventions that apply to this repo (see [House Conventions](#house-conventions) below) and follow them. They are not suggestions to weigh against convenience — they are the standards the review phase measures against, so code that ignores them comes back as findings and gets written twice.
 
-9. **No historical comments.** Comments describe what the code does now, never how it got here. No `// changed from X`, no `// previously did Y`, no `// added per review feedback`, no commented-out old implementation left "just in case". Git already records history accurately and searchably; a comment claiming it is unverifiable, and it starts rotting the moment someone edits nearby. This matters most when `/ship` or a review-fix pass is driving the build, because that is exactly when the temptation to annotate the change is strongest.
+9. **Record what you implemented in `TASKS.md` as you go.** Checking a box says a task is done; it does not say what was built, where it lives, or what you decided along the way. Under each task you complete, add an `Implemented` line naming the files, and a `Note` line for anything a reader could not infer from the diff — a decision the brief did not settle, a deviation and its reason, something deferred.
 
-10. **Close the loop.** After the last phase, one summary: what was built, tests status, anything deferred. Then: "Build done. Run `/review` to check the code against the design."
+   ```markdown
+   - [x] 2. Profile section: display name input + save, inline validation on empty
+         **Implemented:** `src/features/settings/ProfileCard.tsx`, `src/app/api/settings/route.ts`
+         **Note:** cancel restores the saved name — the brief did not say, and platform
+         convention is the smaller state model. Reverse in one line if wrong.
+   ```
+
+   This is the record `/review` measures against, the context the cold review in `/ship` cannot get any other way, and the answer to "why is this like that" six weeks out. Write it as each task closes, not in a sweep at the end — by then the reasons have evaporated and you will write what the code does, which the code already said.
+
+   Keep it to what the diff cannot say. `Implemented:` plus a line or two of real decision. Not a summary of the code, and never a history of how it changed — rule 10 applies here too.
+
+10. **No historical comments.** Comments describe what the code does now, never how it got here. No `// changed from X`, no `// previously did Y`, no `// added per review feedback`, no commented-out old implementation left "just in case". Git already records history accurately and searchably; a comment claiming it is unverifiable, and it starts rotting the moment someone edits nearby. This matters most when `/ship` or a review-fix pass is driving the build, because that is exactly when the temptation to annotate the change is strongest.
+
+11. **Close the loop.** After the last phase, one summary: what was built, tests status, anything deferred. Then: "Build done. Run `/review` to check the code against the design."
 
 ## House Conventions
 
@@ -90,7 +103,7 @@ If `.design/<slug>/DESIGN_TOKENS.md` exists AND the project has no existing toke
 
 Read the token names, values, and semantic roles directly from `DESIGN_TOKENS.md`. Do not re-derive from the philosophy — the spec already made those decisions. Announce the file created in one line, then proceed.
 
-Then read `ui-build/SKILL.md` and follow it. Work through the frontend tasks in `TASKS.md` in order. After each task, check it off in `TASKS.md` and continue to the next without asking.
+Then read `ui-build/SKILL.md` and follow it. Work through the frontend tasks in `TASKS.md` in order. After each task, check it off in `TASKS.md`, add its `Implemented` / `Note` lines per rule 9, and continue to the next without asking.
 
 - **Input**: `TASKS.md`, `DESIGN_BRIEF.md`, `INFORMATION_ARCHITECTURE.md`, materialized token file.
 - **Produces**: frontend components + pages + (if materialized this pass) the token file.
@@ -113,7 +126,7 @@ Read `backend-build/SKILL.md` and follow it. Hand it `.design/<slug>/BACKEND_DES
 
 ## Done when
 
-- Every task in `TASKS.md` is implemented and checked off
+- Every task in `TASKS.md` is implemented, checked off, and carries its `Implemented` / `Note` lines
 - Build passes and tests are green, or you named exactly which are not and why
 - The house conventions were loaded and followed
 - Nothing was left half-done without saying so

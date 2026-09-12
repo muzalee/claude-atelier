@@ -154,6 +154,7 @@ If a design tokens file exists (from `/design-tokens`), use its dark mode palett
 ## Done when
 
 - Every frontend task in `TASKS.md` is implemented and checked off
+- `TASKS.md` records what each task produced: an `Implemented` line naming the files, and a `Note` line for any decision the diff cannot explain
 - The token file is materialized if the spec called for it
 - Tests for the new behavior pass, or you said which did not and why
 - No historical comments anywhere in the code
