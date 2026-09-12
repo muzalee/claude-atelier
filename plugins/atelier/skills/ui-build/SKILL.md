@@ -1,6 +1,6 @@
 ---
-name: frontend-design
-description: Build distinctive, production-grade frontend interfaces with high design quality, guided by named aesthetic philosophies. Use when building components, pages, or applications. Generates working code with exceptional attention to aesthetic details and creative choices that avoid generic AI output.
+name: ui-build
+description: Build the frontend half of a feature from atelier design docs — implements `TASKS.md` against `DESIGN_BRIEF.md`, `INFORMATION_ARCHITECTURE.md`, and the materialized design tokens, guided by a named aesthetic philosophy so the output avoids generic AI styling. This is the frontend phase of `/atelier:build`, the sibling of `backend-build`. Use when implementing UI from a `.design/<slug>/` folder, or when the user asks to build components, pages, or screens in a project that has atelier design docs.
 ---
 
 This skill guides creation of distinctive, production-grade frontend interfaces. Implement real working code with exceptional attention to aesthetic detail.

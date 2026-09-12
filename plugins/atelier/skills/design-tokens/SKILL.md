@@ -1,6 +1,6 @@
 ---
 name: design-tokens
-description: Produce a `DESIGN_TOKENS.md` spec — colors (light + dark), spacing, typography, layout, motion, breakpoints — derived from a chosen aesthetic philosophy. Output is a markdown document (name / value / semantic role) saved to `.design/<slug>/`, NOT an actual CSS or Tailwind config file. Materialization into the project's real token file happens later in `/build` (or when `frontend-design` runs standalone). Use when starting a new project, establishing a visual system, setting up tokens, or the user mentions "tokens" or "design system".
+description: Produce a `DESIGN_TOKENS.md` spec — colors (light + dark), spacing, typography, layout, motion, breakpoints — derived from a chosen aesthetic philosophy. Output is a markdown document (name / value / semantic role) saved to `.design/<slug>/`, NOT an actual CSS or Tailwind config file. Materialization into the project's real token file happens later in `/build` (or when `ui-build` runs standalone). Use when starting a new project, establishing a visual system, setting up tokens, or the user mentions "tokens" or "design system".
 ---
 
 This skill produces the design tokens **spec** for a project. Run it after the design brief and before building any components. It writes a markdown document (`DESIGN_TOKENS.md`) inside `.design/<slug>/` — not a CSS or Tailwind file. The build phase materializes the spec into the project's stack-appropriate format.
