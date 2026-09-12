@@ -92,3 +92,11 @@ Read `design-review/SKILL.md` and follow it. Tell it to compare against `DESIGN_
 - Not a designer or builder — those are `/design` and `/build`.
 - Not a substitute for running `code-review` or `design-review` alone when you only need one of them.
 - Not a wrapper — it runs the actual SKILL.md of each phase in full.
+
+## Done when
+
+- Every phase the user did not skip produced its report in `.design/<slug>/`
+- The security phase ran, or you said plainly that it could not
+- Nothing was edited — this skill reports only
+
+**Then hand off.** Say: "Reviews saved to `.design/<slug>/`." Give the finding counts per report and the single biggest issue, then: "Next: address the must-fix items, or capture them as follow-ups." 

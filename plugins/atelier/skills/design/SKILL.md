@@ -131,3 +131,11 @@ Everything is markdown. No code files.
 - Not a reviewer — `/review` handles code + visual review after the build.
 - Not a wrapper — it runs the actual SKILL.md of each phase in full.
 - Not a fire-and-forget — the confirmation gate between every phase is the point.
+
+## Done when
+
+- Every phase the user did not skip has produced its artifact in `.design/<slug>/`
+- Nothing was implemented — this skill writes markdown only
+- Each skipped phase was skipped deliberately and the user knows which
+
+**Then hand off.** Say: "Design done. Everything is in `.design/<slug>/`." List the artifacts, then: "Next: **`/atelier:preflight`** to check the plan still matches the repo, then **`/atelier:build`** to implement — or **`/atelier:ship`** to build, test, review and open a PR in one unattended run." 

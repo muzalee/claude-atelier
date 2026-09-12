@@ -20,3 +20,11 @@ Interview the user relentlessly about every aspect of the plan until you reach s
 4. **Order matters.** Resolve foundational decisions before dependent ones. Don't ask about button hover states before the page structure is decided.
 5. **Stop when the tree is resolved.** When there are no more unknowns that could change the plan meaningfully, say so and summarize the decisions. Don't manufacture questions to seem thorough.
 6. **Capture the outcome.** At the end, restate the resolved decisions as a short bulleted summary the user can paste into a brief or ticket.
+
+## Done when
+
+- Every branch of the decision tree has an answer, or is explicitly parked with the reason
+- The user has agreed with the resolution, not just heard it
+- Nothing material is left as "we'll figure it out later" without saying who decides and when
+
+**Then hand off.** Say: "Decisions resolved." List them in one line each, then: "Next: **`/atelier:design-brief`** to capture this as a brief before it decays." 

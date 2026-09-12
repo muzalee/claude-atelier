@@ -214,3 +214,14 @@ If a security must-fix appeared in the cold review and could not be fixed, **lea
 - Not a merge. It hands over a PR for a human to read; it never merges and never pushes to main.
 - Not a replacement for `/build` or `/review` alone — reach for those when you want to stop after one of them.
 - Not a wrapper. Every stage runs the real `SKILL.md` of the skill it names, in full.
+
+## Done when
+
+- The PR exists, is no longer a draft, and its description matches what actually shipped
+- Every review ran and every finding is either fixed or listed in the PR under Known findings
+- The browser test ran, or you said plainly why it could not
+- Tests are green on the final commit
+
+**Then hand off.** Say: "PR #N is ready: `<url>`." Give commits, browser test result, finding counts per review, and what is still open with its id. Then stop — **a human reads the PR from here. Never merge it.**
+
+If the run halted instead, say which stage stopped it and what you need, and leave the PR as a draft.

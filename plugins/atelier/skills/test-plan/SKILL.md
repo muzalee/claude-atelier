@@ -97,3 +97,11 @@ Short markdown, no template ceremony:
 - **A plan with only happy-path cases is a bad plan.** If you can't think of a failure mode, ask the user what the failure modes are. That's the whole reason this skill exists.
 - **Never pick "unit" for a case that needs a mock.** Move it to integration and run it against the real thing.
 - **Coverage percentage is a vanity metric.** The number that matters is how many prod incidents your tests catch before deploy. Optimize for that.
+
+## Done when
+
+- The plan names each case, the level it lives at, and what to break to prove it
+- It says what NOT to test, so the build does not gold-plate coverage
+- Saved to `.design/<slug>/TEST_PLAN.md` when a design folder exists
+
+**Then hand off.** Say: "Test plan saved to `.design/<slug>/TEST_PLAN.md`." Then: "Next: **`/atelier:brief-to-tasks`** to turn all of this into an ordered build checklist." 

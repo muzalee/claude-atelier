@@ -148,3 +148,13 @@ If the user doesn't provide topics, suggest 3–5 based on the stack and purpose
 - Installing a test runner, linter, formatter, and CI on day one. Let the user pull those in when they need them.
 - Running `gh repo create` without confirming public/private and topics first.
 - Creating the folder outside the user's chosen path because it "seemed more organized."
+
+## Done when
+
+- The folder exists with the stack starter, `.gitignore`, `README.md`, and `LICENSE` if requested
+- The folder structure for the stack is created, with `.gitkeep` in any empty directory
+- `.claude/rules/0001-structure.md` records the convention, and `CLAUDE.md` points at it
+- `git init` done and the first commit made
+- The GitHub repo exists with description and topics, or you said why it does not
+
+**Then hand off.** Say: "`<name>` is set up at `<path>`. Next: **`/atelier:prd`** to pin down what you're building and what's out of scope, or **`/atelier:design`** to go straight at the first feature." 

@@ -110,3 +110,12 @@ Read `backend-build/SKILL.md` and follow it. Hand it `.design/<slug>/BACKEND_DES
 - Not a reviewer — `/review` does the technical + visual review after the build.
 - Not a wrapper — it runs the actual SKILL.md of each phase in full.
 - Not a chatty pipeline — decisions were made in `/design`. This orchestrator executes, only stopping on real blockers (see rule 6).
+
+## Done when
+
+- Every task in `TASKS.md` is implemented and checked off
+- Build passes and tests are green, or you named exactly which are not and why
+- The house conventions were loaded and followed
+- Nothing was left half-done without saying so
+
+**Then hand off.** Say: "Build done: N files, tests green." Name anything deferred, then: "Next: **`/atelier:review`** to check the code against the design." 

@@ -258,3 +258,11 @@ Date: [date]
 
 [Note the strongest aspects of the implementation. This is not padding. Designers need to know what to keep doing.]
 ```
+
+## Done when
+
+- Screenshots exist at mobile, tablet, and desktop, saved under `.design/<slug>/screenshots/`
+- Every finding is measured against the brief and the token spec, not against taste
+- The report is saved to `.design/<slug>/DESIGN_REVIEW.md`
+
+**Then hand off.** Say: "Design review done: N findings, screenshots in `.design/<slug>/screenshots/`." Then: "Next: fix the must-fix items, then re-run this to confirm." 

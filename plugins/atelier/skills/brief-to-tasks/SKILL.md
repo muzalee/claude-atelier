@@ -78,3 +78,11 @@ _Derived from `TEST_PLAN.md`. One task per case at the level named there (unit /
 - Never create a task that is only "set up the project" or "create the file structure." Those are not vertical slices.
 - If the brief specifies an aesthetic philosophy, note it in the first build task so the visual direction is established immediately.
 - Group related tasks but do not nest them more than one level deep. Flat lists are easier to work through.
+
+## Done when
+
+- `.design/<slug>/TASKS.md` exists, ordered so each task is independently buildable
+- Every task is a vertical slice that leaves the app working, not a layer
+- Test cases from `TEST_PLAN.md` are attached to the tasks they cover
+
+**Then hand off.** Say: "Tasks saved to `.design/<slug>/TASKS.md` — N tasks." Then: "Design is done. Next: **`/atelier:preflight`** to check the plan against the repo, then **`/atelier:build`** — or **`/atelier:ship`** to run build, test, review and open a PR unattended." 

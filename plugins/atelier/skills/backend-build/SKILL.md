@@ -80,3 +80,12 @@ Turn a `BACKEND_DESIGN.md` brief into a working backend. Read the brief first, f
 - The brief conflicts with the existing codebase (e.g. brief says JWT, codebase uses sessions). Ask which wins.
 - The brief calls for a service that isn't available in this environment (e.g. Redis not installed). Ask for the fallback.
 - A "simple" migration would be destructive on existing data. Ask before running.
+
+## Done when
+
+- Every route in the API table exists with its schema, and the tests for them pass
+- Migrations run and are reversible
+- Errors and logging follow the `errors` and `logging` skills, not a local pattern
+- No historical comments anywhere in the code
+
+**Then hand off.** Say: "Backend built: N files, tests green." Then: "Next: **`/atelier:review`** to check it against the design." 

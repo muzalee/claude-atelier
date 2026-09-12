@@ -103,3 +103,13 @@ Close with the smallest useful next action: "Fix the plan?" for mechanical probl
 - The plan is very large (50+ steps). Offer to check the first phase, or the steps touching a named area, rather than burning a full pass on all of it.
 - You cannot find the plan, or several candidates look equally plausible.
 - The plan is written against a different repository or a branch that is not checked out.
+
+## Done when
+
+- Every claim the plan makes has been checked against the repo, or marked unverifiable with the reason
+- A verdict is stated first: Ready, Ready with fixes, or Blocked
+- Findings carry `PF-n` ids, and the Verified section lists what you actually checked
+
+**Then hand off.** **Ready** → "Plan checks out. Next: **`/atelier:build`**, or **`/atelier:ship`** to build, test, review and open a PR unattended."
+**Ready with fixes** → name the mechanical fixes, then: "Fix the plan first, then `/atelier:build`."
+**Blocked** → name the decision needed. Do not suggest building.

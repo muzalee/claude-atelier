@@ -109,3 +109,11 @@ Rules for URL construction:
 - Dynamic segments: [what is parameterized]
 - Query parameters: [filtering, sorting, pagination]
 ```
+
+## Done when
+
+- The IA is saved at `.design/<slug>/INFORMATION_ARCHITECTURE.md`
+- Navigation, URL patterns, and the primary user flows are all named
+- The flows match the endpoints in `BACKEND_DESIGN.md` where one exists
+
+**Then hand off.** Say: "IA saved to `.design/<slug>/INFORMATION_ARCHITECTURE.md`." Then: "Next: **`/atelier:design-tokens`** to derive the visual system, or skip it if this project already has one." 

@@ -137,3 +137,12 @@ Always include a "What's good" section if there's something worth noting. A revi
 - The diff is huge (>500 lines changed across many files). Offer to review in slices.
 - The change touches security-critical code (auth, crypto, payments) and the reviewer isn't sure of the invariant. Ask before flagging.
 - The user asked for review but the diff is empty. Ask which branch or files.
+
+## Done when
+
+- Every finding cites `file:line` and carries a `CR-n` id
+- Findings are bucketed must-fix / should-fix / consider
+- The report is saved to `.design/<slug>/CODE_REVIEW.md` when a design folder exists
+- "What's good" is filled in — a review that only lists problems is unbalanced
+
+**Then hand off.** Say: "Code review done: N must-fix, N should-fix." Name the single biggest issue, then: "Next: fix the must-fix items, or **`/atelier:design-review`** for the visual pass." 
