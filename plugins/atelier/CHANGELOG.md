@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/muzalee/claude-atelier/compare/atelier-v0.4.0...atelier-v0.4.1) (2026-09-12)
+
+
+### Bug Fixes
+
+* **atelier:** close seven preflight gaps found by its first eval ([#14](https://github.com/muzalee/claude-atelier/issues/14)) ([7894832](https://github.com/muzalee/claude-atelier/commit/78948322741ca8371378882b58c530905d82cd83))
+
 ## [0.4.0](https://github.com/muzalee/claude-atelier/compare/atelier-v0.3.0...atelier-v0.4.0) (2026-09-12)
 
 
