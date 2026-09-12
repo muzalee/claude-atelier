@@ -1,7 +1,7 @@
 {
   "name": "atelier-typescript",
-  "version": "0.1.0",
-  "description": "TypeScript-specific skills from the atelier \u2014 house conventions for React and Fastify, plus route scaffolding. Install alongside `atelier` in any TypeScript codebase.",
+  "version": "0.2.0",
+  "description": "TypeScript-specific skills from the atelier — house conventions for React and Fastify, plus route scaffolding. Install alongside `atelier` in any TypeScript codebase.",
   "author": {
     "name": "muza",
     "url": "https://github.com/muzalee"
