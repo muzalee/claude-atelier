@@ -22,7 +22,7 @@
       "name": "atelier-typescript",
       "source": "./plugins/atelier-typescript",
       "description": "TypeScript skills: house conventions for React + Fastify, and route scaffolding. Install alongside atelier in a TypeScript codebase.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "workflow",
       "keywords": [
         "typescript",
