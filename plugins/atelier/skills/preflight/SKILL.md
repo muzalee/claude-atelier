@@ -21,7 +21,7 @@ This skill checks them, and reports what would break — before a build hits the
 
 If the user named a file, use it. Otherwise look, in order: `.design/*/TASKS.md`, `.design/*/BACKEND_DESIGN.md`, `docs/prd/*.md`, `PLAN.md`, `TODO.md`, a plan pasted into the conversation. If several exist, list them and ask which one — checking the wrong plan wastes the whole pass.
 
-Note when it was last modified and how many commits have landed since. A plan written thirty commits ago is a different risk profile from one written this morning, and it tells you how hard to look.
+Note when it was last modified and, **if this is a git repo**, how many commits have landed since. A plan written thirty commits ago is a different risk profile from one written this morning, and it tells you how hard to look. Outside a git repo, or where mtimes are uniform because everything was checked out at once, say the plan's age is unverifiable rather than guessing — a wrong guess makes the whole pass shallower or slower than it should be.
 
 ## Step 2: Extract the claims
 
@@ -57,7 +57,7 @@ Give a verdict first — the reader wants to know whether to proceed before they
 | Verdict | Means |
 | ------- | ----- |
 | **Ready** | Every claim checks out. Build it. |
-| **Ready with fixes** | Real problems, all mechanical — a renamed symbol, a missing script, a wrong path. Fix the plan, then build. |
+| **Ready with fixes** | Real problems, all mechanical — a renamed symbol, a wrong path, a step that assumes a field which already exists. Fix the plan, then build. |
 | **Blocked** | At least one problem needs a decision, not a correction: the plan's approach assumes an architecture the repo does not have, or a step is impossible as described. |
 
 Then the findings, each with a stable id so a later fix pass can report against them one by one:
@@ -65,13 +65,13 @@ Then the findings, each with a stable id so a later fix pass can report against 
 ```markdown
 ## Preflight: <plan file>
 
-**Verdict**: Ready with fixes — 2 blocking, 1 worth knowing.
+**Verdict**: Blocked — 2 blocking, 1 worth knowing. Both blockers need a decision, not a correction.
 **Plan**: `.design/billing/TASKS.md`, last modified 12 days and 31 commits ago.
 **Checked**: 14 claims across 9 files.
 
 ### 🔴 Blocking
-- **PF-1** — Step 3 calls `createSession(userId, tenantId)`; `src/auth/session.ts:42` defines it as `createSession(userId)`. Tenancy was never threaded through. Either add the parameter first, or the step needs rewriting.
-- **PF-2** — Step 7 runs `npm run migrate`; `package.json` has no `migrate` script. Closest is `db:push`, which is not the same operation.
+- **PF-1** — Step 3 calls `createSession(userId, tenantId)`; `src/auth/session.ts:42` defines it as `createSession(userId)`. Tenancy was never threaded through. Either add the parameter first, or the step needs rewriting — step 3 is marked `preflight: BLOCKED — PF-1` until you say which.
+- **PF-2** — Step 7 runs `npm run migrate`; `package.json` has no `migrate` script. `db:push` exists but applies schema without a migration history, which is a different operation with different rollback behaviour — so this is a question, not a rename. Left unfixed, and step 7 is marked `preflight: BLOCKED — PF-2`.
 
 ### 🟡 Worth knowing
 - **PF-3** — The plan states "no rate limiting exists". `src/plugins/rate-limit.ts:1` registers `@fastify/rate-limit`, added in `a3f21c8` after the plan was written. Step 9 would add a second limiter.
@@ -84,7 +84,7 @@ Then the findings, each with a stable id so a later fix pass can report against 
 
 The **Verified** section is not padding — it tells the reader which claims you actually checked, which is the only way they can judge how much the verdict is worth. A report listing three problems and nothing else leaves them unable to distinguish a thorough pass from a shallow one.
 
-When the plan lives in a `.design/<slug>/` folder, save the report as `.design/<slug>/PREFLIGHT.md` alongside the others. Otherwise report inline — a standalone plan check does not need a file nobody will open twice.
+When the plan lives in a `.design/<slug>/` folder, save the report as `.design/<slug>/PREFLIGHT.md` alongside the others — **including when the verdict is Blocked.** The report is a record of what was checked, not a certificate that the plan passed, and a blocked pass is exactly the one whose findings need to outlive the conversation. `/build` reads this file. Otherwise report inline — a standalone plan check does not need a file nobody will open twice.
 
 ## Step 5: Drive the plan to Ready
 
@@ -92,7 +92,9 @@ A verdict of "Ready with fixes" that stops there hands the user a list of chores
 
 Work in this order, because each step is cheaper than the next:
 
-**1. Apply the mechanical fixes yourself.** A renamed symbol, a wrong path, a script that is now called something else, a step that assumes a field which already exists — these have exactly one correct answer, sitting in the repo. Edit the plan file, and list each edit in your report so the user sees what moved. Asking permission for a corrected path is just a slower way of getting the same edit.
+**1. Apply the mechanical fixes yourself.** A renamed symbol, a wrong path, a step that assumes a field which already exists — these have exactly one correct answer, sitting in the repo.
+
+The test is *one right answer*, not *looks like a typo*. A script named `migrate` that does not exist is a rename when the project has exactly one schema-apply path; it is a question when `db:push` and a migrations directory are different operations with different rollback behaviour. Same-looking finding, opposite handling — when in doubt it is a question, because a wrong mechanical fix is the one kind of edit nobody re-reads. Edit the plan file, and list each edit in your report so the user sees what moved. Asking permission for a corrected path is just a slower way of getting the same edit.
 
 **2. Ask about everything with more than one defensible answer.** Batch the questions — one round, not a trickle — and for each one give the evidence from the repo, your recommended answer, and the consequence of choosing otherwise. Then apply the answers to the plan. Most "Blocked" verdicts collapse here: a step is unrunnable because a decision was never made, and making it takes one sentence from the user.
 
@@ -107,6 +109,12 @@ Work in this order, because each step is cheaper than the next:
 
 For these, say plainly that it is a gate, give both options and their consequences, and wait. A gate is not a failure of the skill; guessing past one is.
 
+**When a gate sits upstream of your other questions, say so rather than dropping them.** If the gate's answer could make the rest moot — "is the API in another repo, or does it not exist?" decides whether any downstream question is even about the right tree — ask them all in the one round, marked for which is the gate and which depend on it. Suppressing the dependents costs the user a second round; presenting them as equals costs them answers they may not need.
+
+**Mark the steps you could not resolve, in the plan file.** A pass that stops at a question always leaves the plan half-fixed: some steps corrected, others waiting on an answer. Leaving those unmarked hands `/build` a plan that reads as buildable, which is how a blocked step gets improvised past. A one-line `preflight: BLOCKED — <PF-n>` marker on the step is enough; it costs nothing and it is the thing standing between a gate and a silent guess.
+
+The exception is a step whose correctness depends on how a gate resolves. Annotating that one pre-judges the gate — say so in the report and leave the step alone.
+
 **Update the plan file itself**, not just the report. A plan that stays wrong while a separate document records that it is wrong has two sources of truth, and `/build` reads the wrong one. Where a fix changes what a step does rather than how it is worded, say so in the step so the change is visible to whoever agreed the original.
 
 Then restate the verdict. If it is now Ready, say so and hand off.
@@ -115,7 +123,7 @@ Then restate the verdict. If it is now Ready, say so and hand off.
 
 - **Verify, do not assume.** If a claim cannot be checked from the repo — "the design team will provide assets" — mark it unverifiable rather than guessing. An unverifiable claim is itself worth reporting.
 - **A missing file is not automatically a finding.** Plans create files. Check whether the plan says it creates this one before flagging it.
-- **Do not review the plan's judgement.** Whether the approach is wise is a different question, and mixing it in dilutes the factual findings. Stick to whether it will run. If the approach looks genuinely wrong, say so in one line at the end, clearly separated.
+- **Do not review the plan's judgement — but scope is not judgement.** Whether the approach is wise is a different question, and mixing it in dilutes the factual findings; say that in one line at the end, clearly separated. Whether the plan contradicts a stated non-goal, or is filed under a PRD that does not cover it, is a *fact about two documents* and belongs in the findings. The line is whether you are checking the plan against something written down, or against your own taste.
 - **Fix the plan, never the code.** Mechanical corrections to the plan are the job (step 5). Touching the implementation is not — that is `/build`, and a preflight that starts coding has stopped being a check.
 - **Never fix silently.** Every edit you make to the plan appears in the report. The user agreed to the original; they are entitled to see what changed without diffing it themselves.
 - **Say when you ran out of road.** A plan referencing an external service, another team's API, or a machine you cannot see has claims you cannot check. Name them; do not quietly treat unchecked as verified.
@@ -136,4 +144,4 @@ Then restate the verdict. If it is now Ready, say so and hand off.
 - Findings carry `PF-n` ids, and the Verified section lists what you actually checked
 
 **Then hand off.** **Ready** → "Plan checks out — N claims verified, M fixed." List the edits, then: "Next: **`/atelier:build`**, or **`/atelier:ship`** to build, test, review and open a PR unattended."
-**Blocked on a gate** → name the gate, give both options and their consequences, and say the plan is Ready apart from it. Do not suggest building until it is answered.
+**Blocked on a gate** → name the gate, give both options and their consequences. Say the plan is Ready apart from it only when that is true — when the gate's answer would change what the remaining steps even mean, say the pass is blocked and name what has to be re-checked once it is answered. Do not suggest building either way.

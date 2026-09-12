@@ -1,0 +1,45 @@
+{
+  "skill_name": "preflight",
+  "evals": [
+    { "id": 0, "name": "mechanical-fixes",
+      "prompt": "check this plan before I build it: .design/enterprise-tier/TASKS.md",
+      "files": ["evals/fixtures/mechanical-fixes"],
+      "expected_output": "Fixes the signature claim (createSession takes userId only) and the script name (no `migrate` script; `db:push` exists) directly in TASKS.md, flags src/lib/cache.ts as nonexistent, lists every edit, and returns Ready without asking permission for corrections that have one right answer.",
+      "assertions": [
+        "Catches that `createSession` takes only `userId` — src/lib/auth.ts defines no tenantId parameter",
+        "Catches that `npm run migrate` does not exist; package.json has `db:push`",
+        "Catches that `src/lib/cache.ts` does not exist",
+        "EDITS TASKS.md itself rather than only reporting the problems",
+        "Lists every edit it made in the report",
+        "Does not ask permission for corrections that have exactly one right answer",
+        "Ends Ready (or Ready-apart-from-a-named-gate) and hands off to /atelier:build"
+      ]
+    },
+    { "id": 1, "name": "ambiguous-step",
+      "prompt": "check this plan before I build it: .design/enterprise-tier/TASKS.md",
+      "files": ["evals/fixtures/ambiguous-step"],
+      "expected_output": "Recognises task 1 is unrunnable as written — rate limiting per-IP vs per-user vs per-tenant are all defensible and change the implementation. Asks in ONE batched round with a recommendation and the consequence, rather than guessing or handing back a chore list.",
+      "assertions": [
+        "Identifies that 'add rate limiting' is underspecified — the scope key (per-IP / per-user / per-tenant) is not stated",
+        "Asks the user rather than silently picking one",
+        "Batches its questions into one round instead of trickling them",
+        "Gives a recommended answer and the consequence of choosing otherwise",
+        "Notes @fastify/rate-limit is not currently a dependency",
+        "Does not declare the plan Ready while the ambiguity is unresolved"
+      ]
+    },
+    { "id": 2, "name": "prd-gate",
+      "prompt": "check this plan before I build it: .design/enterprise-tier/TASKS.md",
+      "files": ["evals/fixtures/prd-gate"],
+      "expected_output": "Recognises that the whole plan contradicts PRD 0001's 'On-prem or self-hosted deployment — not ever' non-goal. Treats it as a scope gate: stops, names it, gives the options (amend the PRD or drop the plan), and does NOT edit the plan or the PRD to make it runnable.",
+      "assertions": [
+        "Reads docs/prd/0001-enterprise-tier.md and finds the self-hosting non-goal",
+        "Recognises this as a scope gate, not a mechanical fix",
+        "STOPS and asks rather than editing the plan to make it buildable",
+        "Does NOT edit the PRD to remove or soften the non-goal",
+        "Names the options: amend the PRD deliberately, or drop the plan",
+        "Does not suggest /atelier:build while the gate is open"
+      ]
+    }
+  ]
+}
