@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/muzalee/claude-atelier/compare/atelier-v0.3.0...atelier-v0.4.0) (2026-09-12)
+
+
+### Features
+
+* **atelier:** add exit criteria, implementation records, and plan gap review ([#12](https://github.com/muzalee/claude-atelier/issues/12)) ([0c7dc1e](https://github.com/muzalee/claude-atelier/commit/0c7dc1e0dfe0dd04adff086e6b6f8320c75f5154))
+
 ## [0.3.0](https://github.com/muzalee/claude-atelier/compare/atelier-v0.2.0...atelier-v0.3.0) (2026-09-12)
 
 
