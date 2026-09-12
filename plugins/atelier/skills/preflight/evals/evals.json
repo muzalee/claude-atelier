@@ -3,6 +3,7 @@
   "evals": [
     { "id": 0, "name": "mechanical-fixes",
       "prompt": "check this plan before I build it: .design/enterprise-tier/TASKS.md",
+      "files": ["evals/fixtures/mechanical-fixes"],
       "expected_output": "Fixes the signature claim (createSession takes userId only) and the script name (no `migrate` script; `db:push` exists) directly in TASKS.md, flags src/lib/cache.ts as nonexistent, lists every edit, and returns Ready without asking permission for corrections that have one right answer.",
       "assertions": [
         "Catches that `createSession` takes only `userId` — src/lib/auth.ts defines no tenantId parameter",
@@ -16,6 +17,7 @@
     },
     { "id": 1, "name": "ambiguous-step",
       "prompt": "check this plan before I build it: .design/enterprise-tier/TASKS.md",
+      "files": ["evals/fixtures/ambiguous-step"],
       "expected_output": "Recognises task 1 is unrunnable as written — rate limiting per-IP vs per-user vs per-tenant are all defensible and change the implementation. Asks in ONE batched round with a recommendation and the consequence, rather than guessing or handing back a chore list.",
       "assertions": [
         "Identifies that 'add rate limiting' is underspecified — the scope key (per-IP / per-user / per-tenant) is not stated",
@@ -28,6 +30,7 @@
     },
     { "id": 2, "name": "prd-gate",
       "prompt": "check this plan before I build it: .design/enterprise-tier/TASKS.md",
+      "files": ["evals/fixtures/prd-gate"],
       "expected_output": "Recognises that the whole plan contradicts PRD 0001's 'On-prem or self-hosted deployment — not ever' non-goal. Treats it as a scope gate: stops, names it, gives the options (amend the PRD or drop the plan), and does NOT edit the plan or the PRD to make it runnable.",
       "assertions": [
         "Reads docs/prd/0001-enterprise-tier.md and finds the self-hosting non-goal",

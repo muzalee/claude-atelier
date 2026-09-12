@@ -93,6 +93,10 @@ If `.design/<slug>/PREFLIGHT.md` exists, read it before the first task. `/prefli
 
 Where it and `TASKS.md` disagree, the plan file wins: preflight edits the plan, so a live disagreement means the report is describing an edit that did not land, and that is worth saying out loud before building on it.
 
+**A step marked `preflight: BLOCKED — <PF-n>` is not buildable.** Preflight leaves that marker on a step it could not resolve because the answer was the user's to give. Stop before that task, quote the finding from `PREFLIGHT.md`, and ask — building it means guessing the answer preflight deliberately refused to guess. The marker is the exception to "the plan file wins": it is not a stale edit, it is the plan saying this step is still open.
+
+Tasks that do not depend on the blocked one can still be built. Say which you are skipping and why.
+
 ## House Conventions
 
 Load these before writing code. Each is a real skill — read its `SKILL.md` and follow it, do not work from the summary here.

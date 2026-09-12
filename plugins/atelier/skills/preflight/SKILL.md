@@ -21,7 +21,7 @@ This skill checks them, and reports what would break — before a build hits the
 
 If the user named a file, use it. Otherwise look, in order: `.design/*/TASKS.md`, `.design/*/BACKEND_DESIGN.md`, `docs/prd/*.md`, `PLAN.md`, `TODO.md`, a plan pasted into the conversation. If several exist, list them and ask which one — checking the wrong plan wastes the whole pass.
 
-Note when it was last modified and, **if this is a git repo**, how many commits have landed since. Outside a git repo, or where mtimes are uniform because everything was checked out at once, say the plan's age is unverifiable rather than guessing — age changes how hard you look, so a wrong guess makes the whole pass shallower or slower than it should be. A plan written thirty commits ago is a different risk profile from one written this morning, and it tells you how hard to look.
+Note when it was last modified and, **if this is a git repo**, how many commits have landed since. A plan written thirty commits ago is a different risk profile from one written this morning, and it tells you how hard to look. Outside a git repo, or where mtimes are uniform because everything was checked out at once, say the plan's age is unverifiable rather than guessing — a wrong guess makes the whole pass shallower or slower than it should be.
 
 ## Step 2: Extract the claims
 
@@ -57,7 +57,7 @@ Give a verdict first — the reader wants to know whether to proceed before they
 | Verdict | Means |
 | ------- | ----- |
 | **Ready** | Every claim checks out. Build it. |
-| **Ready with fixes** | Real problems, all mechanical — a renamed symbol, a missing script, a wrong path. Fix the plan, then build. |
+| **Ready with fixes** | Real problems, all mechanical — a renamed symbol, a wrong path, a step that assumes a field which already exists. Fix the plan, then build. |
 | **Blocked** | At least one problem needs a decision, not a correction: the plan's approach assumes an architecture the repo does not have, or a step is impossible as described. |
 
 Then the findings, each with a stable id so a later fix pass can report against them one by one:
@@ -65,13 +65,13 @@ Then the findings, each with a stable id so a later fix pass can report against 
 ```markdown
 ## Preflight: <plan file>
 
-**Verdict**: Ready with fixes — 2 blocking, 1 worth knowing.
+**Verdict**: Blocked — 2 blocking, 1 worth knowing. Both blockers need a decision, not a correction.
 **Plan**: `.design/billing/TASKS.md`, last modified 12 days and 31 commits ago.
 **Checked**: 14 claims across 9 files.
 
 ### 🔴 Blocking
-- **PF-1** — Step 3 calls `createSession(userId, tenantId)`; `src/auth/session.ts:42` defines it as `createSession(userId)`. Tenancy was never threaded through. Either add the parameter first, or the step needs rewriting.
-- **PF-2** — Step 7 runs `npm run migrate`; `package.json` has no `migrate` script. `db:push` exists but applies schema without a migration history, which is a different operation with different rollback behaviour — so this is a question, not a rename. Fixed the name only where a project has exactly one schema-apply path.
+- **PF-1** — Step 3 calls `createSession(userId, tenantId)`; `src/auth/session.ts:42` defines it as `createSession(userId)`. Tenancy was never threaded through. Either add the parameter first, or the step needs rewriting — step 3 is marked `preflight: BLOCKED — PF-1` until you say which.
+- **PF-2** — Step 7 runs `npm run migrate`; `package.json` has no `migrate` script. `db:push` exists but applies schema without a migration history, which is a different operation with different rollback behaviour — so this is a question, not a rename. Left unfixed, and step 7 is marked `preflight: BLOCKED — PF-2`.
 
 ### 🟡 Worth knowing
 - **PF-3** — The plan states "no rate limiting exists". `src/plugins/rate-limit.ts:1` registers `@fastify/rate-limit`, added in `a3f21c8` after the plan was written. Step 9 would add a second limiter.

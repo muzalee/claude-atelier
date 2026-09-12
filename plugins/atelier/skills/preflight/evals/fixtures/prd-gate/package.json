@@ -1,0 +1,12 @@
+{
+  "name": "cadence",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "test": "vitest run",
+    "db:push": "drizzle-kit push"
+  },
+  "dependencies": {
+    "fastify": "^4.28.0"
+  }
+}
