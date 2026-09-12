@@ -29,7 +29,13 @@ Where `/build` stops at working code and `/review` stops at a report, this close
    - A **must-fix finding from `security-review`**. Security findings are not "note it in the PR" material.
    - **A stage asking for a human decision.** Unattended means you do not interrupt for progress reports; it does not mean you guess at a question that was put to you. If the build stops and asks something, that question is the blocker.
 
-   When you stop, always: **push what exists**, leave the PR as a draft, and say which stage stopped it, the exact question or failure, and what you would do if told to proceed. A halted run that pushed its work is recoverable; one that discarded it is not.
+   When you stop, always do all five of these. A halted run that preserved its work is recoverable; one that discarded it is not.
+
+   1. **Push what the build already committed.** Do not commit work it left half-finished mid-phase — that code is not yours and its author did not think it was done. Say it is there and uncommitted.
+   2. **Leave the PR as a draft**, and write the blocker into its "Known findings" section. The PR body is the only channel that survives this transcript; a blocker that exists only in chat is lost the moment the session ends.
+   3. **Leave a spawned terminal open at its prompt.** Stage 3's "close the terminal" step is for a finished run. Closing a halted one throws away the build's accumulated context and forces a restart from the beginning. Record the handle and read cursor so the run can resume.
+   4. **Name the stage that stopped and quote the failure or question verbatim.** Paraphrasing a question loses the detail that made it unanswerable.
+   5. **Recommend, but do not apply.** Saying what you would do if told to proceed is useful and is not the same as deciding — the ban in stage 3 is on *answering* the build, not on having an opinion for the user.
 
 3. **Everything else gets fixed or written down.** A finding you cannot fix cleanly goes in the PR description under "Known findings", with its id. Silently dropping a finding is the one outcome worse than leaving it open.
 
@@ -175,12 +181,18 @@ The point of a cold review is that it has no idea what you meant. A reviewer who
 
 **Spawn a subagent with no context from this conversation.** Give it only:
 
-- the **full PR diff** — `gh pr diff <number>`, every change in the PR, not just the most recent phase,
-- the **PR title and description**,
-- the design brief and PRD, as the statement of intent,
+- the **full PR diff** — every change in the PR, not just the most recent phase. **Paste the output of `gh pr diff <number>` into the instruction** rather than telling the agent to run it. An agent with a shell will also reach `git log`, the commit messages, and the warm `CODE_REVIEW.md` sitting in the same design folder — and arrives warm, having defeated the entire stage. Tell it explicitly not to read git history or the rest of `.design/<slug>/`.
+- the **PR title and description**, labelled as *an unverified claim about the code, not a specification*. That label is what stops the reviewer "fixing" correct code to match a stale sentence.
+- the design brief as the statement of intent, and the PRD if one exists — say so plainly when there is none rather than implying it is required.
 - the instruction to read `code-review/SKILL.md` and follow it, then run `security-review`.
 
-Do not tell it what you built, what you already fixed, or which parts you think are fine. Every one of those is a hint that stops it looking.
+Spawn a **fresh general-purpose agent, never a fork** — a fork inherits this conversation, which is the one thing the stage exists to prevent.
+
+**The parent writes `COLD_REVIEW.md`,** not the subagent: the reviewer should not be browsing the folder it is fenced out of. Have it report findings back and save them yourself.
+
+Do not tell it what you built, what you already fixed, or which parts you think are fine. Every one of those is a hint that stops it looking — and "the code is correct and tested" buys a rubber stamp, not a review.
+
+**`design-review` is deliberately not part of this stage.** A reviewer working from a diff cannot see the rendered page, and stage 5 already covered the visual pass with a running app in front of it.
 
 **It reviews the PR text too, not only the code.** A title that describes something other than what shipped, or a description that no longer matches the diff, is a finding — it is what every future reader sees first, and a wrong one sends them into the code with the wrong model. Findings get ids `CCR-1`, `CSEC-1`.
 

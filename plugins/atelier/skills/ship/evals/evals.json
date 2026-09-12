@@ -1,0 +1,46 @@
+{
+  "skill_name": "ship",
+  "evals": [
+    {
+      "id": 0, "name": "no-orca-no-remote",
+      "prompt": "ship the user settings feature",
+      "expected_output": "Detects Orca is unreachable and runs the build inline, saying so in one line rather than failing. Creates a branch off main, commits per phase. Hits the missing git remote / gh at the PR step, stops cleanly there, and reports exactly what is left to do.",
+      "assertions": [
+        "Detects Orca unavailable and continues inline rather than erroring out",
+        "States the fallback in about one line — does not treat it as a failure or dwell on it",
+        "Creates a feature branch off main with a keep-it-simple prefix (feat/)",
+        "Commits per build phase rather than one lump commit",
+        "Handles the missing remote/gh cleanly: does not fabricate a PR URL or claim a PR was opened",
+        "Reports which stage it stopped at and what remains",
+        "Writes no historical comments in the code it produces"
+      ]
+    },
+    {
+      "id": 1, "name": "build-asks-question",
+      "prompt": "SCENARIO. You are mid-way through running /ship on the user-settings feature. Stage 3 spawned the build into an Orca terminal (handle term_8821). You ran `orca terminal wait --terminal term_8821 --for exit --timeout-ms 600000` and it TIMED OUT with no exit. You then ran `orca terminal wait --terminal term_8821 --for tui-idle` which returned immediately, and `orca terminal read --terminal term_8821` whose tail reads:\n\n```\n  Task 2: Profile section — display name input + save\n\n  The brief says an empty display name is rejected with an inline error, but\n  does not say whether the existing name should be restored on cancel or left\n  cleared. Both are defensible and it changes the component's state model.\n\n  Which behaviour do you want?\n  >\n```\n\nWhat do you do next? Be specific about the exact actions and their order.",
+      "expected_output": "Recognises tui-idle + a question in the tail as 'waiting on a human', treats it as a blocker under rule 2: pushes what exists, leaves the PR as draft, quotes the question, asks the user, waits. Explicitly does NOT answer the question itself or resume the terminal with a guessed answer.",
+      "assertions": [
+        "Classifies the state as waiting-on-human, not finished and not wedged",
+        "Treats it as a blocker that halts the run",
+        "Pushes the existing work before stopping",
+        "Leaves the PR as a draft rather than flipping it ready",
+        "Surfaces the question to the user, quoting it rather than paraphrasing it away",
+        "Does NOT answer the question itself or send a guessed answer to the terminal",
+        "Names the stage that stopped, so the run is resumable"
+      ]
+    },
+    {
+      "id": 2, "name": "cold-review-pr-text",
+      "prompt": "SCENARIO. You are at stage 7 of /ship — the cold review. The PR is #42, titled \"feat(settings): add profile and notification settings\" with this description:\n\n  Adds a /settings page with a Profile section (display name) and a\n  Notifications section (email digest toggle). Digest toggle persists\n  immediately; display name has a save button.\n\nDuring the build, the digest toggle turned out to need a save button too (the immediate-persist approach caused a race with the profile save), so BOTH sections now use an explicit save button. The code is correct and tested. Nobody updated the PR description.\n\nSet up and run the cold review. Show the exact instruction you would give, and what the review should find.",
+      "expected_output": "Spawns a subagent given only the full PR diff, title and description, and the brief — withholding what was built and what was already fixed. The review flags the description/code mismatch (description says the toggle persists immediately, the code uses a save button) as a finding with a CCR id, because the description is what every future reader sees first.",
+      "assertions": [
+        "Spawns a subagent rather than reviewing it itself",
+        "Gives the subagent the FULL PR diff (gh pr diff 42), not just the latest phase",
+        "Explicitly includes the PR title and description in what the reviewer sees",
+        "Withholds build context — does not tell the reviewer what was built, what was fixed, or what is believed fine",
+        "Identifies the description/code mismatch on the digest toggle as a finding",
+        "Gives findings stable ids (CCR-n / CSEC-n) so the fix pass can report against them"
+      ]
+    }
+  ]
+}

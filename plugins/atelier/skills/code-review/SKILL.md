@@ -73,16 +73,24 @@ Reviews **changed code only** by default (uncommitted + last-N commits since bra
    - Duplication of logic that already exists elsewhere in the codebase
    - Over-abstraction: interfaces / factories for something with one caller
 
+   **Intent and documentation drift**
+   - The PR title or description no longer matches what the diff does
+   - A brief, PRD, or comment describing behavior the code has since changed
+   - Where a doc and the code disagree, say so and say which you believe — do not silently pick one. A cold reviewer often cannot tell whether the code drifted or the doc went stale, and guessing turns correct code into a "fix".
+
    **Style consistency**
    - Matches surrounding code (formatting, patterns, naming)
    - Comments follow `keep-it-simple` — no comments explaining what the code obviously does
 
-4. **Categorize findings** by severity. Skip categories with nothing to say.
+4. **Give every finding a stable id** — `CR-1`, `CR-2`, numbered in the order you found them, never reused within a review. A fix pass reports against them one by one, a PR description can list what is still open by id, and a follow-up review can say "CR-3 is still there" instead of re-describing it. A finding without an id cannot be tracked through a fix, which is where findings quietly get lost.
+
+5. **Categorize findings** by severity. Skip categories with nothing to say.
    - **🔴 Must fix** — bugs, security issues, breaking changes. Blocks merge.
    - **🟡 Should fix** — missing tests, unclear code, subtle correctness risk. Address before merge if cheap; note as follow-up if expensive.
    - **🟢 Consider** — style, minor polish, non-blocking suggestions.
 
-5. **For each finding**, name:
+6. **For each finding**, name:
+   - **Its id** (`CR-n`)
    - **File:line**
    - **One-line description** of the issue
    - **Why it matters** (one sentence, not a paragraph)
@@ -98,15 +106,16 @@ Short markdown, no template ceremony:
 **Scanned**: X files changed, Y lines added, Z removed.
 
 ### 🔴 Must fix
-- `src/auth/session.ts:42` — session token compared with `===`, allows timing attack. Use `crypto.timingSafeEqual`.
-- `src/routes/users.ts:87` — new required `email` field on existing endpoint breaks existing clients.
+- **CR-1** `src/auth/session.ts:42` — session token compared with `===`, allows timing attack. Use `crypto.timingSafeEqual`.
+- **CR-2** `src/routes/users.ts:87` — new required `email` field on existing endpoint breaks existing clients.
 
 ### 🟡 Should fix
-- `src/services/orders.ts:120` — happy-path only test. Add: rejected payment case.
-- `src/db/migrations/0042.sql` — index missing on `orders.user_id`; the new query on line 145 will scan.
+- **CR-3** `src/services/orders.ts:120` — happy-path only test. Add: rejected payment case.
+- **CR-4** `src/db/migrations/0042.sql` — index missing on `orders.user_id`; the new query on line 145 will scan.
+- **CR-5** `PR description` — says the digest toggle persists immediately; the diff gives it a save button. Documentation drift counts: the description is what every future reader sees first.
 
 ### 🟢 Consider
-- `src/utils/format.ts:15` — duplicates `formatCurrency` already in `src/lib/money.ts`. Reuse?
+- **CR-6** `src/utils/format.ts:15` — duplicates `formatCurrency` already in `src/lib/money.ts`. Reuse?
 
 ### What's good
 - Error handling in the payment retry logic is careful; timeouts and idempotency keys are correct.

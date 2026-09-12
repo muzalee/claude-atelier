@@ -35,9 +35,20 @@ This skill runs a structured design review of what has been built, measured agai
    ### Screenshot Tool Priority
 
    Try each option in order. Use the first one that is available:
-   1. **Playwright MCP (preferred).** Check if the `plugin-playwright-playwright` MCP server is available. If it is, use it — it gives you precise control over viewport sizing, full-page captures, and file naming.
-   2. **Cursor IDE Browser (second choice).** If Playwright MCP is not available, use the `cursor-ide-browser` MCP server's `browser_take_screenshot` tool instead. It has the same core capabilities.
-   3. **Ask the user (last resort).** If neither MCP server nor in-app browser is available, you MUST ask the user to provide screenshots manually. Be specific about what you need:
+   1. **Orca (preferred where installed).** If `command -v orca` succeeds and `orca status --json` reports the runtime reachable, use it — `orca open` first if Orca is installed but closed. It gives precise viewport control and device emulation from the shell:
+
+      ```bash
+      orca tab create --url http://localhost:3000/<route>
+      orca set device --name "iPhone 12"          # or drive widths directly
+      orca set media --color-scheme dark          # dark-mode variants
+      orca screenshot --format png
+      orca snapshot                               # accessibility tree — refs change after navigation
+      ```
+
+   2. **Playwright MCP.** If the `plugin-playwright-playwright` MCP server is available, use it — precise viewport sizing, full-page captures, file naming.
+   3. **Claude-in-Chrome.** The `mcp__claude-in-chrome__*` tools, if available: `navigate`, `resize_window`, `computer` for screenshots.
+   4. **Cursor IDE Browser.** The `cursor-ide-browser` MCP server's `browser_take_screenshot` tool.
+   5. **Ask the user (last resort).** If no driver above is available, you MUST ask the user to provide screenshots manually. Be specific about what you need:
       - "I don't have access to a browser tool. To complete the visual review I need screenshots of the running application. Please provide:"
       - A full-page screenshot at **desktop** width (1280px)
       - A full-page screenshot at **tablet** width (768px)
@@ -86,7 +97,7 @@ This skill runs a structured design review of what has been built, measured agai
 
    Use `browser_resize` to set the viewport before each screenshot. Use `browser_take_screenshot` with `fullPage: true` to capture the entire scrollable page, and save with the `filename` parameter pointing to the `screenshots/` folder.
 
-   **Playwright MCP example sequence** (assuming feature slug is `onboarding-flow`):
+   **Example sequence with Playwright MCP** (the same shape applies to any driver above) (assuming feature slug is `onboarding-flow`):
 
    ```
    1. browser_navigate → { url: "http://localhost:3000" }
