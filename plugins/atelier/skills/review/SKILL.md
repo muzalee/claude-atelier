@@ -60,7 +60,7 @@ Read `code-review/SKILL.md` and follow it. Point it at the branch diff (or uncom
 Run Claude Code's built-in `security-review` skill against the same changes. This is a **dedicated pass, not a duplicate** of phase 1: `code-review`'s security checklist is a generalist sweep performed by a reviewer also thinking about naming and tests, while `security-review` looks at nothing else. The two find different things, and the overlap is cheap.
 
 - **Input**: the same diff phase 1 reviewed — pending changes on the current branch.
-- **Produces**: `.design/<slug>/SECURITY_REVIEW.md`. Save the findings there even though the skill reports inline, so the report sits with the others and a later fix pass can work from a file.
+- **Produces**: `.design/<slug>/SECURITY_REVIEW.md`. Save the findings there even though the skill reports inline, so the report sits with the others and a later fix pass can work from a file. **Number them `SEC-1`, `SEC-2` as you save** — `security-review` does not assign ids, and a fix pass needs them for the same reason `CR-n` and `DR-n` exist.
 - **If the skill is unavailable**: do not substitute your own security opinion for it and do not skip quietly. Report it under rule 6, note that phase 1's security checklist was the only coverage, and continue.
 - **Transition**: "Security review done. Next: the design review?"
 

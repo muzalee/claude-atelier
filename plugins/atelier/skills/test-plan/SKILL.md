@@ -98,9 +98,20 @@ Short markdown, no template ceremony:
 - **Never pick "unit" for a case that needs a mock.** Move it to integration and run it against the real thing.
 - **Coverage percentage is a vanity metric.** The number that matters is how many prod incidents your tests catch before deploy. Optimize for that.
 
+## Read before writing
+
+The failure modes worth testing live in the design docs, not in your imagination. Where `.design/<slug>/` exists, read first:
+
+- **`DESIGN_BRIEF.md`** — the Key Interactions are the e2e cases, and Out of Scope tells you what not to cover.
+- **`BACKEND_DESIGN.md`** — the invariants, failure modes, and consistency model are the integration cases. Its Failure Modes table is close to a test list already.
+- **`docs/prd/NNNN-*.md`** — every `FR-n` and `NFR-n` is a requirement someone agreed to. A MUST with no test is a shippable bar nothing checks.
+
+Cite what each case comes from. A case traced to `FR-3` or to a named failure mode survives the argument about whether it is worth writing; one that came from nowhere does not.
+
 ## Done when
 
 - The plan names each case, the level it lives at, and what to break to prove it
+- Cases trace back to the brief's interactions, the backend brief's failure modes, or a PRD requirement id
 - It says what NOT to test, so the build does not gold-plate coverage
 - Saved to `.design/<slug>/TEST_PLAN.md` when a design folder exists
 

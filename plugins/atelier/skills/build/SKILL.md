@@ -54,9 +54,38 @@ Skip either phase if the design didn't include it (e.g. no `BACKEND_DESIGN.md` �
 
    Keep it to what the diff cannot say. `Implemented:` plus a line or two of real decision. Not a summary of the code, and never a history of how it changed — rule 10 applies here too.
 
+   **A fix pass is a build pass.** When you are fixing review findings rather than working a fresh task — `/review` handed you must-fix items, or `/ship` is at stage 6 or 8 — the same rule applies: record the finding id you addressed and what changed, against the task the fix belongs to. A fix that lands with no record is the fastest way for the next review to re-find the same thing, or for a reader to see code that no task explains.
+
+   ```markdown
+   - [x] 3. Notifications section: digest toggle, persists on change
+         **Implemented:** `src/features/settings/DigestToggle.tsx`
+         **Note:** CR-4 — moved behind an explicit save button; immediate persist raced
+         the profile save. Description in PR #42 updated to match.
+   ```
+
 10. **No historical comments.** Comments describe what the code does now, never how it got here. No `// changed from X`, no `// previously did Y`, no `// added per review feedback`, no commented-out old implementation left "just in case". Git already records history accurately and searchably; a comment claiming it is unverifiable, and it starts rotting the moment someone edits nearby. This matters most when `/ship` or a review-fix pass is driving the build, because that is exactly when the temptation to annotate the change is strongest.
 
 11. **Close the loop.** After the last phase, one summary: what was built, tests status, anything deferred. Then: "Build done. Run `/review` to check the code against the design."
+
+## Two ways in
+
+**From `TASKS.md`** — the normal path. Work the tasks in order, as the phases below describe.
+
+**From a review report** — `/review` produced findings, or `/ship` is at its fix stage. Same skill, same conventions, different input:
+
+1. Read the report — `CODE_REVIEW.md`, `SECURITY_REVIEW.md`, `DESIGN_REVIEW.md`, or findings handed to you directly.
+2. Fix must-fix and should-fix findings. Consider-level ones are optional; take the cheap ones.
+3. **Report against every finding by id.** Each one is fixed, or not fixed with a one-line reason. A finding you silently skip gets re-found by the next review, which is the most expensive way to learn you skipped it.
+4. Record the fix in `TASKS.md` against the task it belongs to, per rule 9 — including the finding id.
+5. Commit as `fix:` per `keep-it-simple`, and re-run the tests.
+
+A finding you disagree with is not a finding you ignore. Say why you think it is wrong, in one line, and leave it unfixed — that is a position the user can overrule. Silence is not.
+
+## Reading the preflight report
+
+If `.design/<slug>/PREFLIGHT.md` exists, read it before the first task. `/preflight` fixes what it can and asks the user about the rest, so that file holds decisions the plan itself may not show — a gate the user answered, an assumption they confirmed, a step it rewrote and why.
+
+Where it and `TASKS.md` disagree, the plan file wins: preflight edits the plan, so a live disagreement means the report is describing an edit that did not land, and that is worth saying out loud before building on it.
 
 ## House Conventions
 

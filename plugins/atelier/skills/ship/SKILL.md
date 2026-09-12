@@ -174,13 +174,13 @@ Two things that go wrong in an unattended run:
 
 This review is **warm**: you built this, so you know what every line was meant to do. That is worth something on intent and worth nothing on blind spots, which is what stage 7 is for.
 
-**Give every finding a stable id** — `CR-1`, `SEC-1`, `DR-1` — so the fix pass can report against them one by one and the PR can name what is still open.
+**Every finding carries a stable id** — `CR-n` from `code-review`, `DR-n` from `design-review`, and `SEC-n` which you assign as you save the security findings, since `security-review` does not number its own. The fix pass reports against them one by one, and the PR names what is still open by id.
 
 ## Stage 6: Fix the warm findings
 
-Fix must-fix and should-fix findings. Consider-level findings are optional; take the cheap ones.
+Read `build/SKILL.md` and follow its **"from a review report"** path — fixing findings is a build pass, and it carries the same conventions, the same ban on historical comments, and the same duty to record what changed in `TASKS.md` against the task the fix belongs to.
 
-The conventions still apply while fixing — `errors`, `logging`, `typescript-conventions`, and **no historical comments**. A fix is ordinary code, not an annotation on a review.
+Fix must-fix and should-fix findings. Consider-level ones are optional; take the cheap ones. A finding you disagree with is not one you ignore: say why in a line and leave it, which is a position the user can overrule.
 
 Commit the fixes (`fix:` per `keep-it-simple`), re-run the tests, and push. Report each finding as fixed, or as not-fixed with a one-line reason. Anything not fixed goes to the PR's Known findings.
 
@@ -203,7 +203,9 @@ Do not tell it what you built, what you already fixed, or which parts you think 
 
 **`design-review` is deliberately not part of this stage.** A reviewer working from a diff cannot see the rendered page, and stage 5 already covered the visual pass with a running app in front of it.
 
-**It reviews the PR text too, not only the code.** A title that describes something other than what shipped, or a description that no longer matches the diff, is a finding — it is what every future reader sees first, and a wrong one sends them into the code with the wrong model. Findings get ids `CCR-1`, `CSEC-1`.
+Findings from this stage are numbered `CCR-n` and `CSEC-n` — the cold prefix keeps them distinct from stage 5's, so "CR-3 and CCR-3" are two findings rather than one confusingly renumbered.
+
+**It reviews the PR text too, not only the code.** A title that describes something other than what shipped, or a description that no longer matches the diff, is a finding — it is what every future reader sees first, and a wrong one sends them into the code with the wrong model. 
 
 Save to `.design/<slug>/COLD_REVIEW.md`.
 

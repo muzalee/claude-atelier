@@ -256,6 +256,10 @@ Date: [date]
 
 1. **[Issue]**: [Description]. _Suggestion: [idea]._
 
+## Finding ids
+
+Number every finding `DR-1`, `DR-2`, in the order you found them, never reused within a review. `/ship` and any fix pass report against them one by one, and a follow-up review can say "DR-3 is still there" instead of re-describing it. A finding without an id cannot be tracked through a fix, which is how findings quietly get lost.
+
 ## What Works Well
 
 [Note the strongest aspects of the implementation. This is not padding. Designers need to know what to keep doing.]
@@ -264,7 +268,7 @@ Date: [date]
 ## Done when
 
 - Screenshots exist at mobile, tablet, and desktop, saved under `.design/<slug>/screenshots/`
-- Every finding is measured against the brief and the token spec, not against taste
+- Every finding carries a `DR-n` id and is measured against the brief and the token spec, not against taste
 - The report is saved to `.design/<slug>/DESIGN_REVIEW.md`
 
 **Then hand off.** Say: "Design review done: N findings, screenshots in `.design/<slug>/screenshots/`." Then: "Next: fix the must-fix items, then re-run this to confirm." 
