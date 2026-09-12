@@ -58,6 +58,8 @@ This skill runs a structured design review of what has been built, measured agai
       - Ask the user to paste/attach the images directly in chat, or to save them into the `screenshots/` folder themselves.
       - **Do not skip the visual review.** Wait for the user to provide screenshots before proceeding with the checklist.
 
+      **Exception — an unattended run.** When `/ship` or another orchestrator is driving and there is nobody to ask, waiting is not an option: it would stall the whole pipeline on a phase that is not blocking. In that case skip the visual review, record in the report that it did not run and which driver was missing or why the app would not start, and let the run continue. Saying the review was skipped is honest; a checklist filled in from reading the code is not.
+
    ### Screenshot Save Location
 
    All screenshots MUST be saved to a `screenshots/` subfolder inside the feature's `.design/` directory — the same folder where `DESIGN_BRIEF.md` and other design flow files live.
