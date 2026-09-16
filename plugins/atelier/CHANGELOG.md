@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/muzalee/claude-atelier/compare/atelier-v0.4.0...atelier-v0.5.0) (2026-09-16)
+
+
+### Features
+
+* **atelier:** logs that tell a story, errors with two audiences ([#16](https://github.com/muzalee/claude-atelier/issues/16)) ([78fa3ab](https://github.com/muzalee/claude-atelier/commit/78fa3abffc86c5f7a8e58df176d5c217d3e48f58))
+
+
+### Bug Fixes
+
+* **atelier:** close seven preflight gaps found by its first eval ([#14](https://github.com/muzalee/claude-atelier/issues/14)) ([7894832](https://github.com/muzalee/claude-atelier/commit/78948322741ca8371378882b58c530905d82cd83))
+
 ## [0.4.0](https://github.com/muzalee/claude-atelier/compare/atelier-v0.3.0...atelier-v0.4.0) (2026-09-12)
 
 
