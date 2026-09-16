@@ -16,7 +16,13 @@ The three-part pipeline:
 
 **Optional:** `.design/<slug>/` with `DESIGN_BRIEF.md`. It is the yardstick for *intent*, not a gate. Most branches don't have one, and a branch without a brief still deserves a review.
 
-**Running without a design folder.** Say so in one line — "No design folder; reviewing the diff on its own" — then run:
+**No design folder: ask, then do what they say.** Do not start a degraded review on your own judgment — the user may have meant a different slug, or may want `/design` first. State what you found and ask one question:
+
+> No design folder for this branch. Review the diff on its own? Plan-gap and plan-drift checks get skipped — nothing to measure intent against.
+
+**They say yes** — run the review as described below. **They say no, or name a slug** — use it. Ask once; do not re-raise it at each phase.
+
+Once they say yes, run:
 
 - **Phase 1 (code review):** everything except plan gap and plan drift, which have nothing to measure against. The conventions (`errors`, `logging`) still bind — those live in the skills, not in the brief, so they are checked either way.
 - **Phase 2 (security):** unaffected. Never skipped.
@@ -26,7 +32,7 @@ Write reports to `.design/<slug>/` when a folder exists. Otherwise put them in t
 
 **Name what you could not check.** A review missing its plan-gap pass must say so, in the report, not just in chat. A report that silently omits a check reads exactly like one that ran it and found nothing — and that reader is usually future-you.
 
-If the user clearly meant a full design-backed review and no folder exists, mention `/design` once. Once. Then review what's in front of you.
+If the branch obviously wanted a brief that nobody wrote, say so inside the question, not after the review. That is the point where it can still change the answer.
 
 ## The Sequence
 
