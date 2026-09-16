@@ -1,6 +1,6 @@
 ---
 name: build
-description: Explicit-invocation-only orchestrator that reads a completed `.design/<slug>/` folder and implements the code — frontend + backend — autonomously, without per-phase confirmation. All decisions were made in `/design`; this skill executes them. Invoked ONLY when the user types /build or explicitly asks to "build from the design", "implement the design", "code the feature from the brief", or "run the build pipeline". DO NOT auto-trigger from adjacent talk about writing frontend or backend code — those have their own skills. Requires a `.design/<slug>/` folder from a prior `/design` run.
+description: Explicit-invocation-only orchestrator that reads a completed `.design/<slug>/` folder and implements the code — frontend + backend — autonomously, without per-phase confirmation. All decisions were made in `/design`; this skill executes them. Invoked ONLY when the user types /build or explicitly asks to "build from the design", "implement the design", "code the feature from the brief", or "run the build pipeline". DO NOT auto-trigger from adjacent talk about writing frontend or backend code — those have their own skills. Works best from a `.design/<slug>/` folder produced by `/design`; without one it still builds small, self-contained changes (a colour tweak, one component, one endpoint) and asks before freewheeling through anything larger.
 ---
 
 This skill is the **build** orchestrator. It takes the design docs produced by `/design` and turns them into working code. Two phases, executed back-to-back without confirmation gates — the design phase was the interactive one, this phase just delivers.
@@ -12,7 +12,14 @@ The three-part pipeline:
 
 ## Prerequisite
 
-`.design/<slug>/` must exist with at minimum `DESIGN_BRIEF.md`. If it doesn't, stop and tell the user to run `/design` first. This skill needs a brief, tasks, and (optionally) a backend brief + tokens spec — not a vibe.
+`.design/<slug>/` with at minimum `DESIGN_BRIEF.md` is what this skill is built for: a brief, tasks, and optionally a backend brief + tokens spec.
+
+**Without a design folder, build anyway if the work is small.** The gate exists to stop you freewheeling through a feature whose decisions were never made — not to block a colour change. The line:
+
+- **Build it.** The ask fits in one sentence and holds in your head: a colour or token tweak, copy, a single component, one endpoint, a config change, a bug fix. Say what you are building in one line, load the [House Conventions](#house-conventions), do the work, run the tests. Skip the `TASKS.md` bookkeeping — there is no plan to record against, and the diff plus the commit message say enough.
+- **Stop and offer `/design`.** The ask spans several files with decisions nobody has made — a new feature, a new surface, a data-model change, anything where "what should this do?" is still open. Name the unmade decisions, say `/design` settles them, and ask. Guessing at a design in build mode produces code that gets rewritten, which is the expensive outcome the gate was protecting against.
+
+Between the two, ask once, then proceed with the answer. The conventions bind either way — they live in the skills, not in the brief, and small changes are exactly where error and log discipline gets quietly skipped.
 
 ## The Sequence
 
@@ -26,6 +33,8 @@ Skip either phase if the design didn't include it (e.g. no `BACKEND_DESIGN.md` �
 ## Operating Rules
 
 1. **Open with a scan, then proceed.** Auto-detect the slug: if exactly one folder exists under `.design/`, use it; if several, ask once which one. List the artifacts present in `.design/<slug>/` and state which phases will run (frontend if `TASKS.md` exists, backend if `BACKEND_DESIGN.md` exists — skip absent ones). Do not ask permission — the user asked for a build.
+
+   No `.design/` at all: apply the Prerequisite test above. Small enough to build → say in one line what you are building and which half of the tree it touches, then go. Too big → name the unmade decisions and ask.
 
 2. **Announce each phase as you enter it, then execute.** Format: "Phase N: [name]. Building now." No wait, no confirmation.
 

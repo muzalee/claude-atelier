@@ -1,6 +1,6 @@
 ---
 name: review
-description: Explicit-invocation-only orchestrator that runs code review + design review against the built code, using `.design/<slug>/` as the source of intent. Invoked ONLY when the user types /review or explicitly asks to "run the review pipeline", "review the build", or "check the feature". For a single technical review only, use `code-review` directly. For a single visual review only, use `design-review` directly. DO NOT auto-trigger from adjacent talk about reviewing code — those have their own skills.
+description: Explicit-invocation-only orchestrator that runs code review + security review + design review against the built code, using `.design/<slug>/` as the source of intent when one exists — and reviewing the diff on its own merits when it doesn't. Invoked ONLY when the user types /review or explicitly asks to "run the review pipeline", "review the build", or "check the feature". For a single technical review only, use `code-review` directly. For a single visual review only, use `design-review` directly. DO NOT auto-trigger from adjacent talk about reviewing code — those have their own skills.
 ---
 
 This skill is the **review** orchestrator. It runs three reviews — technical, security, then visual — against the code produced by `/build`, using the docs from `.design/<slug>/` as the yardstick.
@@ -12,11 +12,21 @@ The three-part pipeline:
 
 ## Prerequisites
 
-Both are needed:
-- `.design/<slug>/` with at minimum `DESIGN_BRIEF.md` (the intent to measure against).
-- Code changes to review — either uncommitted, on a branch diff, or in files the user names.
+**Required:** code changes to review — uncommitted, a branch diff, or files the user names. If there's no diff and no target, ask which files to review.
 
-If there's no design folder, tell the user to run `/design` first (or point at a brief). If there's no diff, ask which files to review.
+**Optional:** `.design/<slug>/` with `DESIGN_BRIEF.md`. It is the yardstick for *intent*, not a gate. Most branches don't have one, and a branch without a brief still deserves a review.
+
+**Running without a design folder.** Say so in one line — "No design folder; reviewing the diff on its own" — then run:
+
+- **Phase 1 (code review):** everything except plan gap and plan drift, which have nothing to measure against. The conventions (`errors`, `logging`) still bind — those live in the skills, not in the brief, so they are checked either way.
+- **Phase 2 (security):** unaffected. Never skipped.
+- **Phase 3 (design review):** only if the diff touches UI. With no brief or tokens spec, measure against the codebase's own tokens, components, and patterns — consistency with what's already there, plus the universals: responsive behavior, accessibility, contrast, focus states, error copy. Say you reviewed against the codebase rather than a brief.
+
+Write reports to `.design/<slug>/` when a folder exists. Otherwise put them in the scratchpad (or wherever the user says) and hand back the paths — do not create a `.design/` folder just to have somewhere to write.
+
+**Name what you could not check.** A review missing its plan-gap pass must say so, in the report, not just in chat. A report that silently omits a check reads exactly like one that ran it and found nothing — and that reader is usually future-you.
+
+If the user clearly meant a full design-backed review and no folder exists, mention `/design` once. Once. Then review what's in front of you.
 
 ## The Sequence
 
@@ -30,7 +40,7 @@ All three phases read from the same `.design/<slug>/` folder and write their rep
 
 ## Operating Rules
 
-1. **Open with a scan.** Ask (or infer) which feature slug this review is for. List what's in `.design/<slug>/`. Show a git diff summary (files changed, lines added/removed). Ask which phases to run — usually all three, but any subset is fine.
+1. **Open with a scan.** Ask (or infer) which feature slug this review is for, and list what's in `.design/<slug>/` — or say there is no design folder and this is a diff-only review. Show a git diff summary (files changed, lines added/removed). Ask which phases to run — usually all three, but any subset is fine.
 
 2. **Announce each phase before entering it.** Format: "Phase N: [name]. This checks [what]. Ready?" Wait for confirmation.
 
