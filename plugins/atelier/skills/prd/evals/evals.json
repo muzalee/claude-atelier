@@ -7,7 +7,7 @@
       "prompt": "we keep getting asked for shared team workspaces - right now Cadence is one flat schedule per company and bigger customers (the 20-30 seat ones) keep emailing support asking to split it by department because the sales team schedule is drowning out engineering. i want to write up the scope properly before anyone touches code. can you do that? assume i'm the only one deciding, target is end of Q1.",
       "expected_output": "A numbered PRD at docs/prd/0002-<slug>.md with explicit non-goals, numbered testable requirements, measurable success metrics with baseline+target, and phased scope. Should not contain schemas, endpoints, or component names.",
       "files": [
-        "fixtures/saas-app"
+        "evals/fixtures/saas-app"
       ],
       "assertions": [
         "Creates exactly one new PRD file at docs/prd/0002-<slug>.md (correct next number, 4-digit, lowercase-hyphen slug)",
@@ -28,7 +28,7 @@
       "prompt": "ok change of plan on enterprise. SCIM is dead for this year, we're not doing it - the two design partners both said manual invites are fine at their size. also legal came back and says the audit log has to be kept 7 years not 90 days, thats non negotiable now. update the doc.",
       "expected_output": "docs/prd/0001-enterprise-tier.md edited in place: FR-2 (SCIM) removed from requirements or marked cut and moved to Non-Goals, audit log 7-year retention added as a requirement, updated: date bumped, and two new Changelog rows with reasons. Filename and prd number unchanged. No new PRD file created.",
       "files": [
-        "fixtures/saas-app"
+        "evals/fixtures/saas-app"
       ],
       "assertions": [
         "Edits docs/prd/0001-enterprise-tier.md in place \u2014 filename, prd number, and created date unchanged",
@@ -48,7 +48,7 @@
       "prompt": "write me a PRD for adding a dark mode toggle in the settings page",
       "expected_output": "Names the cheaper path first (the real work is de-hardcoding colors / a token layer, not the toggle) in about a sentence, then writes a SHORT PRD anyway \u2014 core sections only, no Stakeholders, no Rollout, no phases. Invents no metrics or stakeholders; an unknown baseline is written as 'unknown \u2014 how to get it'.",
       "files": [
-        "fixtures/saas-app"
+        "evals/fixtures/saas-app"
       ],
       "assertions": [
         "Writes docs/prd/0002-<slug>.md \u2014 does not refuse, since the user asked for the doc",
