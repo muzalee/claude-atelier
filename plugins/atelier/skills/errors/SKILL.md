@@ -28,9 +28,11 @@ Pairs with `logging` — errors get emitted through the global handler that adds
 
 5. **Throw at the boundary where the invariant breaks.** If the DB says the row doesn't exist, throw there — not three call sites up. Callers should catch only when they can *do* something (retry, fallback, transform).
 
-6. **Never rethrow bare.** `catch (e) { throw e }` is dead weight — remove it. If you catch, either **enrich** (`throw new ServiceError("user lookup failed", { cause: e, code: "USER_LOOKUP" })`) or **handle** (fallback, log-and-swallow with justification). Never swallow silently.
+6. **Say whether retrying is worth it.** A caller looking at a failure has one question the error should already answer: *would doing this again help?* Timeouts, 429s, 503s, lock contention and connection resets are `retryable: true` — the world might differ in a second. Validation, auth, not-found and conflict are `retryable: false` — the input is wrong and will still be wrong on attempt five. Without the flag every call site guesses, and the guesses disagree: one gives up on a blip, another hammers a downstream that is 400ing. Put it on the error type once.
 
-7. **HTTP status maps from error type, not per-endpoint.** A `NotFoundError` becomes 404 everywhere. A `ValidationError` becomes 400. Wire the mapping once in the global handler, not in every route.
+7. **Never rethrow bare.** `catch (e) { throw e }` is dead weight — remove it. If you catch, either **enrich** (`throw new ServiceError("user lookup failed", { cause: e, code: "USER_LOOKUP" })`) or **handle** (fallback, log-and-swallow with justification). Never swallow silently.
+
+8. **HTTP status maps from error type, not per-endpoint.** A `NotFoundError` becomes 404 everywhere. A `ValidationError` becomes 400. Wire the mapping once in the global handler, not in every route.
 
 ## The shape of an error
 
@@ -44,6 +46,7 @@ Whatever your language, an error carries these fields:
 | `cause`       | internal | The wrapped underlying error (chain), so the log has the full trail.          |
 | `context`     | internal | Any structured fields relevant to reproducing (ids, params). No secrets.      |
 | `status`      | both     | HTTP status code (for API errors only). Used by the global handler.           |
+| `retryable`   | internal | Whether trying again could plausibly work. Decides retry vs dead-letter.       |
 | `ref`         | user     | Short public reference code, `A0001` style. Quotable in a support ticket.     |
 | `userMessage` | user     | Plain language, no jargon, says what to do next. Safe to render verbatim.     |
 
@@ -52,31 +55,28 @@ The top block never crosses the boundary. The bottom block is what the HTTP resp
 TypeScript example (adapt to your stack):
 
 ```ts
+// REGISTRY holds ref -> { code, status, retryable, userMessage }; see "Public reference codes"
 export class AppError extends Error {
+  readonly code: string;
+  readonly status: number;
+  readonly retryable: boolean;
+  readonly userMessage: string;
+
   constructor(
-    message: string,
-    readonly code: string,
-    readonly status: number,
-    readonly userMessage: string,
-    readonly ref: string,
+    message: string,                                  // internal, precise, logs only
+    readonly ref: Ref,
     readonly context: Record<string, unknown> = {},
-    options?: { cause?: unknown }
+    options?: { cause?: unknown },
   ) {
     super(message, options);
     this.name = this.constructor.name;
+    Object.assign(this, REGISTRY[ref]);
   }
 }
 
 export class NotFoundError extends AppError {
   constructor(resource: string, context: Record<string, unknown>) {
-    super(
-      `${resource} not found`,
-      `${resource.toUpperCase()}_NOT_FOUND`,
-      404,
-      `We couldn't find that ${resource}. It may have been deleted.`,
-      "R0404",
-      context,
-    );
+    super(`${resource} not found`, "R0404", { resource, ...context });
   }
 }
 ```
@@ -88,7 +88,7 @@ const user = await db.users.byId(id);
 if (!user) throw new NotFoundError("user", { id, tenant_id });
 ```
 
-Five arguments is the ceiling before this wants an options object — take that turn when a sixth shows up.
+The throw site supplies only what it actually knows — what broke and the values to reproduce it. Everything else (status, retryability, the words a user reads) is a property of the *kind* of failure, so it lives in the registry and stays consistent across every site that throws it.
 
 ## Public reference codes
 
@@ -108,11 +108,32 @@ The scheme: one letter for the domain, four digits.
 Rules that keep it worth having:
 
 - **A `ref` is never reused and never renamed.** Users quote them, support docs link them, screenshots outlive releases. Retire a code, leave the number burned.
-- **One registry, one file.** `errors/registry.ts` (or equivalent) holds `ref → { code, status, userMessage }`. Adding an error means adding a row. Two places defining the same ref is how they drift.
+- **One registry, one file.** `errors/registry.ts` (or equivalent) holds `ref → { code, status, retryable, userMessage }`. Adding an error means adding a row. Two places defining the same ref is how they drift.
+
+  ```ts
+  export const REGISTRY = {
+    A0001: { code: "INVALID_CREDENTIALS", status: 401, retryable: false,
+             userMessage: "That email and password don't match. Try again or reset your password." },
+    V0001: { code: "FIELD_REQUIRED",      status: 400, retryable: false,
+             userMessage: "Check the highlighted fields and try again." },
+    R0404: { code: "NOT_FOUND",           status: 404, retryable: false,
+             userMessage: "We couldn't find that. It may have been deleted." },
+    D0001: { code: "DB_UNAVAILABLE",      status: 503, retryable: true,
+             userMessage: "We're having trouble reaching our systems. Try again in a moment." },
+    X0000: { code: "UNEXPECTED",          status: 500, retryable: false,
+             userMessage: "Something went wrong on our end. Try again in a moment." },
+  } as const;
+
+  export type Ref = keyof typeof REGISTRY;
+  ```
+
+  Errors take a `Ref` and read the rest from the table, so a typo is a compile error and every row is visible in one screen. That is the whole mechanism — resist making it clever.
 - **Every `ref` has a `userMessage` written for a human, not derived from the code.** `A0001` is not "auth error" — it's "That email and password don't match. Try again or reset your password."
 - **Unexpected errors all collapse to `X0000`.** You are not going to write friendly copy for a null dereference, and enumerating bugs is a losing game.
 
 Keep a matching public page — a table of `ref` → what it means → what to do. That is the whole payoff: a user quotes `A0001`, support answers without a developer.
+
+**If you ship in more than one language**, the registry is already the right shape for it: `ref` is a stable key, `userMessage` is the value that varies. Make the value a translation key (`errors.A0001`) rather than a literal, and the table becomes your message catalogue — every user-facing string in one file, translatable without touching a throw site. Do this on the day a second language is real, not before: a catalogue with one locale in it is just a literal with extra steps. `code` and `ref` never translate.
 
 **Ponytail:** `ref` earns its keep when a support flow actually looks codes up. Before that, `trace_id` in the response is the quotable handle and `code` already categorizes for dashboards — skip `ref` and add it the day someone asks "what does the user read me over the phone?"
 
@@ -162,6 +183,37 @@ fastify.setErrorHandler((err, req, reply) => {
 
 Step 5 is the one that gets skipped, and skipping it quietly wastes the other four.
 
+## Outside HTTP
+
+Everything above assumes a request with a response to send. Most systems have work that has neither, and it is exactly where error discipline is skipped — no framework is binding context for you, and no user is waiting to be told.
+
+The pattern holds; only the last step changes. There is still a boundary, still one handler wired once, still one log per failure. What differs is what the handler *does* with the error.
+
+| Context                     | The boundary             | What replaces the HTTP response                                                      |
+| :-------------------------- | :----------------------- | :------------------------------------------------------------------------------------ |
+| Queue consumer / worker     | The message handler      | `retryable` decides: nack and let it come back, or dead-letter it. Never silently ack a failure. |
+| Scheduled job / cron        | The job entry point      | Non-zero exit or a failure marker the scheduler can see. A job that dies silently reruns forever. |
+| CLI                         | `main`                   | `userMessage` to stderr, `ref` alongside it, exit code in place of status. Stack traces behind `--verbose`. |
+| Mobile / desktop client     | The API client + a top-level handler | Render `userMessage` and `ref`; report the error with its `trace_id` so the client failure joins the server's story. |
+
+Rules that hold everywhere:
+
+- **`retryable` does the work here.** With no caller to hand a status to, the flag is what decides nack vs dead-letter, and what stops a poison message cycling forever. Cap attempts regardless, and log the attempt number.
+- **Every unit of work gets a trace-id.** A job run, a message, a CLI invocation, a user action in an app. Not just requests. See `logging`.
+- **Carry it across the boundary.** Put the `trace_id` in the queue message, the job payload, the outbound header. A background failure should trace back to the click that queued it — otherwise the story ends at "something queued this, once".
+- **The user still exists, just later.** A failed job often has a person waiting on its result. The `userMessage` is what the notification, the status page, or the retry banner shows — write it even though nothing renders it synchronously.
+- **A client is both.** A mobile app renders errors *and* emits logs. Generate the trace-id client-side per user action and send it up, so the client-side log and the server-side log share an id. Without that, "the app showed an error" and "the server logged a failure" are two facts nobody can join.
+
+## Testing the error path
+
+A convention nothing asserts stops being one. The happy path gets tested because it is what you built; the error path gets tested when someone writes it down. For each error path worth having, one test:
+
+- The failing call **throws the typed error**, not a bare `Error` — assert `code` (and `ref` if you use them), not the message text. Message strings get rewritten; codes are the stable contract, which is the point of having them.
+- The response **carries the user half and nothing else** — `ref`, `userMessage`, `trace_id`. Assert the internal message and `context` are *absent*. This is the test that catches a leak before a customer does.
+- `retryable` is what you think it is, on the errors your retry logic branches on.
+
+One assertion per path, at the boundary. Not a suite per error class — see `test-plan` for where these live.
+
 ## When to throw vs return
 
 - **Throw** for exceptional conditions the current function cannot handle. Bad input at a validated boundary, missing entity in a lookup, downstream 500, etc.
@@ -174,15 +226,18 @@ Rule of thumb: if the caller would immediately need to catch and translate, you 
 
 Two thousand error classes for a CRUD service is over-engineering. Start with a handful:
 
-| Class               | Status | `ref`   | `userMessage`                                                    |
-| :------------------ | :----- | :------ | :--------------------------------------------------------------- |
-| `ValidationError`   | 400    | `V0001` | "Check the highlighted fields and try again."                     |
-| `UnauthorizedError` | 401    | `A0001` | "Sign in to continue."                                            |
-| `ForbiddenError`    | 403    | `A0002` | "You don't have access to this."                                  |
-| `NotFoundError`     | 404    | `R0404` | "We couldn't find that. It may have been deleted."                |
-| `ConflictError`     | 409    | `R0409` | "That already exists. Pick a different name."                     |
-| `RateLimitError`    | 429    | `A0003` | "Too many attempts. Wait a minute and try again."                 |
-| `AppError`          | 500    | `X0000` | "Something went wrong on our end. Try again in a moment."         |
+| Class               | Status | `ref`   | Retryable | `userMessage`                                             |
+| :------------------ | :----- | :------ | :-------- | :--------------------------------------------------------- |
+| `ValidationError`   | 400    | `V0001` | no        | "Check the highlighted fields and try again."               |
+| `UnauthorizedError` | 401    | `A0001` | no        | "Sign in to continue."                                      |
+| `ForbiddenError`    | 403    | `A0002` | no        | "You don't have access to this."                            |
+| `NotFoundError`     | 404    | `R0404` | no        | "We couldn't find that. It may have been deleted."          |
+| `ConflictError`     | 409    | `R0409` | no        | "That already exists. Pick a different name."               |
+| `RateLimitError`    | 429    | `A0003` | yes       | "Too many attempts. Wait a minute and try again."           |
+| `TimeoutError`      | 504    | `D0002` | yes       | "That took too long. Try again."                            |
+| `AppError`          | 500    | `X0000` | no        | "Something went wrong on our end. Try again in a moment."   |
+
+`AppError` defaults to `retryable: false` on purpose: an unclassified bug is not something to hammer. When you learn a specific failure is transient, that is the moment it earns its own class.
 
 Add a specialized class only when you have three callers who need the *same* recovery logic. Before three, `throw new ValidationError('bad email', { field: 'email' })` is fine — a new `ref` row is cheap, a new class is not.
 
@@ -199,6 +254,9 @@ Add a specialized class only when you have three callers who need the *same* rec
 - **Blaming the user for your bug** — a 500 is not "Invalid input". If the cause is unknown, say it's on you and give them the `ref` and `trace_id`.
 - **Interpolating internals into `userMessage`** — no ids, no table names, no `cause.message`. If a value must appear, it's one the user typed.
 - **Renumbering `ref` codes in a refactor** — they're printed in screenshots and support docs. Codes are permanent; the `code` beside them is what's free to change.
+- **Retrying a `retryable: false` error** — a 400 will still be a 400 on attempt five. All you built was a slower failure and load on a downstream that already said no.
+- **Silently acking a failed queue message** — the work is gone, nothing failed loudly, and nobody finds out until someone asks where their export went.
+- **Testing error paths by message text** — `expect(err.message).toBe("user not found")` breaks on a reword and teaches people that error tests are noise. Assert the `code`.
 
 ## Reviewing for error discipline
 
@@ -210,6 +268,9 @@ When reviewing (or when `code-review` runs), check for:
 - HTTP responses on 500 don't leak internals — body is `ref` + `userMessage` + `trace_id`, nothing else.
 - Every user-facing error has a `userMessage` a non-engineer could act on, and a `ref` that exists in the registry.
 - No `ref` was renumbered or reused.
+- `retryable` is set deliberately on any error a caller retries on, and no retry loop runs against a non-retryable one.
+- Background work (jobs, consumers, CLI) has a boundary handler too — failures are not silently acked, and `trace_id` is carried in from whatever queued the work.
+- The error paths that matter have a test asserting the `code` and that internals stay out of the response.
 - Log lines for errors include code + ref + trace-id + context (see `logging`).
 
 ## The story with logging

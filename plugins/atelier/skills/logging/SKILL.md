@@ -133,6 +133,26 @@ Where NOT to log:
 - Every step of a happy-path flow. Log the outcome, not the journey.
 - The same event at two levels (once in the handler that catches, once in the global handler). Log once, at the boundary.
 
+## Outside a request
+
+Most of this skill says "request", because that is where the framework does the work for you. The unit that actually matters is **the unit of work**: the thing that starts, does something, and ends. A request is one. So is a job run, a queue message, a CLI invocation, a user action in an app. Each gets a trace-id and a scoped logger bound at its entry point — the same pattern, minus the framework doing it for you.
+
+| Unit of work        | Bind at              | Anchors to bind                                        |
+| :------------------ | :------------------- | :------------------------------------------------------ |
+| HTTP request        | Framework hook       | `trace_id`, `user_id` / `session_id`, `tenant_id`        |
+| Queue message       | The consumer         | `trace_id` (from the message), `job_id`, `attempt`, the `user_id` it is on behalf of |
+| Scheduled job       | The job entry point  | `trace_id` (fresh), `job_name`, `run_id`, `scheduled_for` |
+| CLI invocation      | `main`               | `trace_id` (fresh), `command`, `args` (no secrets)       |
+| Mobile / desktop    | Per user action      | `trace_id` (fresh, client-side), `session_id`, `user_id`, `app_version`, `platform` |
+
+**Trace-ids cross boundaries or the story ends.** When you enqueue, put the current `trace_id` in the message. When the consumer picks it up, bind that id rather than minting a new one. A queued email then traces back to the click that caused it, across two processes and twenty minutes. Same for job payloads and outbound HTTP.
+
+Mint a fresh id only where a unit of work genuinely starts on its own — a cron tick, a cold app launch, a user typing a command. And log the parent id alongside (`parent_trace_id`) when a job fans out into children, or you get a thousand unrelated traces that were all one thing.
+
+**Clients log too.** A mobile or desktop app is a log emitter, not just a UI. Generate the trace-id client-side per user action and send it as a header, so the client-side log and the server-side log share an id — otherwise "the app showed an error" and "the server logged a failure" are two facts nobody can join. Then the local specifics: buffer and upload rather than logging per line over the network, bind `app_version` and `platform` (the bug is usually one build or one OS), and drop the buffer on logout. An offline client's logs arrive late and out of order — order by the event's own timestamp, never by arrival.
+
+**Nothing is watching a background failure.** A request failure has a user retrying and telling you. A job that dies at 3am has nobody, so the log is the *only* evidence — log the start and the end of every run, not just failures, or "did it run at all?" becomes unanswerable. Include `attempt` on retried work, so a poison message is visible as one message failing forty times rather than forty failures.
+
 ## Setup — the once-per-service work
 
 **Node / Fastify:**
@@ -169,11 +189,25 @@ If any of steps 1–6 is missing, step 7 fails. That's when debugging costs hour
 - **Anonymous logs**: no `user_id`, no `session_id`, no `tenant_id`. When a user reports a bug there is nothing to filter by, so their evidence is unreachable even though it's sitting in the index.
 - **Interpolating the variable part into `msg`**: `` `payment declined for ${userId}` `` makes every line unique, so grouping and alerting break. Fixed message, varying fields.
 - **Logging the error without its public code**: the user quotes `P0001` and nothing in the logs contains that string. Bind `err.ref` alongside `err.code`.
+- **Minting a fresh trace-id in the consumer**: the job logs and the request that queued it become unjoinable. Carry the id in the message.
+- **Background work that only logs failures**: when nothing appears, you cannot tell a clean run from a job that never fired.
 - **Logging the same event twice.** Handler catches, logs, rethrows → global handler catches, logs again. Pick one. Global handler wins.
 - **Logging then throwing without cause.** `log.error("failed"); throw new Error("failed")` — the two log entries have no link. Attach the error to the log, or let the global handler log it.
 - **`console.log` in prod.** Bypasses structure, level, redaction. If it slips into a PR, `code-review` should flag it.
 - **Redacting after the fact.** Don't build a redact list of 40 fields. Structure your logs so secrets never enter them in the first place.
 - **PII in log context.** `user_id` is fine. `user_email`, `user_name`, `user_ip` (unless you have a specific compliance-cleared use) is not.
+
+## Testing that the log exists
+
+Logging is the one convention that fails silently: nothing breaks when a log line goes missing, you just find out months later, mid-incident, that the evidence was never written. So the error paths that matter get one assertion, the same way `errors` asks for one on the throw.
+
+Capture logs with a test transport (pino: a stream into an array; most loggers have an equivalent) and assert on the **structure, not the prose**:
+
+- One entry was emitted, at the expected **level** — this is what catches an expected 404 logged at ERROR, and the log-twice bug where a handler and the global handler both fire.
+- It carries `err.code` and the **identity anchor**. Assert the field is present, not its value.
+- It carries **no secret** — for anything that handles a token, password, or card, assert the raw value does not appear anywhere in the serialized entry. That test is worth more than the redact list, because it fails when someone adds a field the list never heard of.
+
+Never assert on `msg` text. It is prose, it gets reworded, and a test that breaks on rewording teaches people to stop writing tests. The `code` is the contract.
 
 ## Reviewing for observability
 
@@ -187,3 +221,6 @@ When reviewing (or in `code-review`), check:
 - No secrets in any log's key/value pairs. No cookies, no tokens, no PII beyond `user_id`.
 - External calls have `duration_ms` + `status`.
 - No log-then-rethrow. Log once, at the boundary.
+- Background work — jobs, consumers, CLI — binds a scoped logger too, with `trace_id` carried from whatever queued it rather than freshly minted.
+- Retried work logs its `attempt`, and job runs log their start as well as their end.
+- The error paths that matter assert the log was emitted, at the right level, with no secret in it.
