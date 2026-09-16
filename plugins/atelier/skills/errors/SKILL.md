@@ -139,7 +139,7 @@ Keep a matching public page — a table of `ref` → what it means → what to d
 
 ## Global error handler — the contract
 
-Wire once. Every thrown error routes through here.
+One per entry point, wired once each — the HTTP handler below, and its equivalent for every other surface (see [Outside HTTP](#outside-http)). Every error that escapes your code reaches exactly one of them. The contract is the same at each; only the last step differs.
 
 **Responsibilities:**
 
@@ -148,26 +148,26 @@ Wire once. Every thrown error routes through here.
 3. **Send only the user block.** Response body is `{ ref, message: userMessage, trace_id }`. The internal `message`, `code`, `context`, and `cause` stay in the logs. Anything that isn't an `AppError` is a bug you haven't classified yet — it goes out as `X0000` with a generic line, never as `err.message`.
 4. **Preserve trace-id.** Attach the request's trace-id to the response so users can quote it in support tickets. `ref` says *what kind*; `trace_id` says *which one*. Support needs both.
 
+**Normalize first, then handle one thing.** Wrapping an untyped error into `X0000` at the top of the handler means the rest of it has no branches: no `isApp ?` on every line, no chance of the log and the response disagreeing about which code this was, and the generic user message comes from the registry row like every other message rather than being retyped here. Two copies of that string is the drift this whole section exists to prevent.
+
 Fastify example:
 
 ```ts
 fastify.setErrorHandler((err, req, reply) => {
-  const isApp = err instanceof AppError;
+  // anything untyped is a bug we haven't classified — it becomes X0000, from the same table
+  const e = err instanceof AppError ? err : new AppError(String(err?.message ?? err), "X0000", {}, { cause: err });
+
   // expected errors are a normal outcome — don't page anyone for a 404
-  const level = isApp && err.status < 500 ? "warn" : "error";
-  req.log[level]({
-    err,                                    // logger serializes message + stack + cause chain
-    code: isApp ? err.code : "UNEXPECTED",
-    ref: isApp ? err.ref : "X0000",
-    context: isApp ? err.context : {},
+  req.log[e.status < 500 ? "warn" : "error"]({
+    err: e,                                 // logger serializes message + stack + cause chain
+    code: e.code,
+    ref: e.ref,
+    retryable: e.retryable,
+    context: e.context,
     operation: req.routeOptions?.config?.operation,
   }, `${req.method} ${req.routeOptions?.url ?? req.url} failed`);
 
-  reply.code(isApp ? err.status : 500).send({
-    ref: isApp ? err.ref : "X0000",
-    message: isApp ? err.userMessage : "Something went wrong on our end. Try again in a moment.",
-    trace_id: req.id,
-  });
+  reply.code(e.status).send({ ref: e.ref, message: e.userMessage, trace_id: req.id });
 });
 ```
 
