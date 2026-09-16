@@ -1,0 +1,6 @@
+{
+  "name": "cadence",
+  "private": true,
+  "scripts": { "dev": "tsx watch src/server.ts" },
+  "dependencies": { "fastify": "^4.28.0", "pino": "^9.3.0" }
+}

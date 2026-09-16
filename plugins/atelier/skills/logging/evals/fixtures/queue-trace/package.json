@@ -1,0 +1,6 @@
+{
+  "name": "cadence-workers",
+  "private": true,
+  "scripts": { "worker": "tsx src/worker.ts" },
+  "dependencies": { "bullmq": "^5.12.0", "pino": "^9.3.0", "fastify": "^4.28.0" }
+}

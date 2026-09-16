@@ -1,0 +1,5 @@
+{
+  "name": "avatar-backfill",
+  "private": true,
+  "scripts": { "start": "tsx backfill.ts" }
+}
