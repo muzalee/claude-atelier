@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: preflight-prd-gate
+description: "Recognises that the whole plan contradicts PRD 0001's 'On-prem or self-hosted deployment \u2014 not ever' non-goal. Treats it as a scope gate: stops, names it, gives the options (amend the PRD or drop the plan), and does NOT edit the plan or the PRD to make it runnable."
+tags: [preflight]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "check this plan before I build it: .design/enterprise-tier/TASKS.md"
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

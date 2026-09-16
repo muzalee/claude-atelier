@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: logging-logged-three-times
+description: "Finds all three emission points: the service logs and rethrows, the route logs and rethrows, and the global handler logs again. Keeps exactly one \u2014 the global handler \u2014 and removes the other two. Also notes that the service's rethrow discards the original error by constructing a new one without a cause, so the smtp timeout is lost from the surviving entry."
+tags: [logging]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "every failed invite shows up three times in our logs and it's making the dashboards useless. can you look at it?. Apply the changes to the files directly — do not just describe what you would do."
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

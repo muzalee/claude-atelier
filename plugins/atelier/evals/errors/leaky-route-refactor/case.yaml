@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: errors-leaky-route-refactor
+description: "Typed errors with stable codes replace the bare throw and the inline 400. The DB message stops reaching the client: the unique-constraint failure becomes a domain error with a user-facing message written for a human. A global error handler is wired once in server.ts rather than try/catch in each route, and the response body carries the user-facing half plus a trace-id, never the internal message."
+tags: [errors]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "the projects routes need proper error handling - right now a missing project just throws a bare Error and the create route is sending the postgres message straight back to the browser. can you sort it out?. Apply the changes to the files directly — do not just describe what you would do."
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

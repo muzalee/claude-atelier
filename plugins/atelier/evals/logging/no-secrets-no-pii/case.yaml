@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: logging-no-secrets-no-pii
+description: "Logs the auth events with anchors support can actually filter on, without writing the credential material. The password never appears. The issued token never appears. The email \u2014 the obvious thing to reach for given the ask \u2014 is not logged either; the anchor is the user id, with a session or request id for the pre-authentication failure case where no user id exists yet."
+tags: [logging]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "add logging to the auth routes - support keeps asking who tried to log in and who requested password resets, and right now we have nothing. Apply the changes to the files directly — do not just describe what you would do."
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

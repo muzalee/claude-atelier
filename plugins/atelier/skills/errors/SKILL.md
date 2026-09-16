@@ -193,11 +193,13 @@ The pattern holds; only the last step changes. There is still a boundary, still 
 | :-------------------------- | :----------------------- | :------------------------------------------------------------------------------------ |
 | Queue consumer / worker     | The message handler      | `retryable` decides: nack and let it come back, or dead-letter it. Never silently ack a failure. |
 | Scheduled job / cron        | The job entry point      | Non-zero exit or a failure marker the scheduler can see. A job that dies silently reruns forever. |
+| Batch / backfill loop       | The loop, not the item   | Collect per-item failures and keep going; name every item that failed and exit non-zero if any did. A loop that skips quietly reports success on a half-done run. |
 | CLI                         | `main`                   | `userMessage` to stderr, `ref` alongside it, exit code in place of status. Stack traces behind `--verbose`. |
 | Mobile / desktop client     | The API client + a top-level handler | Render `userMessage` and `ref`; report the error with its `trace_id` so the client failure joins the server's story. |
 
 Rules that hold everywhere:
 
+- **Partial failure is still failure.** In a loop over N items, catching per item is right — swallowing is not. Collect what failed, name each one so the run can be resumed, and let the exit code or the job's failure marker say the batch did not fully succeed. The dangerous shape is a `catch` that logs and continues into a green exit.
 - **`retryable` does the work here.** With no caller to hand a status to, the flag is what decides nack vs dead-letter, and what stops a poison message cycling forever. Cap attempts regardless, and log the attempt number.
 - **Every unit of work gets a trace-id.** A job run, a message, a CLI invocation, a user action in an app. Not just requests. See `logging`.
 - **Carry it across the boundary.** Put the `trace_id` in the queue message, the job payload, the outbound header. A background failure should trace back to the click that queued it — otherwise the story ends at "something queued this, once".

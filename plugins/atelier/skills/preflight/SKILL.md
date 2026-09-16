@@ -56,9 +56,9 @@ Give a verdict first — the reader wants to know whether to proceed before they
 
 | Verdict | Means |
 | ------- | ----- |
-| **Ready** | Every claim checks out. Build it. |
+| **Ready** | Every claim checks out *and* every step names what it has to do. Build it. A step can be perfectly accurate and still not be buildable — "add rate limiting" makes no false claim and answers no question. |
 | **Ready with fixes** | Real problems, all mechanical — a renamed symbol, a wrong path, a step that assumes a field which already exists. Fix the plan, then build. |
-| **Blocked** | At least one problem needs a decision, not a correction: the plan's approach assumes an architecture the repo does not have, or a step is impossible as described. |
+| **Blocked** | At least one problem needs a decision, not a correction: the plan's approach assumes an architecture the repo does not have, a step is impossible as described, or a step is too underspecified to build — the repo holds no answer, so only the user can supply one. |
 
 Then the findings, each with a stable id so a later fix pass can report against them one by one:
 

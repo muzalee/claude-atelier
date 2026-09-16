@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: logging-trace-carried-across-queue
+description: "Identifies the root cause: the worker mints a fresh trace-id with randomUUID, so the job's logs cannot be joined to the request that queued it. The trace-id is put into the job payload at enqueue time and bound by the consumer instead of generated. The worker also gains a scoped logger with job and user anchors, logs the start of a run and not only its end, and its message stops being 'done'."
+tags: [logging]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "when a reminder doesn't go out we can't tell which request queued it. sort out the logging in the worker. Apply the changes to the files directly — do not just describe what you would do."
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

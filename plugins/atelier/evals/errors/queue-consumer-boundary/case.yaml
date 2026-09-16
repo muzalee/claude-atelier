@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: errors-queue-consumer-boundary
+description: "Identifies the swallowed catch as the root cause: the job fails, the queue is told it succeeded, and the work vanishes. Replaces it with a boundary handler that distinguishes transient failures (S3 timeout \u2014 retry) from permanent ones (deleted user \u2014 dead-letter), never silently acks, and carries the trace-id from the request that queued the job so the failure traces back to the click."
+tags: [errors]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "this export worker keeps losing jobs - people say they requested an export and nothing ever arrives, and there's nothing useful to go on. fix the error handling. Apply the changes to the files directly — do not just describe what you would do."
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

@@ -1,0 +1,9 @@
+schema_version: "1.0"
+name: ship-cold-review-pr-text
+description: "Spawns a subagent given only the full PR diff, title and description, and the brief \u2014 withholding what was built and what was already fixed. The review flags the description/code mismatch (description says the toggle persists immediately, the code uses a save button) as a finding with a CCR id, because the description is what every future reader sees first."
+tags: [ship]
+execution:
+  prompt: "SCENARIO. You are at stage 7 of /ship \u2014 the cold review. The PR is #42, titled \"feat(settings): add profile and notification settings\" with this description:\n\n  Adds a /settings page with a Profile section (display name) and a\n  Notifications section (email digest toggle). Digest toggle persists\n  immediately; display name has a save button.\n\nDuring the build, the digest toggle turned out to need a save button too (the immediate-persist approach caused a race with the profile save), so BOTH sections now use an explicit save button. The code is correct and tested. Nobody updated the PR description.\n\nSet up and run the cold review. Show the exact instruction you would give, and what the review should find."
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

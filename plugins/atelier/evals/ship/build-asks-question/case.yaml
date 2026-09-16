@@ -1,0 +1,9 @@
+schema_version: "1.0"
+name: ship-build-asks-question
+description: "Recognises tui-idle + a question in the tail as 'waiting on a human', treats it as a blocker under rule 2: pushes what exists, leaves the PR as draft, quotes the question, asks the user, waits. Explicitly does NOT answer the question itself or resume the terminal with a guessed answer."
+tags: [ship]
+execution:
+  prompt: "SCENARIO. You are mid-way through running /ship on the user-settings feature. Stage 3 spawned the build into an Orca terminal (handle term_8821). You ran `orca terminal wait --terminal term_8821 --for exit --timeout-ms 600000` and it TIMED OUT with no exit. You then ran `orca terminal wait --terminal term_8821 --for tui-idle` which returned immediately, and `orca terminal read --terminal term_8821` whose tail reads:\n\n```\n  Task 2: Profile section \u2014 display name input + save\n\n  The brief says an empty display name is rejected with an inline error, but\n  does not say whether the existing name should be restored on cancel or left\n  cleared. Both are defensible and it changes the component's state model.\n\n  Which behaviour do you want?\n  >\n```\n\nWhat do you do next? Be specific about the exact actions and their order."
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

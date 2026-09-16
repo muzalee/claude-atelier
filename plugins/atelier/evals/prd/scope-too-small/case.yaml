@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: prd-scope-too-small
+description: "Names the cheaper path first (the real work is de-hardcoding colors / a token layer, not the toggle) in about a sentence, then writes a SHORT PRD anyway \u2014 core sections only, no Stakeholders, no Rollout, no phases. Invents no metrics or stakeholders; an unknown baseline is written as 'unknown \u2014 how to get it'."
+tags: [prd]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "write me a PRD for adding a dark mode toggle in the settings page. Apply the changes to the files directly — do not just describe what you would do."
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
