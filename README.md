@@ -165,3 +165,25 @@ Install `atelier-typescript` in projects where you work with TypeScript — Reac
 
 - `typescript-conventions` — house TS rules (type discipline, module shape, async, validation boundaries) plus `references/react.md` and `references/fastify.md`. `/build` detects a TypeScript repo and loads the relevant half automatically.
 - `fastify-route` — scaffold a new Fastify route matching the project's existing conventions (schema strategy, auth pattern, error shape, test framework)
+
+## Evals
+
+`plugins/atelier/evals/` holds one case directory per scenario, in the format
+`claude plugin eval` runs natively: a `case.yaml` (prompt + limits), one
+grader per assertion under `graders/`, and a `scaffold.sh` that copies the
+case's fixture from `evals/fixtures/<skill>/` into the run workspace.
+
+```bash
+# everything (17 cases, 3 runs each)
+claude plugin eval plugins/atelier --runs 3 -j 4 \
+  --scaffold --trust-plugin --allow-tools Bash Write Edit
+
+# one skill
+claude plugin eval plugins/atelier --tag logging --runs 1 \
+  --scaffold --trust-plugin --allow-tools Bash Write Edit
+```
+
+`--scaffold` is required — without it the fixture never lands and every case
+runs against an empty directory. `--ablation none` skips the no-plugin
+baseline arm and halves the cost when you only want the with-plugin score.
+Results land in `plugins/atelier/evals/results/` (gitignored).

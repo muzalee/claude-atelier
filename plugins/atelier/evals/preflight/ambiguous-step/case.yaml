@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: preflight-ambiguous-step
+description: "Recognises task 1 is unrunnable as written \u2014 rate limiting per-IP vs per-user vs per-tenant are all defensible and change the implementation. Asks in ONE batched round with a recommendation and the consequence, rather than guessing or handing back a chore list."
+tags: [preflight]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "check this plan before I build it: .design/enterprise-tier/TASKS.md"
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

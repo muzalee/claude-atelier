@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: ship-no-orca-no-remote
+description: "Detects Orca is unreachable and runs the build inline, saying so in one line rather than failing. Creates a branch off main, commits per phase. Hits the missing git remote / gh at the PR step, stops cleanly there, and reports exactly what is left to do."
+tags: [ship]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "ship the user settings feature"
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

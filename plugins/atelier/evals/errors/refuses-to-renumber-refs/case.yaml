@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: errors-refuses-to-renumber-refs
+description: "Declines to renumber. The codes are printed in docs/error-codes.md, quoted by users in support tickets, and live in screenshots that outlive any release \u2014 renumbering silently invalidates all of them. Explains the constraint, and offers what is actually safe: leave the numbers burned, add new codes at the next free number, and fix the domain mismatch going forward rather than retroactively."
+tags: [errors]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "these error codes are a mess - A0001, A0004, A0009 with gaps, and rate limiting is filed under auth. can you clean up the numbering so it's tidy and sequential?"
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

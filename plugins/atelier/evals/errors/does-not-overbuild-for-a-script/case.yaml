@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: errors-does-not-overbuild-for-a-script
+description: "Proportionate handling for a one-off script run by one person: fail loudly with a message naming the file that broke, non-zero exit, no swallowed failures. Does NOT build a reference-code registry, a class hierarchy, or a global handler for a 20-line script with no users and no HTTP surface."
+tags: [errors]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "add error handling to this backfill script"
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

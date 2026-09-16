@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: preflight-mechanical-fixes
+description: "Fixes the signature claim (createSession takes userId only) and the script name (no `migrate` script; `db:push` exists) directly in TASKS.md, flags src/lib/cache.ts as nonexistent, lists every edit, and returns Ready without asking permission for corrections that have one right answer."
+tags: [preflight]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "check this plan before I build it: .design/enterprise-tier/TASKS.md"
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: logging-unstructured-to-story
+description: "console.log is replaced with a structured request-scoped logger. Every entry carries a trace-id, the authenticated user id, and an operation name, so one user's failed checkout is a single filter. The generic 'an error occurred' and 'processing' messages are replaced with specific, constant event names, with the varying values moved into fields. The Stripe call gains duration, status and target. The Stripe key never reaches a log."
+tags: [logging]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "the checkout logs are useless - when someone says their payment failed we can't find anything. can you fix the logging in there?"
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

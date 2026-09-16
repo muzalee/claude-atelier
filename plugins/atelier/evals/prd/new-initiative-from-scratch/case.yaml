@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: prd-new-initiative-from-scratch
+description: "A numbered PRD at docs/prd/0002-<slug>.md with explicit non-goals, numbered testable requirements, measurable success metrics with baseline+target, and phased scope. Should not contain schemas, endpoints, or component names."
+tags: [prd]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "we keep getting asked for shared team workspaces - right now Cadence is one flat schedule per company and bigger customers (the 20-30 seat ones) keep emailing support asking to split it by department because the sales team schedule is drowning out engineering. i want to write up the scope properly before anyone touches code. can you do that? assume i'm the only one deciding, target is end of Q1."
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

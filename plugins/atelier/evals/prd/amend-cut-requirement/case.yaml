@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: prd-amend-cut-requirement
+description: "docs/prd/0001-enterprise-tier.md edited in place: FR-2 (SCIM) removed from requirements or marked cut and moved to Non-Goals, audit log 7-year retention added as a requirement, updated: date bumped, and two new Changelog rows with reasons. Filename and prd number unchanged. No new PRD file created."
+tags: [prd]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "ok change of plan on enterprise. SCIM is dead for this year, we're not doing it - the two design partners both said manual invites are fine at their size. also legal came back and says the audit log has to be kept 7 years not 90 days, thats non negotiable now. update the doc."
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

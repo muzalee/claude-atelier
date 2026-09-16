@@ -3,3 +3,4 @@
 .env
 .env.*
 node_modules/
+plugins/atelier/evals/results/
