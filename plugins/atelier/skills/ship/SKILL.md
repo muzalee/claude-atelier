@@ -15,7 +15,9 @@ Where `/build` stops at working code and `/review` stops at a report, this close
 
 ## Prerequisites
 
-- `.design/<slug>/` with at minimum `DESIGN_BRIEF.md` and `TASKS.md`. Without them there is nothing to build — stop and tell the user to run `/design` first.
+- `.design/<slug>/` with at minimum `DESIGN_BRIEF.md` and `TASKS.md`. This gate is real here, unlike in `/build`: ship runs unattended through build, review, fix, and PR, and every one of those stages measures against the plan. Without it there is nothing to check the work against and nothing to write a PR description from.
+
+  Stop and offer the fork: `/design` if it is a feature, or `/build` then `/atelier:code-review` and a commit if it is small enough not to want a plan. Do not ship a small change through a pipeline built for features.
 - A clean working tree. Uncommitted changes would end up in the PR attributed to this run. Stop and ask.
 - `gh` authenticated (`gh auth status`), **and a remote configured** (`git remote -v`). These fail independently: `gh` can be authenticated in a repo that has no remote at all.
   - **No remote** — `git fetch origin` fails in stage 1 too, not just the PR step. Branch off local `main`, say so in one line, and run everything except the push and the PR.

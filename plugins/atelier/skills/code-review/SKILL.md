@@ -27,7 +27,9 @@ Reviews **changed code only** by default (uncommitted + last-N commits since bra
 
 2. **Read the changed files in full** (not just the diff hunks). Context matters — a 3-line change in a security-sensitive function needs the whole function.
 
-3. **Run the checklist** (skip categories that don't apply):
+3. **Load the conventions you are reviewing against.** Read `errors/SKILL.md` and `logging/SKILL.md` — always, in every repo. They define the error and log contract this checklist measures against, and reviewing from memory is how a convention quietly stops being one. Then the project's own rules (`.claude/rules/`) and the stack conventions if installed (`typescript-conventions`, `flutter-conventions`). A convention nobody reviews against is a suggestion.
+
+4. **Run the checklist** (skip categories that don't apply):
 
    **Correctness**
    - Edge cases: empty input, null, undefined, zero, negative, huge input, unicode
@@ -44,11 +46,32 @@ Reviews **changed code only** by default (uncommitted + last-N commits since bra
    - Timing attacks on comparisons (passwords, tokens)
    - PII in logs
 
-   **Error handling**
+   **Error handling** (against `errors`)
    - Silent catches (`catch {}` or `catch (e) { /* ignore */ }`)
    - Errors that get thrown but never caught upstream
    - Fallback values that hide real failures (e.g. `.catch(() => [])`)
    - Missing cleanup on error (open file handles, DB connections, timers)
+   - Bare `new Error("...")` where a typed error with a code belongs
+   - Bare rethrow (`catch (e) { throw e }`) or a wrap that drops `cause`
+   - HTTP status decided in the route instead of carried on the error type
+
+   **User-facing errors** (against `errors`)
+   - One message serving both the log and the user — the internal `message` and `userMessage` must be separate fields
+   - A `userMessage` that says nothing: "An error occurred", "Operation failed", "Invalid request"
+   - Internals in a user-facing string: DB text, constraint names, stack frames, `cause.message`, internal ids
+   - A user-facing error with no `ref`, a `ref` missing from the registry, or a `ref` renumbered in this diff (they are permanent — flag as must-fix)
+   - A 500 response body carrying anything but `ref` + user message + `trace_id`
+   - Frontend rendering `err.message` or "Request failed with status code N" instead of the server's user-facing message
+
+   **Observability** (against `logging`)
+   - Log lines with no identity anchor — no `user_id`, `session_id`, or `tenant_id` — so one user's report cannot be filtered out of the index
+   - Generic messages: "an error occurred", "something went wrong", "failed", "done"
+   - `msg` built by interpolation, so the same event never groups
+   - Error logs missing `err.code`, `err.ref`, `err.context`, or the recursive `cause` chain
+   - `console.log` / `print` / `fmt.Println` on a path that reaches production
+   - Log-then-rethrow: the same failure logged twice, once locally and once by the global handler
+   - A new failure path with no log at all, or a new external call with no `duration_ms` + `status` + `target`
+   - Expected errors (404, 400, 401) logged at ERROR — that is an alert firing for a normal outcome
 
    **Tests**
    - New public behavior with no test
@@ -93,14 +116,14 @@ Reviews **changed code only** by default (uncommitted + last-N commits since bra
    - Matches surrounding code (formatting, patterns, naming)
    - Comments follow `keep-it-simple` — no comments explaining what the code obviously does
 
-4. **Give every finding a stable id** — `CR-1`, `CR-2`, numbered in the order you found them, never reused within a review. A fix pass reports against them one by one, a PR description can list what is still open by id, and a follow-up review can say "CR-3 is still there" instead of re-describing it. A finding without an id cannot be tracked through a fix, which is where findings quietly get lost.
+5. **Give every finding a stable id** — `CR-1`, `CR-2`, numbered in the order you found them, never reused within a review. A fix pass reports against them one by one, a PR description can list what is still open by id, and a follow-up review can say "CR-3 is still there" instead of re-describing it. A finding without an id cannot be tracked through a fix, which is where findings quietly get lost.
 
-5. **Categorize findings** by severity. Skip categories with nothing to say.
+6. **Categorize findings** by severity. Skip categories with nothing to say.
    - **🔴 Must fix** — bugs, security issues, breaking changes. Blocks merge.
    - **🟡 Should fix** — missing tests, unclear code, subtle correctness risk. Address before merge if cheap; note as follow-up if expensive.
    - **🟢 Consider** — style, minor polish, non-blocking suggestions.
 
-6. **For each finding**, name:
+7. **For each finding**, name:
    - **Its id** (`CR-n`)
    - **File:line**
    - **One-line description** of the issue

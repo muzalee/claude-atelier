@@ -57,7 +57,9 @@ If `docs/prd/` holds a PRD for the initiative, it is the scope contract. `.desig
 
 ## 8. House conventions bind the code
 
-`/build` and any fix pass load the conventions that apply before writing code: `errors` and `logging` always, `keep-it-simple` for commits and comments, and `typescript-conventions` when the repo is TypeScript and `atelier-typescript` is installed. These are the standards `/review` measures against, so ignoring them means writing the code twice.
+`/build` and any fix pass load the conventions that apply before writing code: `errors` and `logging` always, `keep-it-simple` for commits and comments, and `typescript-conventions` when the repo is TypeScript and `atelier-typescript` is installed.
+
+`/review` and `code-review` load the same two — `errors` and `logging` — before reviewing, and measure the diff against them. Both ends read the same file, so the convention holds whether or not the same session wrote the code. A convention only one side loads is a suggestion.
 
 A project's own `.claude/rules/` outranks all of them — `/bootstrap` writes the chosen folder structure there when the repo is created. Where a convention and the existing codebase disagree, the codebase wins: say so in one line and match what is there.
 

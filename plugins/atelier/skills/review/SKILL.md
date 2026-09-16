@@ -1,6 +1,6 @@
 ---
 name: review
-description: Explicit-invocation-only orchestrator that runs code review + design review against the built code, using `.design/<slug>/` as the source of intent. Invoked ONLY when the user types /review or explicitly asks to "run the review pipeline", "review the build", or "check the feature". For a single technical review only, use `code-review` directly. For a single visual review only, use `design-review` directly. DO NOT auto-trigger from adjacent talk about reviewing code — those have their own skills.
+description: Explicit-invocation-only orchestrator that runs code review + security review + design review against the built code, using `.design/<slug>/` as the source of intent when one exists — and reviewing the diff on its own merits when it doesn't. Invoked ONLY when the user types /review or explicitly asks to "run the review pipeline", "review the build", or "check the feature". For a single technical review only, use `code-review` directly. For a single visual review only, use `design-review` directly. DO NOT auto-trigger from adjacent talk about reviewing code — those have their own skills.
 ---
 
 This skill is the **review** orchestrator. It runs three reviews — technical, security, then visual — against the code produced by `/build`, using the docs from `.design/<slug>/` as the yardstick.
@@ -12,11 +12,27 @@ The three-part pipeline:
 
 ## Prerequisites
 
-Both are needed:
-- `.design/<slug>/` with at minimum `DESIGN_BRIEF.md` (the intent to measure against).
-- Code changes to review — either uncommitted, on a branch diff, or in files the user names.
+**Required:** code changes to review — uncommitted, a branch diff, or files the user names. If there's no diff and no target, ask which files to review.
 
-If there's no design folder, tell the user to run `/design` first (or point at a brief). If there's no diff, ask which files to review.
+**Optional:** `.design/<slug>/` with `DESIGN_BRIEF.md`. It is the yardstick for *intent*, not a gate. Most branches don't have one, and a branch without a brief still deserves a review.
+
+**No design folder: ask, then do what they say.** Do not start a degraded review on your own judgment — the user may have meant a different slug, or may want `/design` first. State what you found and ask one question:
+
+> No design folder for this branch. Review the diff on its own? Plan-gap and plan-drift checks get skipped — nothing to measure intent against.
+
+**They say yes** — run the review as described below. **They say no, or name a slug** — use it. Ask once; do not re-raise it at each phase.
+
+Once they say yes, run:
+
+- **Phase 1 (code review):** everything except plan gap and plan drift, which have nothing to measure against. The conventions (`errors`, `logging`) still bind — those live in the skills, not in the brief, so they are checked either way.
+- **Phase 2 (security):** unaffected. Never skipped.
+- **Phase 3 (design review):** only if the diff touches UI. With no brief or tokens spec, measure against the codebase's own tokens, components, and patterns — consistency with what's already there, plus the universals: responsive behavior, accessibility, contrast, focus states, error copy. Say you reviewed against the codebase rather than a brief.
+
+Write reports to `.design/<slug>/` when a folder exists. Otherwise put them in the scratchpad (or wherever the user says) and hand back the paths — do not create a `.design/` folder just to have somewhere to write.
+
+**Name what you could not check.** A review missing its plan-gap pass must say so, in the report, not just in chat. A report that silently omits a check reads exactly like one that ran it and found nothing — and that reader is usually future-you.
+
+If the branch obviously wanted a brief that nobody wrote, say so inside the question, not after the review. That is the point where it can still change the answer.
 
 ## The Sequence
 
@@ -30,14 +46,14 @@ All three phases read from the same `.design/<slug>/` folder and write their rep
 
 ## Operating Rules
 
-1. **Open with a scan.** Ask (or infer) which feature slug this review is for. List what's in `.design/<slug>/`. Show a git diff summary (files changed, lines added/removed). Ask which phases to run — usually all three, but any subset is fine.
+1. **Open with a scan.** Ask (or infer) which feature slug this review is for, and list what's in `.design/<slug>/` — or say there is no design folder and this is a diff-only review. Show a git diff summary (files changed, lines added/removed). Ask which phases to run — usually all three, but any subset is fine.
 
 2. **Announce each phase before entering it.** Format: "Phase N: [name]. This checks [what]. Ready?" Wait for confirmation.
 
 3. **Run each phase by reading its SKILL.md and following it in full.**
 
 4. **Thread the design docs into each phase.**
-   - Before phase 1, hand `code-review` the brief, backend brief, `TASKS.md`, `TEST_PLAN.md`, and the PRD, so it can flag drift from spec (an endpoint shape that doesn't match `BACKEND_DESIGN.md`), plan gaps (a task ticked with nothing implementing it), and plan drift (code no task asked for).
+   - Before phase 1, hand `code-review` the brief, backend brief, `TASKS.md`, `TEST_PLAN.md`, and the PRD, so it can flag drift from spec (an endpoint shape that doesn't match `BACKEND_DESIGN.md`), plan gaps (a task ticked with nothing implementing it), and plan drift (code no task asked for). `code-review` loads the `errors` and `logging` conventions itself — the same two `/build` wrote against — so the error and log contract is checked, not assumed.
    - Before phase 2, hand `design-review` the brief and tokens spec so it can measure the built UI against the named philosophy and token roles.
 
 5. **End each phase with a checkpoint.** Summarize the report filename, count of findings by severity, and the biggest single issue. Then ask: "Address any must-fix items now, or continue?"
@@ -51,7 +67,7 @@ All three phases read from the same `.design/<slug>/` folder and write their rep
 ### Phase 1: Code Review
 
 Read `code-review/SKILL.md` and follow it. Point it at the branch diff (or uncommitted changes, or user-named files). Give it the brief + backend brief for context so it can flag both bugs AND drift from spec.
-- **Input**: git diff + `.design/<slug>/DESIGN_BRIEF.md` + `BACKEND_DESIGN.md` + `TASKS.md` + `TEST_PLAN.md` (whichever exist) + the PRD if `docs/prd/` has one. `TASKS.md` matters as much as the diff here — its checkboxes and `Implemented` lines are what gaps and drift are measured against.
+- **Input**: git diff + `.design/<slug>/DESIGN_BRIEF.md` + `BACKEND_DESIGN.md` + `TASKS.md` + `TEST_PLAN.md` (whichever exist) + the PRD if `docs/prd/` has one + the `errors` and `logging` conventions. `TASKS.md` matters as much as the diff here — its checkboxes and `Implemented` lines are what gaps and drift are measured against.
 - **Produces**: `.design/<slug>/CODE_REVIEW.md` with categorized findings (must-fix, should-fix, consider).
 - **Transition**: "Code review done. Next: the dedicated security pass."
 
