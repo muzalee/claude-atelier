@@ -115,7 +115,7 @@ This skill runs a structured design review of what has been built, measured agai
    - Hover states on buttons, cards, links
    - Focus states on form fields
    - Open states on dropdowns, modals, menus
-   - Error/success states on forms
+   - Error/success states on forms — read the copy, not just the styling. A user-facing message that says "An error occurred" is a finding, and so is one rendering a raw exception or a bare HTTP status. It should say what happened, what to do next, and carry a quotable `ref` + `trace_id` (see `errors`).
    - Loading and empty states
 
    **d. Capture dark mode (if the project supports it).** Toggle dark mode and repeat the responsive breakpoint captures with `-dark-mode` in the filename.

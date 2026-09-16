@@ -1,9 +1,11 @@
 ---
 name: logging
-description: Emit logs that are structured, contextual, and let you debug from them without rerunning the code. Every log carries trace-id, user-id (if authed), and operation name. Errors are logged with the full cause chain from the `errors` skill. Level discipline (DEBUG dev-only, INFO business events, WARN recoverable, ERROR needs-attention). Never log secrets, PII, tokens, cookies. Use when adding a log line, setting up a logger, reviewing a service for observability, or debugging a "why isn't there a log for this" gap.
+description: Emit logs that are structured, contextual, and tell a story — who did what, where, and how it ended — so you can debug from them without rerunning the code. Every log carries trace-id, an identity anchor (user-id, session-id, tenant-id) so one user's report is filterable, an operation name, and a specific message: never "an error occurred". Errors are logged with the full cause chain from the `errors` skill. Level discipline (DEBUG dev-only, INFO business events, WARN recoverable, ERROR needs-attention). Never log secrets, PII, tokens, cookies. Use when adding a log line, setting up a logger, reviewing a service for observability, or debugging a "why isn't there a log for this" gap.
 ---
 
 Logs are the evidence trail. The bar: from a single log line, plus its siblings sharing the same trace-id, a reader should be able to reconstruct what happened without re-running the code. That's the whole game. Everything else in this skill is in service of that.
+
+**A log line is one sentence in a story.** Read on its own it answers four questions — *who* (identity anchor), *where* (service, operation), *what* (the specific event), *how it ended* (outcome, duration, error). Read in trace order with its siblings it becomes a narrative: request arrived → user resolved → payment attempted → card declined → 402 returned. If a line can't answer its four questions, or the sequence has a hole where something clearly happened, the story is broken and the next incident costs hours.
 
 Pairs with `errors` — the error is *designed* over there; here it gets *emitted*. Neither works without the other.
 
@@ -20,32 +22,41 @@ Pairs with `errors` — the error is *designed* over there; here it gets *emitte
 
 2. **One log per outcome, not per line.** Log at the entry and exit of interesting operations. Do not log every branch — that's what DEBUG is for, in local dev, off in prod.
 
-3. **Every log carries the same context.** At minimum: `trace_id` (per request), `user_id` (if authenticated), `operation` (the business event, e.g. `checkout.complete`). Set these once via a request-scoped logger (Fastify: `req.log`; Node: AsyncLocalStorage; Go: context.Context). Never pass them by hand into every call.
+3. **Every log carries the same context.** At minimum: `trace_id` (per request), an identity anchor (see 4), `operation` (the business event, e.g. `checkout.complete`). Set these once via a request-scoped logger (Fastify: `req.log`; Node: AsyncLocalStorage; Go: context.Context). Never pass them by hand into every call.
 
-4. **Errors log the full chain.** The `errors` skill defines the error shape. Logging it means: `code`, `message`, `context`, and the recursive `cause` chain. Not just `err.message`.
+4. **Always anchor to an identity.** When a user says "it broke around 2pm", you need one field to filter on. Bind whatever identity exists, in this order of preference: `user_id` when authenticated, `session_id` or `anon_id` when not, `tenant_id` / `org_id` whenever the system is multi-tenant (bind it *alongside* `user_id`, not instead — support tickets arrive per-account). A log with no identity anchor is unfilterable and effectively lost. For background jobs the anchor is `job_id` plus the `user_id` the work is on behalf of.
 
-5. **Level discipline** (see the table below). Wrong level = alerts that don't fire, or dashboards that drown.
+5. **The message is specific and constant.** `msg` names the event and its outcome — `"payment declined"`, `"checkout complete"`, `"user lookup failed"`. Never the generic filler: "an error occurred", "something went wrong", "error", "failed", "done", "here". Those describe every log ever written, so they distinguish nothing. And keep `msg` a fixed string per event — the varying parts (`user_id`, `amount`, `card_last4`) go in fields, which is what makes "show me every declined payment" a single query instead of a regex.
 
-6. **Never log secrets, PII, tokens, cookies, session data.** Not even in DEBUG. Not "we'll strip them later." Never write them in the first place — the redaction step *will* be forgotten.
+6. **Errors log the full chain.** The `errors` skill defines the error shape. Logging it means: `code`, `ref`, the internal `message`, `context`, and the recursive `cause` chain. Not just `err.message` — and never the `userMessage` alone, which is written to be vague.
+
+7. **Level discipline** (see the table below). Wrong level = alerts that don't fire, or dashboards that drown.
+
+8. **Never log secrets, PII, tokens, cookies, session data.** Not even in DEBUG. Not "we'll strip them later." Never write them in the first place — the redaction step *will* be forgotten. The identity anchors in 4 are the exception that proves it: opaque ids are safe, the things they unlock are not. `session_id` means a random correlation id, never the session cookie or token value — if logging it would let someone impersonate the user, it's a secret, not an anchor.
 
 ## The log entry shape
 
 Every entry, minimum:
 
-| Field       | Purpose                                                                            |
-| :---------- | :--------------------------------------------------------------------------------- |
-| `level`     | `debug` `info` `warn` `error` `fatal`                                              |
-| `msg`       | Short, human. `"checkout complete"` not `"the checkout has been completed by user"` |
-| `time`      | ISO 8601 or epoch (logger default)                                                 |
-| `trace_id`  | The request's trace-id. Correlates all logs for one request.                       |
-| `operation` | Business event name. `checkout.complete`, `auth.login`, `user.create`.             |
-| `user_id`   | Authenticated user id (if any). Not the email, not the name.                       |
+| Field       | Answers    | Purpose                                                                             |
+| :---------- | :--------- | :----------------------------------------------------------------------------------- |
+| `level`     | how it ended | `debug` `info` `warn` `error` `fatal`                                              |
+| `msg`       | what       | Specific, fixed per event. `"checkout complete"`, never `"an error occurred"`        |
+| `time`      | when       | ISO 8601 or epoch (logger default)                                                  |
+| `trace_id`  | which one  | The request's trace-id. Correlates all logs for one request.                         |
+| `service`   | where      | Which deployable emitted this. Bound once in the logger's `base`.                    |
+| `operation` | where      | Business event name. `checkout.complete`, `auth.login`, `user.create`.               |
+| `user_id`   | who        | Authenticated user id (if any). Not the email, not the name.                         |
+| `session_id`| who        | When unauthenticated — the anchor for pre-login failures (signup, password reset).   |
+| `tenant_id` | who        | Account / org, whenever the system is multi-tenant. Support tickets arrive per-account. |
+| `outcome`   | how it ended | `ok` / `denied` / `failed` on operations where level alone is ambiguous.           |
 
 On error entries, add:
 
 | Field          | Purpose                                                                    |
 | :------------- | :------------------------------------------------------------------------- |
-| `err.code`     | The stable code from the `errors` skill.                                   |
+| `err.code`     | The stable internal code from the `errors` skill.                          |
+| `err.ref`      | The public reference code (`A0001`) the user was shown. Lets you search logs by what a support ticket quotes. |
 | `err.message`  | Error message.                                                             |
 | `err.context`  | The structured context from the thrown error.                              |
 | `err.cause`    | The wrapped underlying error (walked recursively — one field per level).   |
@@ -74,6 +85,40 @@ Cardinal sins:
 - Logging a caught-and-handled expected error at ERROR. It fires alerts for a normal outcome.
 - Logging every successful DB call at INFO. Drowns real signal.
 - Using `console.log` in prod. Not structured, no level, no context. Firing offense.
+
+## Writing the story
+
+A trace read top to bottom should read like a report of what happened. Same request, two versions:
+
+Broken — no anchor, generic messages, no outcome:
+
+```
+INFO  processing
+INFO  ok
+ERROR an error occurred
+```
+
+Whole — every line answers who / where / what / how it ended:
+
+```
+INFO  {operation: checkout.start,   user_id: u_42, tenant_id: t_9, cart_id: c_71, items: 3}   "checkout started"
+INFO  {operation: checkout.charge,  user_id: u_42, tenant_id: t_9, target: stripe.charge, amount_cents: 4200, duration_ms: 310, status: 402}  "payment declined"
+WARN  {operation: checkout.charge,  user_id: u_42, tenant_id: t_9, err.code: CARD_DECLINED, err.ref: P0001, outcome: failed}  "checkout failed"
+```
+
+Nobody has to guess. Who: `u_42` on `t_9`. Where: `checkout.charge`. What: Stripe returned 402 in 310ms. How it ended: declined, `P0001`, which is the exact code the user is reading off their screen.
+
+The test before you write a line: **if this is the only line I have at 3am, what can't I answer?** Add that field. If the answer is "nothing", the line is done.
+
+Filterability follows from the anchors. Each of these should be one query:
+
+- "This user reported a problem" → filter `user_id`.
+- "This account is complaining" → filter `tenant_id`.
+- "The user quoted code A0001" → filter `err.ref`.
+- "Show me this one request" → filter `trace_id`.
+- "Is checkout broken for everyone or just them?" → filter `operation`, group by `outcome`.
+
+If a question on that list needs a full-text search, a field is missing.
 
 ## Where to log
 
@@ -111,15 +156,19 @@ fastify.register(require("@fastify/http-proxy"), { logger });
 2. Business logic runs → INFO logs at outcomes with `operation` names.
 3. External call → INFO with `duration_ms` + `status` + `target`.
 4. Error thrown (from the `errors` skill) → propagates to the global error handler.
-5. Global handler logs at the right level: WARN for expected, ERROR for unexpected. Entry includes `err.code`, `err.context`, `err.cause` chain, `trace_id`.
-6. HTTP response goes back with `{ code, message, trace_id }` — the same `trace_id` that's in the logs.
-7. Operator sees the log in the dashboard → filters by `trace_id` → sees all sibling logs from the same request → greps the code for `err.code` → finds where it was thrown → reproduces with the captured `context`.
+5. Global handler logs at the right level: WARN for expected, ERROR for unexpected. Entry includes `err.code`, `err.ref`, `err.context`, `err.cause` chain, `trace_id`, and the identity anchor.
+6. HTTP response goes back with `{ ref, message, trace_id }` — the user-facing half of the error, carrying the same `trace_id` that's in the logs.
+7. Operator sees the log in the dashboard → filters by `trace_id` (or by `user_id` when all they have is "it broke for me") → sees all sibling logs from the same request → greps the code for `err.code` → finds where it was thrown → reproduces with the captured `context`.
 
 If any of steps 1–6 is missing, step 7 fails. That's when debugging costs hours.
 
 ## Anti-patterns
 
 - **Unstructured strings**: `log.info("user " + id + " logged in")`. Do: `log.info({ user_id: id, operation: "auth.login" }, "user logged in")`.
+- **Generic messages**: `"an error occurred"`, `"something went wrong"`, `"failed"`, `"done"`, `"here"`. They match every line in the system and identify none. Name the event and its outcome: `"password reset token expired"`.
+- **Anonymous logs**: no `user_id`, no `session_id`, no `tenant_id`. When a user reports a bug there is nothing to filter by, so their evidence is unreachable even though it's sitting in the index.
+- **Interpolating the variable part into `msg`**: `` `payment declined for ${userId}` `` makes every line unique, so grouping and alerting break. Fixed message, varying fields.
+- **Logging the error without its public code**: the user quotes `P0001` and nothing in the logs contains that string. Bind `err.ref` alongside `err.code`.
 - **Logging the same event twice.** Handler catches, logs, rethrows → global handler catches, logs again. Pick one. Global handler wins.
 - **Logging then throwing without cause.** `log.error("failed"); throw new Error("failed")` — the two log entries have no link. Attach the error to the log, or let the global handler log it.
 - **`console.log` in prod.** Bypasses structure, level, redaction. If it slips into a PR, `code-review` should flag it.
@@ -130,8 +179,10 @@ If any of steps 1–6 is missing, step 7 fails. That's when debugging costs hour
 
 When reviewing (or in `code-review`), check:
 
-- Every INFO/WARN/ERROR entry has `trace_id` + `operation` bound (via request-scoped logger).
-- Every error entry has `err.code` + `err.context` + `err.cause` (recursive).
+- Every INFO/WARN/ERROR entry has `trace_id` + `operation` + an identity anchor bound (via request-scoped logger).
+- No generic messages. Every `msg` names a specific event and its outcome, and is constant per event.
+- Every error entry has `err.code` + `err.ref` + `err.context` + `err.cause` (recursive).
+- The trace reads as a story — no gap where something clearly happened but nothing was logged.
 - No `console.log`. No `fmt.Println`. No `print(...)`.
 - No secrets in any log's key/value pairs. No cookies, no tokens, no PII beyond `user_id`.
 - External calls have `duration_ms` + `status`.

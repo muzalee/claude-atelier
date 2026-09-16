@@ -105,8 +105,8 @@ Load these before writing code. Each is a real skill — read its `SKILL.md` and
 
 | Skill | Applies to |
 | ----- | ---------- |
-| `errors` | Every error you throw, wrap, or handle. Typed errors with stable codes and cause chains, thrown not returned. |
-| `logging` | Every log line. Structured, carrying trace-id and operation name, correct level, no secrets or PII. |
+| `errors` | Every error you throw, wrap, or handle. Typed errors with stable codes and cause chains, thrown not returned — and the message a user reads kept separate from the one you debug from. |
+| `logging` | Every log line. Structured, carrying trace-id, an identity anchor, and an operation name, with a specific message, correct level, no secrets or PII. |
 | `keep-it-simple` | Commit messages, branch names, code comments, and any docs written along the way. |
 
 **This project's own rules come first.** If `.claude/rules/` exists, read every file in it before anything below. `/bootstrap` writes the project's chosen folder structure there as `0001-structure.md`, and a structure decision made when the repo was created outranks any default — putting a file in the wrong folder is cheap to fix now and expensive once fifty imports point at it.

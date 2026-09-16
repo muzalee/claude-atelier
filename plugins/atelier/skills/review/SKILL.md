@@ -37,7 +37,7 @@ All three phases read from the same `.design/<slug>/` folder and write their rep
 3. **Run each phase by reading its SKILL.md and following it in full.**
 
 4. **Thread the design docs into each phase.**
-   - Before phase 1, hand `code-review` the brief, backend brief, `TASKS.md`, `TEST_PLAN.md`, and the PRD, so it can flag drift from spec (an endpoint shape that doesn't match `BACKEND_DESIGN.md`), plan gaps (a task ticked with nothing implementing it), and plan drift (code no task asked for).
+   - Before phase 1, hand `code-review` the brief, backend brief, `TASKS.md`, `TEST_PLAN.md`, and the PRD, so it can flag drift from spec (an endpoint shape that doesn't match `BACKEND_DESIGN.md`), plan gaps (a task ticked with nothing implementing it), and plan drift (code no task asked for). `code-review` loads the `errors` and `logging` conventions itself — the same two `/build` wrote against — so the error and log contract is checked, not assumed.
    - Before phase 2, hand `design-review` the brief and tokens spec so it can measure the built UI against the named philosophy and token roles.
 
 5. **End each phase with a checkpoint.** Summarize the report filename, count of findings by severity, and the biggest single issue. Then ask: "Address any must-fix items now, or continue?"
@@ -51,7 +51,7 @@ All three phases read from the same `.design/<slug>/` folder and write their rep
 ### Phase 1: Code Review
 
 Read `code-review/SKILL.md` and follow it. Point it at the branch diff (or uncommitted changes, or user-named files). Give it the brief + backend brief for context so it can flag both bugs AND drift from spec.
-- **Input**: git diff + `.design/<slug>/DESIGN_BRIEF.md` + `BACKEND_DESIGN.md` + `TASKS.md` + `TEST_PLAN.md` (whichever exist) + the PRD if `docs/prd/` has one. `TASKS.md` matters as much as the diff here — its checkboxes and `Implemented` lines are what gaps and drift are measured against.
+- **Input**: git diff + `.design/<slug>/DESIGN_BRIEF.md` + `BACKEND_DESIGN.md` + `TASKS.md` + `TEST_PLAN.md` (whichever exist) + the PRD if `docs/prd/` has one + the `errors` and `logging` conventions. `TASKS.md` matters as much as the diff here — its checkboxes and `Implemented` lines are what gaps and drift are measured against.
 - **Produces**: `.design/<slug>/CODE_REVIEW.md` with categorized findings (must-fix, should-fix, consider).
 - **Transition**: "Code review done. Next: the dedicated security pass."
 

@@ -151,12 +151,24 @@ If a design tokens file exists (from `/design-tokens`), use its dark mode palett
 - Accent colors may need lightness adjustments to maintain WCAG contrast ratios against dark backgrounds.
 - Include a `prefers-reduced-motion` media query for users who need it. Disable or simplify all animations and transitions within that query.
 
+## Error States
+
+Error states are part of the design, not an afterthought bolted on when something breaks. The backend (see `errors`) hands you a body of `{ ref, message, trace_id }` — `message` is written for humans and is safe to render verbatim.
+
+- **Render `message` as-is.** Do not rewrite it in the component, do not prefix it with "Error:", do not fall back to `err.message` or `"Request failed with status code 500"`. Those are the internal half, and the user should never see them.
+- **Never invent copy for a failure you did not model.** If the response has no `message`, one line — "Something went wrong on our end. Try again in a moment." — plus the `ref` and `trace_id`.
+- **Show `ref` and `trace_id`, quietly.** Small, muted, selectable, near the message. That is what the user screenshots into a support ticket. Copy-to-clipboard on the pair is a two-line affordance that saves support a round trip.
+- **Give the user the next action.** Retry, go back, contact support. An error state that only states the problem makes the user's next move guesswork.
+- **Style it like the rest of the design.** The error state follows the same philosophy, tokens, and type scale as everything else. A default red browser-looking box in a Scandinavian interface is a broken seam.
+- **Validation errors go inline, next to the field.** A form-wide banner for a single bad email makes the user hunt for it.
+
 ## Done when
 
 - Every frontend task in `TASKS.md` is implemented and checked off
 - `TASKS.md` records what each task produced: an `Implemented` line naming the files, and a `Note` line for any decision the diff cannot explain
 - Tests cover the cases named in `TEST_PLAN.md`, and nothing it listed as not worth testing
 - The token file is materialized if the spec called for it
+- Every failure path renders the server's user-facing message plus `ref` and `trace_id` — no raw exceptions, no invented copy
 - Tests for the new behavior pass, or you said which did not and why
 - No historical comments anywhere in the code
 
