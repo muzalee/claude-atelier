@@ -187,3 +187,5 @@ claude plugin eval plugins/atelier --tag logging --runs 1 \
 runs against an empty directory. `--ablation none` skips the no-plugin
 baseline arm and halves the cost when you only want the with-plugin score.
 Results land in `plugins/atelier/evals/results/` (gitignored).
+
+**Known limitation:** graders read the agent's final message, not the files it wrote. `focus: files` looks like the fix and is not — it reports "(no file changes)" even when the workspace plainly contains the right answer. So a case scores partly on how completely a run summarizes its own work, and scores are comparable across runs of the same case rather than between cases. Read a low score as "look at this case", never as a measurement.
