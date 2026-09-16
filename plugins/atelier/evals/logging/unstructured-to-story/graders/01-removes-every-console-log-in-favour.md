@@ -1,5 +1,6 @@
 ---
 type: llm
+focus: {source: file, path: src/routes/checkout.ts}
 weight: 1
 ---
 

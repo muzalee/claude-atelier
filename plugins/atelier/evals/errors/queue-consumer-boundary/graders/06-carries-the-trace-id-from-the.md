@@ -1,5 +1,6 @@
 ---
 type: llm
+focus: {source: file, path: src/routes/exports.ts}
 weight: 1
 ---
 

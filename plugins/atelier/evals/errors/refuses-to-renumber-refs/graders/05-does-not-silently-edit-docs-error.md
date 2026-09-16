@@ -1,5 +1,6 @@
 ---
 type: llm
+focus: {source: file, path: docs/error-codes.md}
 weight: 1
 ---
 

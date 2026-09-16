@@ -1,5 +1,6 @@
 ---
 type: llm
+focus: {source: file, path: src/server.ts}
 weight: 1
 ---
 

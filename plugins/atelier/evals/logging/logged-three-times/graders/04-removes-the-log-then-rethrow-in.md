@@ -1,5 +1,6 @@
 ---
 type: llm
+focus: {source: file, path: src/lib/invites.ts}
 weight: 1
 ---
 

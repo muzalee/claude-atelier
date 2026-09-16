@@ -3,4 +3,4 @@ type: llm
 weight: 1
 ---
 
-Reads docs/prd/0001-enterprise-tier.md and finds the self-hosting non-goal
+Names the self-hosting non-goal from docs/prd/0001-enterprise-tier.md, quoting or paraphrasing it
