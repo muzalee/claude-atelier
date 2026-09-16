@@ -5,7 +5,7 @@ tags: [errors]
 context:
   scaffold_script: scaffold.sh
 execution:
-  prompt: "the projects routes need proper error handling - right now a missing project just throws a bare Error and the create route is sending the postgres message straight back to the browser. can you sort it out?"
+  prompt: "the projects routes need proper error handling - right now a missing project just throws a bare Error and the create route is sending the postgres message straight back to the browser. can you sort it out?. Apply the changes to the files directly — do not just describe what you would do."
   max_turns: 30
   timeout_seconds: 900
   allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

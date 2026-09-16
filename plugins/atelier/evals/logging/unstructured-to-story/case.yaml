@@ -5,7 +5,7 @@ tags: [logging]
 context:
   scaffold_script: scaffold.sh
 execution:
-  prompt: "the checkout logs are useless - when someone says their payment failed we can't find anything. can you fix the logging in there?"
+  prompt: "the checkout logs are useless - when someone says their payment failed we can't find anything. can you fix the logging in there?. Apply the changes to the files directly — do not just describe what you would do."
   max_turns: 30
   timeout_seconds: 900
   allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

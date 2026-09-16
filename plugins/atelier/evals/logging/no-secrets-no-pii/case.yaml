@@ -5,7 +5,7 @@ tags: [logging]
 context:
   scaffold_script: scaffold.sh
 execution:
-  prompt: "add logging to the auth routes - support keeps asking who tried to log in and who requested password resets, and right now we have nothing"
+  prompt: "add logging to the auth routes - support keeps asking who tried to log in and who requested password resets, and right now we have nothing. Apply the changes to the files directly — do not just describe what you would do."
   max_turns: 30
   timeout_seconds: 900
   allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
