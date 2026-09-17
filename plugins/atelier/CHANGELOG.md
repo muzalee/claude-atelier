@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2](https://github.com/muzalee/claude-atelier/compare/atelier-v0.6.1...atelier-v0.6.2) (2026-09-17)
+
+
+### Bug Fixes
+
+* **atelier:** one design file, no review artifacts, gated build ([#24](https://github.com/muzalee/claude-atelier/issues/24)) ([1c96fbb](https://github.com/muzalee/claude-atelier/commit/1c96fbbdf55bdd2f7a73bccdb8f8cd5844aafa0f))
+
 ## [0.6.1](https://github.com/muzalee/claude-atelier/compare/atelier-v0.6.0...atelier-v0.6.1) (2026-09-17)
 
 
