@@ -53,7 +53,7 @@ Read the repo before the interview so you do not ask questions the code already 
 
 - `README.md`, `docs/` — stated product purpose, existing feature set
 - `docs/prd/` — prior PRDs; a new one must not contradict a live one
-- `.design/*/DESIGN_BRIEF.md` and `BACKEND_DESIGN.md` — features already designed, and their stated non-goals
+- `.design/*/DESIGN_BRIEF.md` and `.design/*/BACKEND_DESIGN.md` — features already designed, and their stated non-goals. The glob matches both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones
 - `package.json` / dependency manifests — what the product currently *is* (SaaS app, CLI, library, mobile)
 - Auth, billing, or tenancy code — reveals the existing user model, which constrains who a new feature can serve
 - Open `TODO`/`FIXME` clusters and issue templates — the backlog the user is implicitly working around
@@ -131,9 +131,9 @@ Create `docs/prd/` if it does not exist. Do not add an index file — `ls` is th
 
 ### 6. Cross-link with design
 
-If `.design/<slug>/` folders exist for work under this PRD, link both directions so any skill entering from either side can find the other:
+If design folders exist for work under this PRD — glob `.design/*/`, which matches both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones — link both directions so any skill entering from either side can find the other. Copy the folder name exactly as it is on disk; this skill never creates or renames one:
 
-- In the PRD front matter: `design: .design/billing-portal/`
+- In the PRD front matter: `design: .design/2026-09-08-billing-portal/`
 - At the top of each `DESIGN_BRIEF.md` under this PRD: `> PRD: docs/prd/0001-billing-portal.md`
 
 Omit the `design:` key entirely until a design folder exists. An empty pointer is a broken one.
@@ -162,7 +162,7 @@ What matters is that the *current* state stays readable while the *change* stays
 
 6. **Check for contradictions the change creates.** Two places to look:
    - *Inside the PRD* — a surviving requirement that the change just invalidated. (A custom-retention-window requirement cannot survive a legal 7-year floor untouched.)
-   - *Downstream* — `.design/<slug>/` briefs, tasks, or tests that design work the change just cut or contradicted. Say so explicitly and offer to update them. A PRD that quietly diverges from its briefs is worse than no PRD.
+   - *Downstream* — design-folder briefs, tasks, or tests that design work the change just cut or contradicted. Say so explicitly and offer to update them. A PRD that quietly diverges from its briefs is worse than no PRD.
 
 7. **Correct a false premise rather than encoding it.** If the user says "change X from 90 days to 7 years" and the document never said 90 days, do not invent the history — make the change and tell them the figure was not in the PRD, because it means the number lives somewhere else that may now contradict this one.
 
@@ -182,7 +182,7 @@ status: draft | active | shipped | cancelled | superseded by NNNN
 owner: [name]
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
-design: .design/<slug>/        # omit until a design folder exists
+design: .design/YYYY-MM-DD-<slug>/        # the folder's real name; omit until one exists
 ---
 
 # PRD NNNN: [Initiative Name]

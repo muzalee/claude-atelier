@@ -14,12 +14,12 @@ This skill checks them, and reports what would break — before a build hits the
 - "Check this plan against the repo before I run it"
 - "I wrote this TASKS.md last week — is it still accurate?"
 - "Can this migration plan actually run?"
-- "Sanity check the plan in `.design/billing/TASKS.md`"
+- "Sanity check the plan in `.design/2026-09-08-billing/TASKS.md`"
 - "Will this still work? The codebase moved since I wrote it"
 
 ## Step 1: Locate the plan
 
-If the user named a file, use it. Otherwise look, in order: `.design/*/TASKS.md`, `.design/*/BACKEND_DESIGN.md`, `docs/prd/*.md`, `PLAN.md`, `TODO.md`, a plan pasted into the conversation. If several exist, list them and ask which one — checking the wrong plan wastes the whole pass.
+If the user named a file, use it. Otherwise look, in order: `.design/*/TASKS.md`, `.design/*/BACKEND_DESIGN.md`, `docs/prd/*.md`, `PLAN.md`, `TODO.md`, a plan pasted into the conversation. The `.design/*/` globs match both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones. If several exist, list them and ask which one — checking the wrong plan wastes the whole pass.
 
 Note when it was last modified and, **if this is a git repo**, how many commits have landed since. A plan written thirty commits ago is a different risk profile from one written this morning, and it tells you how hard to look. Outside a git repo, or where mtimes are uniform because everything was checked out at once, say the plan's age is unverifiable rather than guessing — a wrong guess makes the whole pass shallower or slower than it should be.
 
@@ -66,7 +66,7 @@ Then the findings, each with a stable id so a later fix pass can report against 
 ## Preflight: <plan file>
 
 **Verdict**: Blocked — 2 blocking, 1 worth knowing. Both blockers need a decision, not a correction.
-**Plan**: `.design/billing/TASKS.md`, last modified 12 days and 31 commits ago.
+**Plan**: `.design/2026-09-08-billing/TASKS.md`, last modified 12 days and 31 commits ago.
 **Checked**: 14 claims across 9 files.
 
 ### 🔴 Blocking
@@ -84,7 +84,7 @@ Then the findings, each with a stable id so a later fix pass can report against 
 
 The **Verified** section is not padding — it tells the reader which claims you actually checked, which is the only way they can judge how much the verdict is worth. A report listing three problems and nothing else leaves them unable to distinguish a thorough pass from a shallow one.
 
-When the plan lives in a `.design/<slug>/` folder, save the report as `.design/<slug>/PREFLIGHT.md` alongside the others — **including when the verdict is Blocked.** The report is a record of what was checked, not a certificate that the plan passed, and a blocked pass is exactly the one whose findings need to outlive the conversation. `/build` reads this file. Otherwise report inline — a standalone plan check does not need a file nobody will open twice.
+When the plan lives in a `.design/YYYY-MM-DD-<slug>/` folder, save the report as `PREFLIGHT.md` in that same folder — the one the plan is already in, under the name it already has — alongside the others — **including when the verdict is Blocked.** The report is a record of what was checked, not a certificate that the plan passed, and a blocked pass is exactly the one whose findings need to outlive the conversation. `/build` reads this file. Otherwise report inline — a standalone plan check does not need a file nobody will open twice.
 
 ## Step 5: Drive the plan to Ready
 

@@ -1,6 +1,6 @@
 ---
 type: llm
-focus: {source: file, path: .design/enterprise-tier/TASKS.md}
+focus: {source: file, path: .design/2026-07-28-enterprise-tier/TASKS.md}
 weight: 1
 ---
 

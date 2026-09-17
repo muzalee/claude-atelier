@@ -14,7 +14,7 @@ This skill turns a design brief into an ordered, buildable task list. Each task 
 
 ## Process
 
-1. Read the design brief. Look for `.design/*/DESIGN_BRIEF.md`. If multiple subfolders exist, use the most recently modified one, or ask the user which feature they are working on. Also check for `INFORMATION_ARCHITECTURE.md`, a tokens file, and `TEST_PLAN.md` in the same subfolder. If `TEST_PLAN.md` exists, its cases become test tasks alongside the implementation work — one task per meaningful assertion, grouped in the "Tests" section (see template below). If none exist, ask the user to describe what they are building.
+1. Read the design brief. Look for `.design/*/DESIGN_BRIEF.md` — the glob matches both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones. If several match, take the most recent date (undated folders sort oldest) and say which folder you picked, or ask the user which feature they are working on. Reuse that folder name verbatim for everything you write — never create a new dated folder, never rename an existing one. Also check for `INFORMATION_ARCHITECTURE.md`, a tokens file, and `TEST_PLAN.md` in the same subfolder. If `TEST_PLAN.md` exists, its cases become test tasks alongside the implementation work — one task per meaningful assertion, grouped in the "Tests" section (see template below). If none exist, ask the user to describe what they are building.
 
 2. Explore the existing codebase to understand what is already built. Scan specifically for:
    - **Component directories**: `components/`, `ui/`, `shared/` and list every component by name
@@ -36,14 +36,14 @@ This skill turns a design brief into an ordered, buildable task list. Each task 
    - **Visual priority**: the most prominent UI element early, so the user can validate the aesthetic direction before investing in details.
    - **Risk first**: the hardest or most uncertain piece early, so problems surface before everything else is built around them.
 
-5. Save the task list as `TASKS.md` in the same `.design/<feature-slug>/` subfolder as the design brief.
+5. Save the task list as `TASKS.md` in the same subfolder as the design brief — the one you discovered in step 1, under the name it already has.
 
 ## Task List Template
 
 ```markdown
 # Build Tasks: [Feature/Page Name]
 
-Generated from: .design/<feature-slug>/DESIGN_BRIEF.md
+Generated from: .design/YYYY-MM-DD-<feature-slug>/DESIGN_BRIEF.md
 Date: [date]
 
 ## Foundation
@@ -81,8 +81,8 @@ _Derived from `TEST_PLAN.md`. One task per case at the level named there (unit /
 
 ## Done when
 
-- `.design/<slug>/TASKS.md` exists, ordered so each task is independently buildable
+- `.design/YYYY-MM-DD-<slug>/TASKS.md` exists, ordered so each task is independently buildable
 - Every task is a vertical slice that leaves the app working, not a layer
 - Test cases from `TEST_PLAN.md` are attached to the tasks they cover
 
-**Then hand off.** Say: "Tasks saved to `.design/<slug>/TASKS.md` — N tasks." Then: "Design is done. Next: **`/atelier:preflight`** to check the plan against the repo, then **`/atelier:build`** — or **`/atelier:ship`** to run build, test, review and open a PR unattended." 
+**Then hand off.** Say: "Tasks saved to `.design/YYYY-MM-DD-<slug>/TASKS.md` — N tasks." Then: "Design is done. Next: **`/atelier:preflight`** to check the plan against the repo, then **`/atelier:build`** — or **`/atelier:ship`** to run build, test, review and open a PR unattended." 

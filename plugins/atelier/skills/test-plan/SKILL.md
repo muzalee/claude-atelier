@@ -1,6 +1,6 @@
 ---
 name: test-plan
-description: Write a short test plan for a change before implementing — name the cases that must pass, the level each should live at (unit / integration / e2e), what to break to prove them, and what NOT to test. Saves to `.design/<slug>/TEST_PLAN.md` when a `.design/<slug>/` folder exists (invoked from `/design` or standalone in a design-driven project); otherwise outputs inline. Use before starting non-trivial work, when asked for a "test plan", when reviewing a PR to sanity-check coverage, or as part of the `/design` pipeline.
+description: Write a short test plan for a change before implementing — name the cases that must pass, the level each should live at (unit / integration / e2e), what to break to prove them, and what NOT to test. Saves to `.design/YYYY-MM-DD-<slug>/TEST_PLAN.md` when a `.design/YYYY-MM-DD-<slug>/` folder exists (invoked from `/design` or standalone in a design-driven project); otherwise outputs inline. Use before starting non-trivial work, when asked for a "test plan", when reviewing a PR to sanity-check coverage, or as part of the `/design` pipeline.
 ---
 
 Before writing code (or before a PR ships), name the cases that must pass — and the *level* they should live at. Picking the wrong level catches bugs but wastes weeks maintaining flaky fake tests.
@@ -32,7 +32,7 @@ Before writing code (or before a PR ships), name the cases that must pass — an
    - Cases where the type system already guarantees the invariant
    - Third-party services (mock the boundary at the highest level, don't retest the vendor)
 
-6. **Save the plan.** If `.design/<slug>/` exists (invoked from `/design` or the project uses design folders), write to `.design/<slug>/TEST_PLAN.md`. Otherwise output inline.
+6. **Save the plan.** Glob `.design/*/` for the feature's folder — the glob matches both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones. If one exists (invoked from `/design`, or the project uses design folders), write `TEST_PLAN.md` into it under the name it already has; say which folder you picked when several match, taking the most recent date. Do not create a design folder just to have somewhere to write — with none, output inline.
 
 ## Test level guide
 
@@ -100,7 +100,7 @@ Short markdown, no template ceremony:
 
 ## Read before writing
 
-The failure modes worth testing live in the design docs, not in your imagination. Where `.design/<slug>/` exists, read first:
+The failure modes worth testing live in the design docs, not in your imagination. Where a `.design/YYYY-MM-DD-<slug>/` folder exists, read first:
 
 - **`DESIGN_BRIEF.md`** — the Key Interactions are the e2e cases, and Out of Scope tells you what not to cover.
 - **`BACKEND_DESIGN.md`** — the invariants, failure modes, and consistency model are the integration cases. Its Failure Modes table is close to a test list already.
@@ -113,6 +113,6 @@ Cite what each case comes from. A case traced to `FR-3` or to a named failure mo
 - The plan names each case, the level it lives at, and what to break to prove it
 - Cases trace back to the brief's interactions, the backend brief's failure modes, or a PRD requirement id
 - It says what NOT to test, so the build does not gold-plate coverage
-- Saved to `.design/<slug>/TEST_PLAN.md` when a design folder exists
+- Saved to `.design/YYYY-MM-DD-<slug>/TEST_PLAN.md` when a design folder exists
 
-**Then hand off.** Say: "Test plan saved to `.design/<slug>/TEST_PLAN.md`." Then: "Next: **`/atelier:brief-to-tasks`** to turn all of this into an ordered build checklist." 
+**Then hand off.** Say: "Test plan saved to `.design/YYYY-MM-DD-<slug>/TEST_PLAN.md`." Then: "Next: **`/atelier:brief-to-tasks`** to turn all of this into an ordered build checklist." 

@@ -14,7 +14,7 @@ Turn a `BACKEND_DESIGN.md` brief into a working backend. Read the brief first, f
 
 ## Prerequisites
 
-- A `BACKEND_DESIGN.md` file at `.design/<feature-slug>/` (produced by `/backend-design`).
+- A `BACKEND_DESIGN.md` file in the feature's design folder, found by globbing `.design/*/BACKEND_DESIGN.md` — matching both dated `.design/YYYY-MM-DD-<feature-slug>/` folders and legacy undated `.design/<feature-slug>/` ones (produced by `/backend-design`). Several match: take the most recent date and say which. Write back only into that folder, under the name it already has.
 - If none exists, stop and tell the user to run `/backend-design` first — this skill needs a brief, not a vibe.
 
 ## Process

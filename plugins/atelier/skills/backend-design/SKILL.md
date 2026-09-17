@@ -56,7 +56,7 @@ This skill creates a backend design brief through structured conversation. It is
 
    **Config / secrets**
    - `@fastify/env` with JSON Schema validation, `dotenv`, secret managers, feature flag clients
-   - If a frontend brief or IA exists at `.design/<slug>/DESIGN_BRIEF.md` or `INFORMATION_ARCHITECTURE.md`, read it. The data model and routes must serve those flows.
+   - If a frontend brief or IA exists, read it. Find it by globbing `.design/*/DESIGN_BRIEF.md` and `.design/*/INFORMATION_ARCHITECTURE.md` — the glob matches both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy bare `.design/<slug>/` ones. The data model and routes must serve those flows.
    - Treat what exists as the starting vocabulary. Extend, don't replace.
 
 3. Interview the user on each unresolved area below. Ask one question at a time. For each, propose a recommended answer and explain the tradeoff so the user can push back. Skip any area the codebase scan answered definitively.
@@ -109,7 +109,11 @@ This skill creates a backend design brief through structured conversation. It is
 
 ## File Output
 
-Save the brief to `.design/<feature-slug>/BACKEND_DESIGN.md`, using the same `<feature-slug>` as any existing frontend brief in `.design/`. If no `.design/` folder exists yet, create one and pick a slug derived from the feature name (e.g., `notifications-service`, `checkout-api`, `video-processor`).
+Save the brief to `BACKEND_DESIGN.md` inside the feature's design folder.
+
+**Find the folder before you make one.** Glob `.design/*<feature-slug>*/`, or `.design/*/` if you are not sure of the slug yet. A frontend brief usually got here first, and its folder — `.design/YYYY-MM-DD-<feature-slug>/`, or a legacy bare `.design/<feature-slug>/` — is the one to write into, exactly as it is named. Several dated folders match the slug: take the most recent date and say which one you picked. Never mint a new date for a feature that already has a folder, and never rename one.
+
+**Only when nothing matches** do you create the folder yourself, as `.design/YYYY-MM-DD-<feature-slug>/` — the date read from the environment (`date +%F`), never guessed — with a slug derived from the feature name (e.g., `notifications-service`, `checkout-api`, `video-processor`). That date is then frozen for the life of the folder.
 
 If a `DESIGN_BRIEF.md` already exists in the chosen subfolder, cross-reference it: the data model and API should serve the flows and components named there.
 
@@ -117,7 +121,7 @@ Example:
 
 ```
 .design/
-└── checkout-api/
+└── 2026-09-20-checkout-api/
     ├── DESIGN_BRIEF.md       (if frontend brief exists)
     └── BACKEND_DESIGN.md     ← this skill produces this
 ```
@@ -243,8 +247,8 @@ Anything still unresolved that needs a decision before or during the build.
 
 ## Done when
 
-- The brief is saved at `.design/<slug>/BACKEND_DESIGN.md`
+- The brief is saved at `.design/YYYY-MM-DD-<slug>/BACKEND_DESIGN.md`
 - Entities, API surface, and auth model are concrete enough to implement without asking again
 - Every open question has an owner and a by-when, or it is not open, it is undecided
 
-**Then hand off.** Say: "Backend brief saved to `.design/<slug>/BACKEND_DESIGN.md`." Then: "Next: **`/atelier:information-architecture`** to map structure and flows against this API surface." 
+**Then hand off.** Say: "Backend brief saved to `.design/YYYY-MM-DD-<slug>/BACKEND_DESIGN.md`." Then: "Next: **`/atelier:information-architecture`** to map structure and flows against this API surface." 

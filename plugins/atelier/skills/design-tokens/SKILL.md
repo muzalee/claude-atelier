@@ -1,9 +1,9 @@
 ---
 name: design-tokens
-description: Produce a `DESIGN_TOKENS.md` spec — colors (light + dark), spacing, typography, layout, motion, breakpoints — derived from a chosen aesthetic philosophy. Output is a markdown document (name / value / semantic role) saved to `.design/<slug>/`, NOT an actual CSS or Tailwind config file. Materialization into the project's real token file happens later in `/build` (or when `ui-build` runs standalone). Use when starting a new project, establishing a visual system, setting up tokens, or the user mentions "tokens" or "design system".
+description: Produce a `DESIGN_TOKENS.md` spec — colors (light + dark), spacing, typography, layout, motion, breakpoints — derived from a chosen aesthetic philosophy. Output is a markdown document (name / value / semantic role) saved to `.design/YYYY-MM-DD-<slug>/`, NOT an actual CSS or Tailwind config file. Materialization into the project's real token file happens later in `/build` (or when `ui-build` runs standalone). Use when starting a new project, establishing a visual system, setting up tokens, or the user mentions "tokens" or "design system".
 ---
 
-This skill produces the design tokens **spec** for a project. Run it after the design brief and before building any components. It writes a markdown document (`DESIGN_TOKENS.md`) inside `.design/<slug>/` — not a CSS or Tailwind file. The build phase materializes the spec into the project's stack-appropriate format.
+This skill produces the design tokens **spec** for a project. Run it after the design brief and before building any components. It writes a markdown document (`DESIGN_TOKENS.md`) inside `.design/YYYY-MM-DD-<slug>/` — not a CSS or Tailwind file. The build phase materializes the spec into the project's stack-appropriate format.
 
 ## Example prompts
 
@@ -24,9 +24,9 @@ This skill produces the design tokens **spec** for a project. Run it after the d
 
    If tokens already exist, **extend the spec to cover gaps** (missing dark mode, incomplete spacing scale, no motion tokens) rather than replacing.
 
-2. **Read the brief.** Look for `.design/<slug>/DESIGN_BRIEF.md`. If multiple slugs exist, use the most recently modified one or ask. If the brief names a philosophy, derive token values from it. If no brief exists, ask the user what direction they want.
+2. **Read the brief.** Glob `.design/*/DESIGN_BRIEF.md` — the glob matches both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones. If several match, take the most recent date (undated folders sort oldest) and say which folder you picked. Reuse that name verbatim — never create a new dated folder, never rename an existing one. Or ask the user which feature this is. If the brief names a philosophy, derive token values from it. If no brief exists, ask the user what direction they want.
 
-3. **Write `DESIGN_TOKENS.md`** into the same `.design/<slug>/` folder as the brief. Use the output shape below. Every token gets a name, a value, and a semantic role — the role is what tells the builder *why* this token exists, so it isn't renamed away.
+3. **Write `DESIGN_TOKENS.md`** into the same folder as the brief — the one you discovered in step 2, under the name it already has. Use the output shape below. Every token gets a name, a value, and a semantic role — the role is what tells the builder *why* this token exists, so it isn't renamed away.
 
 4. **Note the intended stack.** In a "Materialization notes" section, name the project's stack (Tailwind, CSS, CSS-in-JS) and where the materialized file should live. `/build` uses this to translate the spec into real code.
 
@@ -191,17 +191,17 @@ Base grid: [4px / 8px]. Rationale: [why this base fits the philosophy].
 
 ## Output
 
-Write to `.design/<slug>/DESIGN_TOKENS.md`. State the philosophy the tokens derive from and note any deviations or judgment calls at the top of the file. Do **not** write a `tokens.css`, `tailwind.config.js`, or `theme.ts` — that's `/build`'s job.
+Write to `DESIGN_TOKENS.md` inside the brief's folder (`.design/YYYY-MM-DD-<slug>/`, discovered not invented). State the philosophy the tokens derive from and note any deviations or judgment calls at the top of the file. Do **not** write a `tokens.css`, `tailwind.config.js`, or `theme.ts` — that's `/build`'s job.
 
 ## Read before writing
 
-Where `.design/<slug>/` exists, read `DESIGN_BRIEF.md` for the aesthetic direction the tokens must express, and `INFORMATION_ARCHITECTURE.md` for what the system actually has to cover — the page types, the density of the busiest screen, the states the navigation needs. A token set derived from a philosophy alone tends to be beautiful and short of exactly the semantic roles the real screens turn out to need.
+Where `.design/YYYY-MM-DD-<slug>/` exists, read `DESIGN_BRIEF.md` for the aesthetic direction the tokens must express, and `INFORMATION_ARCHITECTURE.md` for what the system actually has to cover — the page types, the density of the busiest screen, the states the navigation needs. A token set derived from a philosophy alone tends to be beautiful and short of exactly the semantic roles the real screens turn out to need.
 
 ## Done when
 
-- The spec is saved at `.design/<slug>/DESIGN_TOKENS.md`
+- The spec is saved at `.design/YYYY-MM-DD-<slug>/DESIGN_TOKENS.md`
 - Every token has a name, a value, and a semantic role — a value with no role is a hex code, not a token
 - Light and dark are both covered
 - It is still a markdown spec. No `.css`, no `tailwind.config` — `/build` materializes it
 
-**Then hand off.** Say: "Token spec saved to `.design/<slug>/DESIGN_TOKENS.md` — spec only, not yet code." Then: "Next: **`/atelier:test-plan`** to name what has to pass before any of this gets built." 
+**Then hand off.** Say: "Token spec saved to `.design/YYYY-MM-DD-<slug>/DESIGN_TOKENS.md` — spec only, not yet code." Then: "Next: **`/atelier:test-plan`** to name what has to pass before any of this gets built." 

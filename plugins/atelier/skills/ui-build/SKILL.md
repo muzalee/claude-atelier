@@ -1,6 +1,6 @@
 ---
 name: ui-build
-description: Build the frontend half of a feature from atelier design docs — implements `TASKS.md` against `DESIGN_BRIEF.md`, `INFORMATION_ARCHITECTURE.md`, and the materialized design tokens, guided by a named aesthetic philosophy so the output avoids generic AI styling. This is the frontend phase of `/atelier:build`, the sibling of `backend-build`. Use when implementing UI from a `.design/<slug>/` folder, or when the user asks to build components, pages, or screens in a project that has atelier design docs.
+description: Build the frontend half of a feature from atelier design docs — implements `TASKS.md` against `DESIGN_BRIEF.md`, `INFORMATION_ARCHITECTURE.md`, and the materialized design tokens, guided by a named aesthetic philosophy so the output avoids generic AI styling. This is the frontend phase of `/atelier:build`, the sibling of `backend-build`. Use when implementing UI from a `.design/YYYY-MM-DD-<slug>/` folder, or when the user asks to build components, pages, or screens in a project that has atelier design docs.
 ---
 
 This skill guides creation of distinctive, production-grade frontend interfaces. Implement real working code with exceptional attention to aesthetic detail.
@@ -14,7 +14,7 @@ This skill guides creation of distinctive, production-grade frontend interfaces.
 
 ## Before You Write Any Code
 
-0. **Materialize a token spec if one exists but no token file does.** If `.design/<slug>/DESIGN_TOKENS.md` exists AND the project has no existing token file (no `tokens.css`, no populated `theme.extend`, no `theme.ts` populated from a prior pass), translate the spec into the project's stack-appropriate format first:
+0. **Materialize a token spec if one exists but no token file does.** Glob `.design/*/DESIGN_TOKENS.md` — matching both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones; several matches, take the most recent date and say which. If such a spec exists AND the project has no existing token file (no `tokens.css`, no populated `theme.extend`, no `theme.ts` populated from a prior pass), translate the spec into the project's stack-appropriate format first:
    - Tailwind project → extend `tailwind.config.js|ts` under `theme.extend` AND write CSS variables to `globals.css` for anything that needs runtime theming.
    - Plain CSS/HTML → write to `tokens.css`, imported by the root stylesheet.
    - CSS-in-JS (Material UI / Chakra / Emotion) → write to `theme.ts` in the expected shape for the library.
