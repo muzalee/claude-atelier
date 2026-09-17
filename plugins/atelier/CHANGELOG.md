@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/muzalee/claude-atelier/compare/atelier-v0.6.0...atelier-v0.6.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* **atelier:** commit the design folder, and say so once ([#22](https://github.com/muzalee/claude-atelier/issues/22)) ([5fa8554](https://github.com/muzalee/claude-atelier/commit/5fa8554614292ec4e7adc0d6cb3a6e8b96b2ed0e))
+
 ## [0.6.0](https://github.com/muzalee/claude-atelier/compare/atelier-v0.5.1...atelier-v0.6.0) (2026-09-17)
 
 
