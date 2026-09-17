@@ -31,7 +31,27 @@ Default to the shortest form that still conveys the point. Structure follows a c
 
    This is the one place a trailer belongs. Commits stay clean (rule 1) — a squash-merge would drag a commit trailer onto main, while the PR body stays on the PR.
 
-4. **Code comments** — necessity bar, not brevity bar. Write one when the *why* is non-obvious: a hidden constraint, a workaround for a specific bug, a subtle invariant, a landmine warning for future refactors. **Keep necessary comments fully** — a 3-line note explaining a real invariant earns its length; don't artificially cut it, later readers will pay the cost. **Ruthlessly cut redundant ones**: restating what the code obviously does, session context that will rot ("added for the current PR", "used by the flow above", "as discussed with the user"), fluff paragraphs that repeat the diff, decorative section banners. The test: if removing the comment wouldn't confuse a reader six months from now, delete it.
+4. **Code comments** — necessity bar, not brevity bar. The default is **no comment**. Most functions need none: a good name and a clear signature already say it.
+
+   **Write one only when the *why* is non-obvious** — a hidden constraint, a workaround for a specific bug, a subtle invariant, a landmine for a future refactor, a non-obvious reason for an ordering. Then **keep it fully**: a 3-line note explaining a real invariant earns its length, and cutting it to look terse makes a later reader pay for it.
+
+   **Watch the ratio.** Comments should be rare enough to be a signal. More than roughly one per ten lines of new code means they have stopped marking the interesting parts and become narration — at that point a reader skims past all of them, including the one that mattered. If a file's diff has a comment on most lines, delete until only the non-obvious ones remain.
+
+   **Never write a historical comment.** Comments describe the code as it is, never how it got here. Git already has the history, and a comment about a change rots the moment the next change lands:
+
+   ```js
+   // ✗ every one of these is deleted, not reworded
+   // Changed per review feedback
+   // Added in the auth refactor
+   // Previously this used a Map
+   // TODO: remove once the old flow is gone   ← if it must exist, it is an issue, not a comment
+   // as discussed with the user
+   // used by the flow above
+   ```
+
+   **Also cut**: restating what the code obviously does, commented-out code, fluff paragraphs that repeat the diff, decorative section banners (`// ===== HELPERS =====`), and a docstring on a one-line function whose name already says it.
+
+   The test: if removing the comment would not confuse a reader six months from now who has never seen this PR, delete it.
 
 5. **Docstrings** — one short line max. Skip entirely if the function name and signature already tell the story.
 

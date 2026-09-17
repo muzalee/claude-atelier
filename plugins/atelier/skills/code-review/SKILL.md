@@ -116,7 +116,10 @@ Reviews **changed code only** by default (uncommitted + last-N commits since bra
 
    **Style consistency**
    - Matches surrounding code (formatting, patterns, naming)
-   - Comments follow `keep-it-simple` — no comments explaining what the code obviously does
+   - Comments follow `keep-it-simple` rule 4. Three separate findings, not one:
+     - **Obvious** — restates what the code already says. Delete.
+     - **Historical** — describes the change rather than the code ("changed per review feedback", "previously used a Map", "added in the auth refactor"). Delete. Git has the history and the comment is wrong by the next commit.
+     - **Ratio** — the diff comments most lines. Individually defensible, collectively noise: a reader skims all of them, including the one that mattered. Report it once against the file, not once per line.
 
 5. **Give every finding a stable id** — `CR-1`, `CR-2`, numbered in the order you found them, never reused within a review. A fix pass reports against them one by one, a PR description can list what is still open by id, and a follow-up review can say "CR-3 is still there" instead of re-describing it. A finding without an id cannot be tracked through a fix, which is where findings quietly get lost.
 

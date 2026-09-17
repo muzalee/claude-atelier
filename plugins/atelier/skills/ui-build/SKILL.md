@@ -170,6 +170,6 @@ Error states are part of the design, not an afterthought bolted on when somethin
 - The token file is materialized if the spec called for it
 - Every failure path renders the server's user-facing message plus `ref` and `trace_id` — no raw exceptions, no invented copy
 - Tests for the new behavior pass, or you said which did not and why
-- No historical comments anywhere in the code
+- Comments follow `keep-it-simple` rule 4 — none by default, none historical, and the ratio kept low enough that the ones left still read as signal
 
 **Then hand off.** Say: "Frontend done: N files, tests green." Then: "Next: **`/atelier:backend-build`** if `## Architecture` names server work, otherwise **`/atelier:review`**."

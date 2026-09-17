@@ -64,7 +64,7 @@ Turn the design file's `## Architecture` section into a working backend. Read it
 - **Thin handlers, fat services.** Route handlers stay under ~20 lines. Business logic goes in `src/services/<domain>.ts`.
 - **Every route gets a schema.** No untyped `request.body`. If the brief says an endpoint takes `{ email }`, that's a schema, not a comment.
 - **Errors: throw, don't return.** The global `setErrorHandler` shapes the response.
-- **Follow `keep-it-simple`** for commit messages and any inline docs written along the way.
+- **Follow `keep-it-simple`** for commit messages, branch names, and code comments. Rule 4 is the one that bites here: no comment by default, never a historical one, and a ratio low enough that a comment still means something.
 - **Don't add anything the brief didn't ask for** — no rate limiting, CORS, Swagger UI, admin panel, etc. unless the brief names it.
 
 ## Anti-patterns
