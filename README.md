@@ -174,11 +174,22 @@ grader per assertion under `graders/`, and a `scaffold.sh` that copies the
 case's fixture from `evals/fixtures/<skill>/` into the run workspace.
 
 ```bash
-# everything (17 cases, 3 runs each)
-claude plugin eval plugins/atelier --runs 3 -j 4 \
-  --scaffold --trust-plugin --allow-tools Bash Write Edit
+# one suite, one cost ceiling — the usual way to run these
+plugins/atelier/evals/run.sh logging
 
-# one skill
+# every suite, each under its own ceiling
+plugins/atelier/evals/run.sh all
+
+# knobs
+EVAL_RUNS=3 EVAL_BUDGET_USD=12 plugins/atelier/evals/run.sh errors
+EVAL_ABLATION=with-without plugins/atelier/evals/run.sh prd
+```
+
+`run.sh` wraps the CLI with the flags that are easy to get wrong and a
+`--max-cost-usd` ceiling **per suite**, so a budget hit costs one suite's
+results rather than the whole 17-case pass. The raw form is:
+
+```bash
 claude plugin eval plugins/atelier --tag logging --runs 1 \
   --scaffold --trust-plugin --allow-tools Bash Write Edit
 ```
@@ -188,4 +199,59 @@ runs against an empty directory. `--ablation none` skips the no-plugin
 baseline arm and halves the cost when you only want the with-plugin score.
 Results land in `plugins/atelier/evals/results/` (gitignored).
 
-**Known limitation:** graders read the agent's final message, not the files it wrote. `focus: files` looks like the fix and is not — it reports "(no file changes)" even when the workspace plainly contains the right answer. So a case scores partly on how completely a run summarizes its own work, and scores are comparable across runs of the same case rather than between cases. Read a low score as "look at this case", never as a measurement.
+### What a grader can read
+
+A grader's `focus` decides what the judge is shown, and it defaults to the
+agent's closing summary — so an unfocused grader scores the write-up, not the
+code. Three forms are accepted:
+
+| `focus` | judge sees |
+| --- | --- |
+| `last_message` (default) | the agent's closing summary |
+| `{source: file, path: src/routes/projects.ts}` | that file's post-run contents |
+| `files` | **broken** — reports `(no file changes)` even when the workspace holds the right answer |
+
+So every assertion about code carries the path it is actually about:
+
+```markdown
+---
+type: llm
+focus: {source: file, path: src/routes/projects.ts}
+weight: 1
+---
+
+Replaces `throw new Error("not found")` with a typed error carrying a stable code
+```
+
+Only fixture paths are used as targets. A path the agent invents (`src/lib/errors.ts`)
+is not guaranteed to exist under that name, and a grader pointed at a missing file
+risks passing vacuously — which is the failure mode to watch for generally, since a
+negative assertion ("the postgres message is NOT returned") passes whenever the judge
+is shown nothing.
+
+Assertions about what the agent *said* — what it noticed, asked, recommended, or
+refused — correctly stay on `last_message`. 64 of the 127 graders read a file; the
+other 63 are genuinely about the reply.
+
+Grader `type` is one of `regex`, `tool_order`, `tool_used`, `file_exists`, `llm`,
+`baseline`. Only `llm` and `baseline` cost a judge call, but the free ones cannot
+replace the file assertions: `regex` rejects `focus` in every form and has no
+negation, so it cannot be pointed at a file or express absence, and `file_exists`
+(with `path`, and optionally `exists: false`) only sees whether a whole file is
+there. Every case does carry one free `tool_used: Skill` grader, which is the
+ground truth for whether the run measured the skill at all or just plain Claude.
+
+`focus: file` shows the file's contents, never a diff — so "does not edit X" is
+only checkable when the forbidden edit would be *visible* as content (a softened
+non-goal, a renumbered code). "Stopped rather than editing" is a property of the
+reply, not of the file, and belongs on `last_message`.
+
+### Judge model
+
+`run.sh` overrides the CLI's default judge (haiku) with sonnet. Haiku mis-votes a
+whole class of assertion: bare negatives ("does not suggest `/atelier:build`") and
+anything phrased as a tool action ("**reads** `docs/prd/0001.md`"), failing them
+3-0 against messages that plainly comply. On preflight, with grader wording left
+untouched, `prd-gate` went 0.33 → 1.00 and `ambiguous-step` 0.33 → 0.71. The judge
+was $0.0117 of a $0.31 run, so the fidelity costs almost nothing. Override with
+`EVAL_JUDGE=`.

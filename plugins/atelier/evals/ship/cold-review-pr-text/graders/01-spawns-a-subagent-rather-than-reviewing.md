@@ -3,4 +3,4 @@ type: llm
 weight: 1
 ---
 
-Spawns a subagent rather than reviewing it itself
+Routes the review to a fresh subagent with no build context, rather than reviewing it in the current session
