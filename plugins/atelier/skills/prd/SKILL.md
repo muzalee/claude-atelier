@@ -53,7 +53,7 @@ Read the repo before the interview so you do not ask questions the code already 
 
 - `README.md`, `docs/` — stated product purpose, existing feature set
 - `docs/prd/` — prior PRDs; a new one must not contradict a live one
-- `.design/*/DESIGN_BRIEF.md` and `.design/*/BACKEND_DESIGN.md` — features already designed, and their stated non-goals. The glob matches both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones
+- `.design/*.md` — features already designed, and the non-goals in their `## Scope` sections. Two legacy folder shapes also exist and still read; see **Finding the design file** in `design/SKILL.md`
 - `package.json` / dependency manifests — what the product currently *is* (SaaS app, CLI, library, mobile)
 - Auth, billing, or tenancy code — reveals the existing user model, which constrains who a new feature can serve
 - Open `TODO`/`FIXME` clusters and issue templates — the backlog the user is implicitly working around
@@ -134,7 +134,7 @@ Create `docs/prd/` if it does not exist. Do not add an index file — `ls` is th
 If design folders exist for work under this PRD — glob `.design/*/`, which matches both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones — link both directions so any skill entering from either side can find the other. Copy the folder name exactly as it is on disk; this skill never creates or renames one:
 
 - In the PRD front matter: `design: .design/2026-09-08-billing-portal/`
-- At the top of each `DESIGN_BRIEF.md` under this PRD: `> PRD: docs/prd/0001-billing-portal.md`
+- Under the title of each `.design/YYYY-MM-DD-<slug>.md` covered by this PRD: `> PRD: docs/prd/0001-billing-portal.md`
 
 Omit the `design:` key entirely until a design folder exists. An empty pointer is a broken one.
 

@@ -5,6 +5,8 @@ description: Technical code review for correctness, security, tests, error handl
 
 Review recently changed code for correctness, safety, and clarity. Not a style pass — a technical read that flags what could break, what's missing, and what's over-engineered.
 
+**The review is printed, not filed.** Findings carry `CR-n` ids so a fix pass can report against them and a PR can name what is still open. Nothing is written to the repo; the fix pass records what it did in the design file's `## Implementation` section.
+
 ## Example prompts
 
 - "Code review the changes on this branch"
@@ -96,16 +98,16 @@ Reviews **changed code only** by default (uncommitted + last-N commits since bra
    - Duplication of logic that already exists elsewhere in the codebase
    - Over-abstraction: interfaces / factories for something with one caller
 
-   **Plan gap and plan drift** (when `.design/YYYY-MM-DD-<slug>/` or `docs/prd/` exists)
+   **Plan gap and plan drift** (when `.design/YYYY-MM-DD-<slug>.md` or `docs/prd/` exists)
 
-   Read `TASKS.md`, the brief, `TEST_PLAN.md`, and the PRD, and compare them against what the diff actually does. Two failures, opposite directions, both invisible in a pure code read:
+   Read the design file — `## Tasks`, `## Tests`, `## Implementation` and the sections above them — and the PRD, and compare them against what the diff actually does. Two failures, opposite directions, both invisible in a pure code read:
 
-   - **Gap — the plan asked for it and it is not there.** A task checked off with no code implementing it. A requirement (`FR-n`) nothing satisfies. A case in `TEST_PLAN.md` with no test. An `Implemented:` line naming a file that does not exist or does not do what the line claims. Gaps are what make a build look finished while the feature is half-built, and a ticked checkbox is the thing that hides them.
+   - **Gap — the plan asked for it and it is not there.** A task ticked with no code implementing it. A requirement (`FR-n`) nothing satisfies. A case in `## Tests` with no test. A line in `## Implementation` naming a file that does not exist or does not do what the line claims. Gaps are what make a build look finished while the feature is half-built, and a ticked checkbox is the thing that hides them.
    - **Drift — it is there and the plan never asked for it.** A file nobody's task called for. A feature beyond the brief. Something the PRD listed under Non-Goals that got built anyway. Drift is rarely malicious; it is usually a good idea had mid-build. It still means the thing shipped is not the thing agreed, and the PRD or brief should be amended to match — or the code dropped.
 
    Report each as a finding citing both sides: the plan location and the code location, or the code location and the absence. "FR-3 requires rate limiting; nothing in the diff implements it" is a finding. "The code looks incomplete" is not.
 
-   Where a task's `Note` line records a deliberate deviation and gives a reason, that is not drift — that is the build doing its job. Check the reason is in the doc that owns the decision: a deviation from a PRD requirement belongs in the PRD, not only in `TASKS.md`.
+   Where `## Implementation` records a deliberate deviation and gives a reason, that is not drift — that is the build doing its job. Check the reason is in the doc that owns the decision: a deviation from a PRD requirement belongs in the PRD, not only in `## Implementation`.
 
    **Intent and documentation drift**
    - The PR title or description no longer matches what the diff does
@@ -147,8 +149,8 @@ Short markdown, no template ceremony:
 - **CR-3** `src/services/orders.ts:120` — happy-path only test. Add: rejected payment case.
 - **CR-4** `src/db/migrations/0042.sql` — index missing on `orders.user_id`; the new query on line 145 will scan.
 - **CR-5** `PR description` — says the digest toggle persists immediately; the diff gives it a save button. Documentation drift counts: the description is what every future reader sees first.
-- **CR-6** `TASKS.md:12` ↔ nothing in diff — task 3 is checked off and its `Implemented` line names `src/lib/digest.ts`, which does not exist. Plan gap.
-- **CR-7** `src/features/settings/ThemeToggle.tsx` ↔ `DESIGN_BRIEF.md` — a theme toggle nobody asked for; the brief lists theming under Out of Scope. Plan drift: drop it, or amend the brief.
+- **CR-6** `.design/2026-09-02-user-settings.md` `## Tasks` ↔ nothing in diff — task 3 is ticked and `## Implementation` names `src/lib/digest.ts`, which does not exist. Plan gap.
+- **CR-7** `src/features/settings/ThemeToggle.tsx` ↔ `## Scope` — a theme toggle nobody asked for; theming is listed out of scope. Plan drift: drop it, or amend the design.
 
 ### 🟢 Consider
 - **CR-8** `src/utils/format.ts:15` — duplicates `formatCurrency` already in `src/lib/money.ts`. Reuse?
@@ -177,9 +179,9 @@ Always include a "What's good" section if there's something worth noting. A revi
 ## Done when
 
 - Every finding cites `file:line` and carries a `CR-n` id
-- The plan was checked for gaps and drift where `.design/YYYY-MM-DD-<slug>/` or `docs/prd/` exists — a checked-off task with no code, and code no task asked for, are both findings
+- The plan was checked for gaps and drift where `.design/YYYY-MM-DD-<slug>.md` or `docs/prd/` exists — a ticked task with no code, and code no task asked for, are both findings
 - Findings are bucketed must-fix / should-fix / consider
-- The report is saved as `CODE_REVIEW.md` in the feature's design folder when one exists — found by globbing `.design/*/` (matching both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones; most recent date wins, say which) and written to under the name it already has, never a folder you created
+- The review was printed and **nothing was written to the repo** — no report file, and no edit to the design file. The fix pass records what it fixed in `## Implementation`; the reviewer does not
 - "What's good" is filled in — a review that only lists problems is unbalanced
 
-**Then hand off.** Say: "Code review done: N must-fix, N should-fix." Name the single biggest issue, then: "Next: fix the must-fix items, or **`/atelier:design-review`** for the visual pass." 
+**Then hand off.** Say: "Code review done: N must-fix, N should-fix." Name the single biggest issue, then: "Next: fix the must-fix items with **`/atelier:build`** — it records each `CR-n` in `## Implementation` — or **`/atelier:design-review`** for the visual pass." 

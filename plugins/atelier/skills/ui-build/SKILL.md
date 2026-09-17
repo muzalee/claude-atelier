@@ -1,6 +1,6 @@
 ---
 name: ui-build
-description: Build the frontend half of a feature from atelier design docs — implements `TASKS.md` against `DESIGN_BRIEF.md`, `INFORMATION_ARCHITECTURE.md`, and the materialized design tokens, guided by a named aesthetic philosophy so the output avoids generic AI styling. This is the frontend phase of `/atelier:build`, the sibling of `backend-build`. Use when implementing UI from a `.design/YYYY-MM-DD-<slug>/` folder, or when the user asks to build components, pages, or screens in a project that has atelier design docs.
+description: Build the frontend half of a feature from the atelier design file — implements `## Tasks` against `## Experience`, `## Structure` and the materialized design tokens, guided by a named aesthetic philosophy so the output avoids generic AI styling. This is the frontend phase of `/atelier:build`, the sibling of `backend-build`. Use when implementing UI from a `.design/YYYY-MM-DD-<slug>.md`, or when the user asks to build components, pages, or screens in a project that has an atelier design file.
 ---
 
 This skill guides creation of distinctive, production-grade frontend interfaces. Implement real working code with exceptional attention to aesthetic detail.
@@ -14,7 +14,7 @@ This skill guides creation of distinctive, production-grade frontend interfaces.
 
 ## Before You Write Any Code
 
-0. **Materialize a token spec if one exists but no token file does.** Glob `.design/*/DESIGN_TOKENS.md` — matching both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones; several matches, take the most recent date and say which. If such a spec exists AND the project has no existing token file (no `tokens.css`, no populated `theme.extend`, no `theme.ts` populated from a prior pass), translate the spec into the project's stack-appropriate format first:
+0. **Materialize a token spec if one exists but no token file does.** Find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). If its `## Tokens` section names new tokens AND the project has no existing token file (no `tokens.css`, no populated `theme.extend`, no `theme.ts` populated from a prior pass), translate the spec into the project's stack-appropriate format first:
    - Tailwind project → extend `tailwind.config.js|ts` under `theme.extend` AND write CSS variables to `globals.css` for anything that needs runtime theming.
    - Plain CSS/HTML → write to `tokens.css`, imported by the root stylesheet.
    - CSS-in-JS (Material UI / Chakra / Emotion) → write to `theme.ts` in the expected shape for the library.
@@ -164,12 +164,12 @@ Error states are part of the design, not an afterthought bolted on when somethin
 
 ## Done when
 
-- Every frontend task in `TASKS.md` is implemented and checked off
-- `TASKS.md` records what each task produced: an `Implemented` line naming the files, and a `Note` line for any decision the diff cannot explain
-- Tests cover the cases named in `TEST_PLAN.md`, and nothing it listed as not worth testing
+- Every frontend task in `## Tasks` is implemented and ticked
+- `## Implementation` records what each task produced: the files, and any decision the diff cannot explain
+- Tests cover the cases named in `## Tests`, and nothing its "Not testing" list ruled out
 - The token file is materialized if the spec called for it
 - Every failure path renders the server's user-facing message plus `ref` and `trace_id` — no raw exceptions, no invented copy
 - Tests for the new behavior pass, or you said which did not and why
 - No historical comments anywhere in the code
 
-**Then hand off.** Say: "Frontend done: N files, tests green." Then: "Next: **`/atelier:backend-build`** if `BACKEND_DESIGN.md` exists, otherwise **`/atelier:review`**." 
+**Then hand off.** Say: "Frontend done: N files, tests green." Then: "Next: **`/atelier:backend-build`** if `## Architecture` names server work, otherwise **`/atelier:review`**."

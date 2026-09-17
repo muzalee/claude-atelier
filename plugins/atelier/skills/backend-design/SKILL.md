@@ -1,9 +1,9 @@
 ---
 name: backend-design
-description: Create a backend design brief through an interactive interview, codebase exploration, and decisions about data model, auth, scale, consistency, deployment, and observability. Biased toward Fastify (Node) but works for any backend stack. Saved as a markdown file in the project. Use when user wants to plan a backend, design an API, define a data model, mention "backend brief", or pair with a frontend design brief.
+description: Create a backend design through an interactive interview, codebase exploration, and decisions about data model, auth, invariants and failure modes. Biased toward Fastify (Node) but works for any backend stack. Fills the `## Architecture` section of the feature's `.design/YYYY-MM-DD-<slug>.md`. Use when user wants to plan a backend, design an API, define a data model, mention "backend brief", or pair with a frontend design brief.
 ---
 
-This skill creates a backend design brief through structured conversation. It is the server-side counterpart to `design-brief`. Skip any question the codebase already answers — read first, then ask only what is unresolved.
+This skill designs the server side through structured conversation. It is the counterpart to `design-brief`, and it fills one section — `## Architecture` — of the feature's `.design/YYYY-MM-DD-<slug>.md`. Skip any question the codebase already answers — read first, then ask only what is unresolved.
 
 ## Example prompts
 
@@ -56,10 +56,12 @@ This skill creates a backend design brief through structured conversation. It is
 
    **Config / secrets**
    - `@fastify/env` with JSON Schema validation, `dotenv`, secret managers, feature flag clients
-   - If a frontend brief or IA exists, read it. Find it by globbing `.design/*/DESIGN_BRIEF.md` and `.design/*/INFORMATION_ARCHITECTURE.md` — the glob matches both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy bare `.design/<slug>/` ones. The data model and routes must serve those flows.
+   - If the feature already has a design file, read it — find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). The data model and routes must serve the flows named there.
    - Treat what exists as the starting vocabulary. Extend, don't replace.
 
 3. Interview the user on each unresolved area below. Ask one question at a time. For each, propose a recommended answer and explain the tradeoff so the user can push back. Skip any area the codebase scan answered definitively.
+
+   **On an existing backend, most of the last four areas are already answered.** Scale, consistency, deployment and observability are decisions a running service made long ago; ask about them only where *this feature* changes them — a new table with a retention question, a write that needs a transaction, a migration that cannot take downtime. Asking a user to restate their deploy pipeline because you are adding an endpoint is how an interview loses its credibility.
 
    **Data model**
    - What are the core entities and how do they relate?
@@ -105,150 +107,51 @@ This skill creates a backend design brief through structured conversation. It is
    - Tracing across services? Sampling rate?
    - Alerts: who gets paged, on what threshold?
 
-4. Once you have a complete picture, write the brief using the template below.
+4. Once you have a complete picture, write the `## Architecture` section using the guidance below.
 
 ## File Output
 
-Save the brief to `BACKEND_DESIGN.md` inside the feature's design folder.
+Fill the `## Architecture` section of the feature's `.design/YYYY-MM-DD-<feature-slug>.md`.
 
-**Find the folder before you make one.** Glob `.design/*<feature-slug>*/`, or `.design/*/` if you are not sure of the slug yet. A frontend brief usually got here first, and its folder — `.design/YYYY-MM-DD-<feature-slug>/`, or a legacy bare `.design/<feature-slug>/` — is the one to write into, exactly as it is named. Several dated folders match the slug: take the most recent date and say which one you picked. Never mint a new date for a feature that already has a folder, and never rename one.
+**Find the file before you make one.** Find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). The frontend brief usually got here first and already created it.
 
-**Only when nothing matches** do you create the folder yourself, as `.design/YYYY-MM-DD-<feature-slug>/` — the date read from the environment (`date +%F`), never guessed — with a slug derived from the feature name (e.g., `notifications-service`, `checkout-api`, `video-processor`). That date is then frozen for the life of the folder.
+In a legacy six-file folder, keep writing to `BACKEND_DESIGN.md` beside the other old files.
 
-If a `DESIGN_BRIEF.md` already exists in the chosen subfolder, cross-reference it: the data model and API should serve the flows and components named there.
+**Only when nothing matches** do you create the file yourself, as `.design/YYYY-MM-DD-<feature-slug>.md` — the date read from the environment (`date +%F`), never guessed — with a slug derived from the feature name (e.g., `notifications-service`, `checkout-api`, `video-processor`). That date is then frozen for the life of the file. Write the full set of headings in order, and fill `## Architecture`.
 
-Example:
+Read the sections already written — `## Problem`, `## Solution`, `## Scope`, `## Experience` — before you write. The data model and API must serve the flows and components named there.
 
-```
-.design/
-└── 2026-09-20-checkout-api/
-    ├── DESIGN_BRIEF.md       (if frontend brief exists)
-    └── BACKEND_DESIGN.md     ← this skill produces this
-```
+## What to write in `## Architecture`
 
-## Brief Template
+**Write what this feature actually touches, and nothing else.** The menu below is what a *new service* needs. A feature on an existing backend needs the first four items and usually collapses the rest to one line or drops them entirely — the deployment story, the observability story and the scale targets did not change because you added an endpoint. Say so in a line if it is worth saying; say nothing if it is not.
+
+Never leave a placeholder table. A two-row API table is a design; a two-row API table plus six `| [type] | ... |` rows is a form nobody filled.
 
 ```markdown
-# Backend Design: [Service / Feature Name]
+## Architecture
 
-## Problem
+**Shape**: what kind of system this is (CRUD API, event processor, job runner, gateway) and the one or two architectural choices that define it. On an existing backend: which plugin/module this lands in.
 
-What this backend exists to do, framed by the calling context (which frontends, jobs, or external systems depend on it and why). Not implementation detail — purpose.
+**Callers**: who calls this, how (request/response, webhook, subscribe), and with what auth. Skip when it is only the frontend already named in `## Experience`.
 
-## Solution Sketch
+**Data model**: the entities this feature adds or changes — fields, types, required/optional, indexes, relationships. Only the delta; the rest of the schema is in the repo.
 
-The shape of the solution in plain terms: what kind of system this is (CRUD API, event processor, job runner, gateway), and the one or two architectural choices that define it.
+**Invariants**: the business rules the schema must enforce — uniqueness, referential integrity, state machines, allowed transitions. Note which are enforced at the DB layer vs. the application layer and why.
 
-## Callers & Consumers
+**API surface**: method, path, purpose, auth, idempotency. Sketch request/response shape inline for the non-trivial ones.
 
-| Caller            | Pattern              | Auth method | Notes |
-| ----------------- | -------------------- | ----------- | ----- |
-| [frontend / svc]  | [request/response, webhook, subscribe] | [session, JWT, API key] | [rate, criticality] |
+**Auth**: authentication mechanism, authorization model, tenancy, and what the threat model worries about here — credential leak, replay, IDOR, enumeration. On an existing backend this is usually one line: which existing guard the routes sit behind.
 
-## Data Model
+**Failure modes**: the top 3-5 ways this goes wrong and the chosen response — retry, fail loud, degrade, queue for later. These become integration cases in `## Tests`, so name them.
 
-### Entities
-
-For each entity: fields, types, required/optional, indexes, relationships.
-
-```
-EntityName
-├── id              [pk, type]
-├── field_a         [type, required, indexed]
-├── field_b         [type, optional]
-└── relations       [foreign keys / joins]
-```
-
-### Invariants
-
-Business rules the schema must enforce (uniqueness, referential integrity, state machines, allowed transitions). Note which are enforced at the DB layer vs. application layer and why.
-
-### Growth & Retention
-
-Expected size per entity at 1 month, 1 year. Retention policy (keep forever, archive after N, hard delete after N).
-
-## API Surface
-
-| Method | Path | Purpose | Auth | Idempotent? |
-| ------ | ---- | ------- | ---- | ----------- |
-| GET    | /... | ...     | ...  | yes         |
-| POST   | /... | ...     | ...  | no (use idempotency key) |
-
-For non-trivial endpoints, sketch request/response shape inline.
-
-## Fastify Architecture (if applicable)
-
-- **Plugin tree**: how the app is decomposed into plugins and which use `fastify-plugin` to escape encapsulation.
-- **Schema/validation**: chosen strategy (JSON Schema / TypeBox / Zod) and where it lives.
-- **Decorators**: cross-cutting state attached to `fastify`, `request`, `reply`.
-- **Hooks**: which lifecycle hooks are used and for what (auth in `preHandler`, audit in `onResponse`, etc.).
-- **Error handling**: shape of the error response, where `setErrorHandler` lives.
-- **Logger**: Pino config, transports per environment, redaction list.
-
-## Auth Model
-
-- **Authentication**: [mechanism — sessions/JWT/API keys/OAuth/mTLS, where credentials live, rotation policy]
-- **Authorization**: [model — RBAC/ABAC/resource-scoped, who can do what]
-- **Tenancy**: [single-tenant, multi-tenant with row-level isolation, multi-tenant with separate DBs]
-- **Threat model notes**: [what we worry about — credential leak, replay, IDOR, enumeration]
-
-## Scale & Latency Targets
-
-| Metric           | Target            | Notes |
-| ---------------- | ----------------- | ----- |
-| p50 latency      | [ms]              | [hot path / cold path] |
-| p95 latency      | [ms]              |       |
-| p99 latency      | [ms]              |       |
-| RPS at launch    | [n]               |       |
-| RPS ceiling      | [n]               |       |
-| Read:write ratio | [e.g. 90:10]      |       |
-
-## Consistency Model
-
-What guarantees we promise and where. Call out:
-- Operations that need ACID transactions
-- Operations safe under eventual consistency
-- Idempotency strategy for retried writes (idempotency keys, dedup tables, natural keys)
-- Exactly-once vs. at-least-once expectations for async work
-
-## Deployment
-
-- **Runtime**: [serverless / long-running container / edge / VM]
-- **Region(s)**: [one / multi, primary, failover]
-- **Migrations**: [tool, when applied, zero-downtime requirements, backfill strategy]
-- **Rollout**: [blue/green, canary %, rolling, manual]
-- **Rollback**: [how, how fast]
-
-## Observability
-
-- **Logs**: [what gets logged, levels, format, PII handling]
-- **Metrics**: [the handful that matter — latency, error rate, queue depth, business KPIs]
-- **Traces**: [tooling, sampling rate, propagation across services]
-- **Alerts**: [signal → threshold → who gets paged]
-- **Healthcheck**: [endpoint, what it actually checks]
-
-## Failure Modes
-
-The top 3-5 ways this can go wrong and the chosen response: retry, fail loud, degrade gracefully, queue for later.
-
-| Failure                  | Response                        |
-| ------------------------ | ------------------------------- |
-| [downstream times out]   | [retry with backoff, then ...]  |
-| [DB unavailable]         | [...]                           |
-
-## Out of Scope
-
-Explicit non-goals. Things this brief does not cover so the build stays bounded.
-
-## Open Questions
-
-Anything still unresolved that needs a decision before or during the build.
+**Growth / consistency / deployment / observability**: only when this feature changes them. A new table with a retention policy, a write that needs a transaction, a migration with a zero-downtime requirement, a new signal worth alerting on. Nothing to say means these do not appear.
 ```
 
 ## Done when
 
-- The brief is saved at `.design/YYYY-MM-DD-<slug>/BACKEND_DESIGN.md`
+- `## Architecture` in `.design/YYYY-MM-DD-<slug>.md` is filled, or says in one line why there is no server work
 - Entities, API surface, and auth model are concrete enough to implement without asking again
-- Every open question has an owner and a by-when, or it is not open, it is undecided
+- Nothing in the section is a placeholder, and nothing restates a decision `## Experience` already made
+- Every open question has an owner and a by-when, or it is not open, it is undecided — carry unresolved ones into `## Tasks` rather than leaving a dangling list
 
-**Then hand off.** Say: "Backend brief saved to `.design/YYYY-MM-DD-<slug>/BACKEND_DESIGN.md`." Then: "Next: **`/atelier:information-architecture`** to map structure and flows against this API surface." 
+**Then hand off.** Say: "Architecture written to `.design/YYYY-MM-DD-<slug>.md`." Then: "Next: **`/atelier:information-architecture`** to map structure and flows against this API surface." 

@@ -9,11 +9,11 @@ If a task maps to an atelier skill, use it — don't reinvent it in freeform:
 - Defining what an initiative is and is not (scope, requirements, success metrics) → `/atelier:prd`
 - Planning a new feature end-to-end → `/atelier:design`
 - Checking whether an existing plan still matches the repo → `/atelier:preflight`
-- Implementing from a completed `.design/YYYY-MM-DD-<slug>/` → `/atelier:build`
+- Implementing from a completed `.design/YYYY-MM-DD-<slug>.md` → `/atelier:build`
 - Reviewing built code against the design → `/atelier:review`
 - Taking a design all the way to a review-ready PR, unattended → `/atelier:ship`
 - Scaffolding a fresh repo → `/atelier:bootstrap`
-- Writing just a brief / tokens spec / IA / tasks → the matching phase skill (`design-brief`, `design-tokens`, `information-architecture`, `brief-to-tasks`)
+- Writing just one section — brief / architecture / structure / tokens / tests / tasks → the matching phase skill (`design-brief`, `backend-design`, `information-architecture`, `design-tokens`, `test-plan`, `brief-to-tasks`)
 - Terse commits, PRs, docs, comments → `keep-it-simple`
 - Writing or reviewing TypeScript / React / Fastify → `typescript-conventions` (from `atelier-typescript`)
 - Writing or reviewing Flutter / Dart → `flutter-conventions` (from `atelier-flutter`)
@@ -25,7 +25,7 @@ State which skill you're about to run before running it, so the user can redirec
 Two atelier skills share a name with something else that may be installed:
 
 - **`design`** — collides with Claude Code's built-in design-canvas skill and with `ui-ux-pro-max:design`. Always invoke the orchestrator as `/atelier:design`. A bare `/design` is ambiguous and may open a canvas instead.
-- **`ui-build`** — renamed from `frontend-design` for exactly this reason; Anthropic ships an official `frontend-design`. If a user says "frontend-design" they may mean either, so ask which when a `.design/YYYY-MM-DD-<slug>/` folder is in play.
+- **`ui-build`** — renamed from `frontend-design` for exactly this reason; Anthropic ships an official `frontend-design`. If a user says "frontend-design" they may mean either, so ask which when a `.design/YYYY-MM-DD-<slug>.md` is in play.
 
 ## 3. Never paraphrase a skill
 
@@ -33,17 +33,19 @@ When executing an atelier skill, read its `SKILL.md` and follow it end to end. D
 
 ## 4. Boundaries are hard
 
-- `/atelier:design` and its phases produce **markdown only** in `.design/YYYY-MM-DD-<slug>/`. No code.
-- `/atelier:build` produces **code**, reading `.design/YYYY-MM-DD-<slug>/` for intent.
-- `/atelier:review` produces a **report**, editing nothing.
+- `/atelier:design` and its phases produce **one markdown file**, `.design/YYYY-MM-DD-<slug>.md`. No code.
+- `/atelier:build` produces **code**, reading that file for intent and writing only its `## Implementation` section.
+- `/atelier:review` **prints** its findings, writing and editing nothing.
 
 If a user request would cross a boundary mid-skill (e.g. asks you to code during `/design`), pause, name the boundary, and offer to close the current phase before switching modes.
 
 ## 5. Design asks. Build executes. Review reports.
 
 - **`/design`** is the interactive phase. Confirmation gates between every phase are non-negotiable — decisions live here.
-- **`/build`** runs autonomously. No per-phase confirmation. State the plan, execute end to end, only pause on real blockers (docs contradict code, missing service with no obvious fallback, destructive migration).
-- **`/review`** runs autonomously. Produces a report, edits nothing.
+- **`/build`** asks go/no-go between phases — "Next phase: X. Go?" — and skips every gate for the rest of the run when told **"go all"** (or `/build --all`, "run everything", "no gates", "unattended"). The gate is go/no-go, not a reopened design; a new decision at the gate is a blocker.
+- **`/review`** runs autonomously, prints findings with stable ids, and edits nothing.
+
+**An unattended caller says "go all" in its instruction text.** `/ship` stage 3 and any other skill spawning a build without a human watching puts the words in the literal instruction — a build that gates inside an unattended run stops at phase 1 and halts the pipeline.
 
 The user chose `/design` when they wanted to think, and `/build` when they wanted to ship. Do not turn `/build` back into `/design`.
 
@@ -84,15 +86,17 @@ Two rules about the handoff:
 
 The user can discuss design, briefs, tokens, IA, tasks without triggering `/design`. Only fire an orchestrator on explicit invocation (`/design`, "run the design pipeline", etc.). This mirrors each orchestrator's own `description` gating.
 
-## 12. Date the design folder once, then discover it
+## 12. Date the design file once, then discover it
 
-Design folders are `.design/YYYY-MM-DD-<slug>/`, where the date is the day the folder was first created and never changes.
+A design is one file, `.design/YYYY-MM-DD-<slug>.md`, where the date is the day it was created and never changes.
 
-- **Only the skill that creates the folder picks the date** — `design-brief`, or `backend-design` when it runs standalone with no brief present. Take the date from the environment (`date +%F`), never from memory.
-- **Every other skill discovers the folder** by globbing `.design/*<slug>*/` (or `.design/*/` when no slug is known yet) and reuses the matched name verbatim. Never mint a new date for an existing feature, never rename a folder on disk.
-- **Several matches for one slug** → take the most recent date and say out loud which folder you picked.
-- **Folders from before this convention have no date prefix.** `.design/<slug>/` is still valid and still matched by those globs. Leave them as they are.
+- **Only `design-brief` creates one** — or `backend-design` running standalone with nothing to match. It takes the date from the environment (`date +%F`), never from memory.
+- **Every other skill discovers it** by the single procedure in `design/SKILL.md` → **Finding the design file**, and reuses the matched name verbatim. That section is the one description of discovery; skills reference it rather than restating it.
+- **Two legacy shapes still read and are never written fresh**: `.design/<slug>/DESIGN.md`, and the original `.design/<slug>/DESIGN_BRIEF.md` plus siblings, dated or undated. Read and edit them where they lie. Do not convert them, do not migrate them, do not start a flat file beside one.
+- **Never create `.design/` just to have somewhere to write.**
 
-## 13. The design folder is committed
+## 13. The design file is committed
 
-`.design/YYYY-MM-DD-<slug>/` is tracked in the repo — screenshots included, and never added to a `.gitignore`. It is the intent record the PR reviewer and every later reader work from, and `TASKS.md` is the implementation log beside it. Skills commit it rather than re-arguing whether it belongs.
+`.design/YYYY-MM-DD-<slug>.md` is tracked in the repo and never added to a `.gitignore`. It is the intent record the PR reviewer and every later reader work from, and its `## Implementation` section is the build log. Skills commit it rather than re-arguing whether it belongs.
+
+**Nothing else is.** Reviews print their findings and write no file; browser testing takes screenshots to look at and saves none. A finding is either fixed and recorded in `## Implementation`, or open and named in the PR body — those two places, and no third.
