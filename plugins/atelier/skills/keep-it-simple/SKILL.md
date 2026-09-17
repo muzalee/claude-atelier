@@ -1,6 +1,6 @@
 ---
 name: keep-it-simple
-description: Apply to all written output — commit messages, PR titles/descriptions, branch names, code comments, documentation, and explanations. Enforces conventional-commit format for git (feat/fix/chore/etc. + scope + short subject) with matching branch prefix (`feat/`, `fix/`, etc.), respects project convention if `.commitlintrc.*` is present, keeps everything short and why-focused, and never adds "Co-Authored-By Claude" or "Generated with Claude Code" trailers. Trigger on any writing task, especially git commit, gh pr create, git checkout -b, adding comments/docstrings, or writing README/docs.
+description: Apply to all written output — commit messages, PR titles/descriptions, branch names, code comments, documentation, and explanations. Enforces conventional-commit format for git (feat/fix/chore/etc. + scope + short subject) with matching branch prefix (`feat/`, `fix/`, etc.), respects project convention if `.commitlintrc.*` is present, keeps everything short and why-focused, never adds a "Co-Authored-By Claude" trailer to commits, and ends PR descriptions with the Claude Code trailer. Trigger on any writing task, especially git commit, gh pr create, git checkout -b, adding comments/docstrings, or writing README/docs.
 ---
 
 Default to the shortest form that still conveys the point. Structure follows a convention where one exists; tone stays terse everywhere.
@@ -23,7 +23,13 @@ Default to the shortest form that still conveys the point. Structure follows a c
 
 2. **PR titles** — same conventional format as commits. Since squash-merge uses the PR title as the commit message on main, a bad title poisons history.
 
-3. **PR descriptions** — short summary (1–3 bullets), short test plan (checklist). No essay. **Do NOT add "🤖 Generated with Claude Code" trailer.**
+3. **PR descriptions** — short summary (1–3 bullets), short test plan (checklist). No essay. End with a blank line and the trailer:
+
+   ```
+   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+   ```
+
+   This is the one place a trailer belongs. Commits stay clean (rule 1) — a squash-merge would drag a commit trailer onto main, while the PR body stays on the PR.
 
 4. **Code comments** — necessity bar, not brevity bar. Write one when the *why* is non-obvious: a hidden constraint, a workaround for a specific bug, a subtle invariant, a landmine warning for future refactors. **Keep necessary comments fully** — a 3-line note explaining a real invariant earns its length; don't artificially cut it, later readers will pay the cost. **Ruthlessly cut redundant ones**: restating what the code obviously does, session context that will rot ("added for the current PR", "used by the flow above", "as discussed with the user"), fluff paragraphs that repeat the diff, decorative section banners. The test: if removing the comment wouldn't confuse a reader six months from now, delete it.
 

@@ -157,7 +157,7 @@ git push -u origin <branch>
 gh pr create --draft --title "<conventional commit title>" --body "<body>"
 ```
 
-The PR body is written now and updated as the run proceeds. Follow `keep-it-simple`: what changed and why, no ceremony. Include the design file path so a reader can find the intent, and leave a "Known findings" section that later stages fill in or remove.
+The PR body is written now and updated as the run proceeds. Follow `keep-it-simple`: what changed and why, no ceremony. Include the design file path so a reader can find the intent, and leave a "Known findings" section that later stages fill in or remove. **End the body with the `🤖 Generated with [Claude Code](https://claude.com/claude-code)` trailer** — per `keep-it-simple` rule 3, and repeated here because this is where the body is actually written.
 
 ## Stage 3: Remaining build phases
 
@@ -269,7 +269,7 @@ Keep the returned findings to hand for stage 8. They go nowhere else.
 
 Same rules as stage 6, one pass, working from the `CCR-n` / `CSEC-n` findings the subagent returned — hand them to `build`'s "from a review report" path exactly as stage 6 did with the warm findings. Then:
 
-1. Update the PR description: what the run did, which interactions the browser test actually drove (the reader wants the list, not that a test "ran"), and every finding left open with its id and why — `FT-n`, `CR-n`, `SEC-n`, `DR-n`, `CCR-n`, `CSEC-n` alike.
+1. Update the PR description: what the run did, which interactions the browser test actually drove (the reader wants the list, not that a test "ran"), and every finding left open with its id and why — `FT-n`, `CR-n`, `SEC-n`, `DR-n`, `CCR-n`, `CSEC-n` alike. Keep the Claude Code trailer at the bottom; rewriting the body is the easiest place to drop it.
 2. `gh pr ready <number>`.
 3. Report: branch, PR link, commits, browser test result, finding counts per review, and what is still open.
 
