@@ -92,3 +92,7 @@ Design folders are `.design/YYYY-MM-DD-<slug>/`, where the date is the day the f
 - **Every other skill discovers the folder** by globbing `.design/*<slug>*/` (or `.design/*/` when no slug is known yet) and reuses the matched name verbatim. Never mint a new date for an existing feature, never rename a folder on disk.
 - **Several matches for one slug** → take the most recent date and say out loud which folder you picked.
 - **Folders from before this convention have no date prefix.** `.design/<slug>/` is still valid and still matched by those globs. Leave them as they are.
+
+## 13. The design folder is committed
+
+`.design/YYYY-MM-DD-<slug>/` is tracked in the repo — screenshots included, and never added to a `.gitignore`. It is the intent record the PR reviewer and every later reader work from, and `TASKS.md` is the implementation log beside it. Skills commit it rather than re-arguing whether it belongs.

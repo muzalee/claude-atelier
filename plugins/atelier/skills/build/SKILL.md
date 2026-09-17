@@ -75,6 +75,8 @@ Skip either phase if the design didn't include it (e.g. no `BACKEND_DESIGN.md` �
 
    Keep it to what the diff cannot say. `Implemented:` plus a line or two of real decision. Not a summary of the code, and never a history of how it changed — rule 10 applies here too.
 
+   **The record is committed with the code it describes**, in the same commit as the task it belongs to — not left uncommitted for a later sweep. `TASKS.md` is a tracked file like any other, and a log that lands a commit away from its diff is a log a reviewer reads out of order.
+
    **A fix pass is a build pass.** When you are fixing review findings rather than working a fresh task — `/review` handed you must-fix items, or `/ship` is at stage 6 or 8 — the same rule applies: record the finding id you addressed and what changed, against the task the fix belongs to. A fix that lands with no record is the fastest way for the next review to re-find the same thing, or for a reader to see code that no task explains.
 
    ```markdown
