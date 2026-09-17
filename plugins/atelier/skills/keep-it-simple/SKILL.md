@@ -43,7 +43,7 @@ Default to the shortest form that still conveys the point. Structure follows a c
    // used by the flow above
    ```
 
-   **Also cut**: restating what the code obviously does, commented-out code, fluff paragraphs that repeat the diff, decorative section banners (`// ===== HELPERS =====`), and a docstring on a one-line function whose name already says it.
+   **Also cut**: restating what the code obviously does, commented-out code, fluff paragraphs that repeat the diff, and decorative section banners (`// ===== HELPERS =====`).
 
    The test: if removing the comment would not confuse a reader six months from now who has never seen this PR, delete it.
 
