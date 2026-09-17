@@ -51,11 +51,11 @@ The user chose `/design` when they wanted to think, and `/build` when they wante
 
 ## 6. Resume, don't restart
 
-On re-invocation of an orchestrator, if `.design/YYYY-MM-DD-<slug>/` already contains artifacts, list what exists and offer to resume from the next incomplete phase. Never restart from phase 1 without asking.
+On re-invocation of an orchestrator, if `.design/YYYY-MM-DD-<slug>.md` already has sections filled, list which ones and offer to resume from the next empty one. Never restart from phase 1 without asking.
 
 ## 7. The PRD outranks the design docs on scope
 
-If `docs/prd/` holds a PRD for the initiative, it is the scope contract. `.design/YYYY-MM-DD-<slug>/` decides *how*; the PRD decides *what* and *whether*. When design or build discovers that a requirement is wrong, infeasible, or newly out of scope, amend the PRD (`prd` skill, Amend mode) rather than letting the brief quietly disagree with it. Two documents claiming to define scope is worse than one imperfect one.
+If `docs/prd/` holds a PRD for the initiative, it is the scope contract. `.design/YYYY-MM-DD-<slug>.md` decides *how*; the PRD decides *what* and *whether*. When design or build discovers that a requirement is wrong, infeasible, or newly out of scope, amend the PRD (`prd` skill, Amend mode) rather than letting the brief quietly disagree with it. Two documents claiming to define scope is worse than one imperfect one.
 
 ## 8. House conventions bind the code
 

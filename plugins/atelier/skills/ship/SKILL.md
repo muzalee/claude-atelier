@@ -64,7 +64,7 @@ git fetch origin
 git checkout -b <type>/<slug> origin/main    # or origin/master — check which exists
 ```
 
-Branch type follows `keep-it-simple`: `feat/`, `fix/`, `chore/`. Derive the slug from the design folder. Branch off the **freshly fetched** remote main, not the local one — a stale local main produces a PR full of other people's changes.
+Branch type follows `keep-it-simple`: `feat/`, `fix/`, `chore/`. Derive the slug from the design file's name. Branch off the **freshly fetched** remote main, not the local one — a stale local main produces a PR full of other people's changes.
 
 ## The build terminal — read this before stage 2
 

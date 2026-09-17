@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Technical code review for correctness, security, tests, error handling, and style. Distinct from design-review (which is visual/aesthetic). Use when user says "review this code", "check my PR", "code review", "check for issues", or after implementing a feature.
+description: Technical code review for correctness, security, tests, error handling, and style. Findings are printed with `CR-n` ids; nothing is written to the repo. Distinct from design-review (which is visual/aesthetic). Use when user says "review this code", "check my PR", "code review", "check for issues", or after implementing a feature.
 ---
 
 Review recently changed code for correctness, safety, and clarity. Not a style pass — a technical read that flags what could break, what's missing, and what's over-engineered.

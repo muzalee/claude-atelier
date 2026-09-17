@@ -122,7 +122,7 @@ This skill runs a structured design review of what has been built, measured agai
    - **Should fix**: Inconsistencies, missing states, responsive issues.
    - **Could improve**: Polish, animation refinement, typography fine-tuning.
 
-6. **Print the review.** No file, in the design folder or anywhere else. Say which routes and breakpoints you actually looked at, so a reader can tell a real pass from a code read.
+6. **Print the review.** No file, beside the design file or anywhere else. Say which routes and breakpoints you actually looked at, so a reader can tell a real pass from a code read.
 
 ## Review Checklist
 
