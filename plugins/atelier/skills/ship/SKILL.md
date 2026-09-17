@@ -19,6 +19,8 @@ Where `/build` stops at working code and `/review` stops at a report, this close
 
   Stop and offer the fork: `/design` if it is a feature, or `/build` then `/atelier:code-review` and a commit if it is small enough not to want a plan. Do not ship a small change through a pipeline built for features.
 - A clean working tree. Uncommitted changes would end up in the PR attributed to this run. Stop and ask.
+
+  **Uncommitted `.design/YYYY-MM-DD-<slug>/` docs are the exception.** They belong in the repo — commit them as `docs(design): <slug> brief` per `keep-it-simple`, say you did in one line, and carry on. Only design docs get this; a dirty source file still stops the run.
 - `gh` authenticated (`gh auth status`), **and a remote configured** (`git remote -v`). These fail independently: `gh` can be authenticated in a repo that has no remote at all.
   - **No remote** — `git fetch origin` fails in stage 1 too, not just the PR step. Branch off local `main`, say so in one line, and run everything except the push and the PR.
   - **No `gh`** — run everything else and stop before the PR step, telling the user what is left.
@@ -48,6 +50,8 @@ Where `/build` stops at working code and `/review` stops at a report, this close
 5. **Pass the conventions down explicitly.** When you invoke `build`, name its house conventions and its no-historical-comments rule in the instruction. A sub-skill that is not told builds to its own defaults, and the fix passes are exactly where "// changed per review feedback" comments creep in.
 
 6. **Commit per phase, never in one lump.** Each build phase is its own commit, following `keep-it-simple`. A reviewer reading a 40-file single commit cannot tell the frontend work from the backend work, and neither can `git bisect`.
+
+   The commit carries that phase's code **and** the `TASKS.md` lines recorded for it. The log and the diff it explains land together, or a reviewer reads them a commit apart and the record trails the work it describes.
 
 ## Stage 1: Branch
 
@@ -157,7 +161,7 @@ Start the dev server first if it is not running, and shut down anything you star
 
 **What to actually test:** walk the primary user journey from the brief. For each interactive element the change touched — does it respond, does it do the right thing, does it handle the empty and invalid case. Check the browser console for errors that the happy path produced anyway.
 
-Save screenshots to `.design/YYYY-MM-DD-<slug>/screenshots/`, and write what you exercised and what happened to `.design/YYYY-MM-DD-<slug>/FUNCTIONAL_TEST.md`. A failure here is a finding, fixed in this stage before review — reviewing code you already know is broken wastes the review.
+Save screenshots to `.design/YYYY-MM-DD-<slug>/screenshots/`, and write what you exercised and what happened to `.design/YYYY-MM-DD-<slug>/FUNCTIONAL_TEST.md`. Commit both and push — screenshots included; a PR that cites a test record nobody can open cites nothing. A failure here is a finding, fixed in this stage before review — reviewing code you already know is broken wastes the review.
 
 ## Stage 5: Warm review
 
@@ -166,6 +170,8 @@ Read and follow, in order, against the changes on this branch:
 1. `code-review/SKILL.md` → `.design/YYYY-MM-DD-<slug>/CODE_REVIEW.md`
 2. Claude Code's built-in `security-review` → `.design/YYYY-MM-DD-<slug>/SECURITY_REVIEW.md`
 3. `design-review/SKILL.md` → `.design/YYYY-MM-DD-<slug>/DESIGN_REVIEW.md` (skip when there is no UI)
+
+Commit and push each report as you save it (`docs(design): <slug> code review`, per `keep-it-simple`). The PR names open findings by id, and a reader chasing one needs the report in the branch rather than in a transcript they never saw.
 
 Run the three skills directly rather than the `/review` orchestrator — it gates on confirmation between phases, which is correct for interactive use and wrong here.
 
@@ -209,7 +215,7 @@ Findings from this stage are numbered `CCR-n` and `CSEC-n` — the cold prefix k
 
 **It reviews the PR text too, not only the code.** A title that describes something other than what shipped, or a description that no longer matches the diff, is a finding — it is what every future reader sees first, and a wrong one sends them into the code with the wrong model. 
 
-Save to `.design/YYYY-MM-DD-<slug>/COLD_REVIEW.md`.
+Save to `.design/YYYY-MM-DD-<slug>/COLD_REVIEW.md`, then commit and push it like the warm reports.
 
 ## Stage 8: Fix the cold findings, then flip to ready
 
@@ -235,6 +241,7 @@ If a security must-fix appeared in the cold review and could not be fixed, **lea
 - `COLD_REVIEW.md` was acted on, not just saved — a report written and never read is the same as not running the stage
 - The browser test ran, or you said plainly why it could not
 - Tests are green on the final commit
+- The working tree is clean, and every `.design/YYYY-MM-DD-<slug>/` artifact this run produced — screenshots, functional test, both reviews — is committed and pushed
 
 **Then hand off.** Say: "PR #N is ready: `<url>`." Give commits, browser test result, finding counts per review, and what is still open with its id. Then stop — **a human reads the PR from here. Never merge it.**
 

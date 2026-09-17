@@ -57,7 +57,9 @@ At the end, every artifact is markdown inside `.design/YYYY-MM-DD-<slug>/`. Noth
 
 10. **Design can change requirements — but say so out loud.** Design routinely reveals that a requirement was wrong, impossible, or more expensive than it looked. When that happens, stop, tell the user which PRD requirement is affected, and offer to amend the PRD (read `prd/SKILL.md`, Amend mode) before continuing. A design that silently contradicts its PRD leaves two documents claiming to be the scope, and the team then argues about which one counts.
 
-11. **Close the loop.** After phase 7, tell the user: "Design done. Everything is in `.design/YYYY-MM-DD-<slug>/`. Run `/build` when you're ready to implement, then `/review` when the code is ready to be checked."
+11. **Commit the folder.** `.design/YYYY-MM-DD-<slug>/` is part of the repo, not scratch — it is what a PR reviewer reads to see what the code was meant to do. When the last phase closes, commit it per `keep-it-simple` (`docs(design): <slug> brief`) and say you did. It also leaves the tree clean for `/ship`, which stops on a dirty one.
+
+12. **Close the loop.** After phase 7, tell the user: "Design done. Everything is in `.design/YYYY-MM-DD-<slug>/`. Run `/build` when you're ready to implement, then `/review` when the code is ready to be checked."
 
 ## Phase Details
 
@@ -137,5 +139,6 @@ Everything is markdown. No code files.
 - Every phase the user did not skip has produced its artifact in `.design/YYYY-MM-DD-<slug>/`
 - Nothing was implemented — this skill writes markdown only
 - Each skipped phase was skipped deliberately and the user knows which
+- The folder is committed and the working tree is clean
 
 **Then hand off.** Say: "Design done. Everything is in `.design/YYYY-MM-DD-<slug>/`." List the artifacts, then: "Next: **`/atelier:preflight`** to check the plan still matches the repo, then **`/atelier:build`** to implement — or **`/atelier:ship`** to build, test, review and open a PR in one unattended run." 
