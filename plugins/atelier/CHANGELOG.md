@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/muzalee/claude-atelier/compare/atelier-v0.5.0...atelier-v0.5.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* **atelier:** make eval graders read the code, not the write-up ([#18](https://github.com/muzalee/claude-atelier/issues/18)) ([4ce93c0](https://github.com/muzalee/claude-atelier/commit/4ce93c014ad5c7a5baea1d1411890535acb064d4))
+
 ## [0.5.0](https://github.com/muzalee/claude-atelier/compare/atelier-v0.4.0...atelier-v0.5.0) (2026-09-16)
 
 
