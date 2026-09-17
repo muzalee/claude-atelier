@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.3](https://github.com/muzalee/claude-atelier/compare/atelier-v0.6.2...atelier-v0.6.3) (2026-09-17)
+
+
+### Bug Fixes
+
+* **atelier:** make the comment rules actually bind ([#26](https://github.com/muzalee/claude-atelier/issues/26)) ([fa84903](https://github.com/muzalee/claude-atelier/commit/fa84903eb0366fccc401d535ffdbc2ac4e790933))
+
 ## [0.6.2](https://github.com/muzalee/claude-atelier/compare/atelier-v0.6.1...atelier-v0.6.2) (2026-09-17)
 
 

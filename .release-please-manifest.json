@@ -1,5 +1,5 @@
 {
-  "plugins/atelier": "0.6.2",
+  "plugins/atelier": "0.6.3",
   "plugins/atelier-typescript": "0.3.0",
   "plugins/atelier-flutter": "0.2.0"
 }
