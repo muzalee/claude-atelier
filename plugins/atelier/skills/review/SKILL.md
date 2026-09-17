@@ -1,12 +1,12 @@
 ---
 name: review
-description: Explicit-invocation-only orchestrator that runs code review + security review + design review against the built code, using `.design/<slug>/` as the source of intent when one exists — and reviewing the diff on its own merits when it doesn't. Invoked ONLY when the user types /review or explicitly asks to "run the review pipeline", "review the build", or "check the feature". For a single technical review only, use `code-review` directly. For a single visual review only, use `design-review` directly. DO NOT auto-trigger from adjacent talk about reviewing code — those have their own skills.
+description: Explicit-invocation-only orchestrator that runs code review + security review + design review against the built code, using `.design/YYYY-MM-DD-<slug>/` as the source of intent when one exists — and reviewing the diff on its own merits when it doesn't. Invoked ONLY when the user types /review or explicitly asks to "run the review pipeline", "review the build", or "check the feature". For a single technical review only, use `code-review` directly. For a single visual review only, use `design-review` directly. DO NOT auto-trigger from adjacent talk about reviewing code — those have their own skills.
 ---
 
-This skill is the **review** orchestrator. It runs three reviews — technical, security, then visual — against the code produced by `/build`, using the docs from `.design/<slug>/` as the yardstick.
+This skill is the **review** orchestrator. It runs three reviews — technical, security, then visual — against the code produced by `/build`, using the docs from `.design/YYYY-MM-DD-<slug>/` as the yardstick.
 
 The three-part pipeline:
-- `/design` — produces docs in `.design/<slug>/`.
+- `/design` — produces docs in `.design/YYYY-MM-DD-<slug>/`.
 - `/build`  — reads those docs, writes the code.
 - `/review` — this skill. Reviews the code against the docs.
 
@@ -14,7 +14,7 @@ The three-part pipeline:
 
 **Required:** code changes to review — uncommitted, a branch diff, or files the user names. If there's no diff and no target, ask which files to review.
 
-**Optional:** `.design/<slug>/` with `DESIGN_BRIEF.md`. It is the yardstick for *intent*, not a gate. Most branches don't have one, and a branch without a brief still deserves a review.
+**Optional:** `.design/YYYY-MM-DD-<slug>/` with `DESIGN_BRIEF.md`. It is the yardstick for *intent*, not a gate. Most branches don't have one, and a branch without a brief still deserves a review.
 
 **No design folder: ask, then do what they say.** Do not start a degraded review on your own judgment — the user may have meant a different slug, or may want `/design` first. State what you found and ask one question:
 
@@ -28,7 +28,7 @@ Once they say yes, run:
 - **Phase 2 (security):** unaffected. Never skipped.
 - **Phase 3 (design review):** only if the diff touches UI. With no brief or tokens spec, measure against the codebase's own tokens, components, and patterns — consistency with what's already there, plus the universals: responsive behavior, accessibility, contrast, focus states, error copy. Say you reviewed against the codebase rather than a brief.
 
-Write reports to `.design/<slug>/` when a folder exists. Otherwise put them in the scratchpad (or wherever the user says) and hand back the paths — do not create a `.design/` folder just to have somewhere to write.
+Write reports into the feature's existing design folder, under the name it already has. Otherwise put them in the scratchpad (or wherever the user says) and hand back the paths — do not create a `.design/` folder just to have somewhere to write.
 
 **Name what you could not check.** A review missing its plan-gap pass must say so, in the report, not just in chat. A report that silently omits a check reads exactly like one that ran it and found nothing — and that reader is usually future-you.
 
@@ -37,16 +37,16 @@ If the branch obviously wanted a brief that nobody wrote, say so inside the ques
 ## The Sequence
 
 ```
-1. Code Review      → .design/<slug>/CODE_REVIEW.md              (correctness / tests / clarity)
-2. Security Review  → .design/<slug>/SECURITY_REVIEW.md          (dedicated security pass)
-3. Design Review    → .design/<slug>/DESIGN_REVIEW.md + screenshots  (visual / aesthetic / responsive)
+1. Code Review      → .design/YYYY-MM-DD-<slug>/CODE_REVIEW.md              (correctness / tests / clarity)
+2. Security Review  → .design/YYYY-MM-DD-<slug>/SECURITY_REVIEW.md          (dedicated security pass)
+3. Design Review    → .design/YYYY-MM-DD-<slug>/DESIGN_REVIEW.md + screenshots  (visual / aesthetic / responsive)
 ```
 
-All three phases read from the same `.design/<slug>/` folder and write their reports back into it.
+All three phases read from the same `.design/YYYY-MM-DD-<slug>/` folder and write their reports back into it.
 
 ## Operating Rules
 
-1. **Open with a scan.** Ask (or infer) which feature slug this review is for, and list what's in `.design/<slug>/` — or say there is no design folder and this is a diff-only review. Show a git diff summary (files changed, lines added/removed). Ask which phases to run — usually all three, but any subset is fine.
+1. **Open with a scan.** Ask (or infer) which feature slug this review is for, then find its folder by globbing `.design/*<slug>*/` — matching both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones. Several match: take the most recent date and say which one you picked. List what's in it — or say there is no design folder and this is a diff-only review. Show a git diff summary (files changed, lines added/removed). Ask which phases to run — usually all three, but any subset is fine.
 
 2. **Announce each phase before entering it.** Format: "Phase N: [name]. This checks [what]. Ready?" Wait for confirmation.
 
@@ -60,15 +60,15 @@ All three phases read from the same `.design/<slug>/` folder and write their rep
 
 6. **Never silently skip the security phase.** If `security-review` is unavailable, say so plainly — "the `security-review` skill isn't available here, so this ran without a dedicated security pass" — and tell the user to update Claude Code or enable it. A review that quietly omits security reads identical to one that ran it and found nothing, which is the worst possible outcome for the reader.
 
-7. **Close the loop.** After the last phase, tell the user: "Reviews saved to `.design/<slug>/`. Address must-fix items now, or capture them as follow-ups."
+7. **Close the loop.** After the last phase, tell the user: "Reviews saved to `.design/YYYY-MM-DD-<slug>/`. Address must-fix items now, or capture them as follow-ups."
 
 ## Phase Details
 
 ### Phase 1: Code Review
 
 Read `code-review/SKILL.md` and follow it. Point it at the branch diff (or uncommitted changes, or user-named files). Give it the brief + backend brief for context so it can flag both bugs AND drift from spec.
-- **Input**: git diff + `.design/<slug>/DESIGN_BRIEF.md` + `BACKEND_DESIGN.md` + `TASKS.md` + `TEST_PLAN.md` (whichever exist) + the PRD if `docs/prd/` has one + the `errors` and `logging` conventions. `TASKS.md` matters as much as the diff here — its checkboxes and `Implemented` lines are what gaps and drift are measured against.
-- **Produces**: `.design/<slug>/CODE_REVIEW.md` with categorized findings (must-fix, should-fix, consider).
+- **Input**: git diff + `.design/YYYY-MM-DD-<slug>/DESIGN_BRIEF.md` + `BACKEND_DESIGN.md` + `TASKS.md` + `TEST_PLAN.md` (whichever exist) + the PRD if `docs/prd/` has one + the `errors` and `logging` conventions. `TASKS.md` matters as much as the diff here — its checkboxes and `Implemented` lines are what gaps and drift are measured against.
+- **Produces**: `.design/YYYY-MM-DD-<slug>/CODE_REVIEW.md` with categorized findings (must-fix, should-fix, consider).
 - **Transition**: "Code review done. Next: the dedicated security pass."
 
 ### Phase 2: Security Review
@@ -76,7 +76,7 @@ Read `code-review/SKILL.md` and follow it. Point it at the branch diff (or uncom
 Run Claude Code's built-in `security-review` skill against the same changes. This is a **dedicated pass, not a duplicate** of phase 1: `code-review`'s security checklist is a generalist sweep performed by a reviewer also thinking about naming and tests, while `security-review` looks at nothing else. The two find different things, and the overlap is cheap.
 
 - **Input**: the same diff phase 1 reviewed — pending changes on the current branch.
-- **Produces**: `.design/<slug>/SECURITY_REVIEW.md`. Save the findings there even though the skill reports inline, so the report sits with the others and a later fix pass can work from a file. **Number them `SEC-1`, `SEC-2` as you save** — `security-review` does not assign ids, and a fix pass needs them for the same reason `CR-n` and `DR-n` exist.
+- **Produces**: `.design/YYYY-MM-DD-<slug>/SECURITY_REVIEW.md`. Save the findings there even though the skill reports inline, so the report sits with the others and a later fix pass can work from a file. **Number them `SEC-1`, `SEC-2` as you save** — `security-review` does not assign ids, and a fix pass needs them for the same reason `CR-n` and `DR-n` exist.
 - **If the skill is unavailable**: do not substitute your own security opinion for it and do not skip quietly. Report it under rule 6, note that phase 1's security checklist was the only coverage, and continue.
 - **Transition**: "Security review done. Next: the design review?"
 
@@ -84,14 +84,14 @@ Run Claude Code's built-in `security-review` skill against the same changes. Thi
 
 Read `design-review/SKILL.md` and follow it. Tell it to compare against `DESIGN_BRIEF.md` and to use the philosophy + component inventory from there, plus the tokens spec. Screenshots via Playwright MCP, Cursor IDE Browser, or by asking the user.
 - **Input**: built code + `DESIGN_BRIEF.md` + `DESIGN_TOKENS.md` + `INFORMATION_ARCHITECTURE.md`.
-- **Produces**: `.design/<slug>/DESIGN_REVIEW.md` + `.design/<slug>/screenshots/`.
+- **Produces**: `.design/YYYY-MM-DD-<slug>/DESIGN_REVIEW.md` + `.design/YYYY-MM-DD-<slug>/screenshots/`.
 - **Transition**: "Both reviews complete. Must-fix items can be addressed now, or captured as follow-ups."
 
 ## Project Files Structure (after review)
 
 ```
 .design/
-└── <feature-slug>/
+└── YYYY-MM-DD-<feature-slug>/
     ├── DESIGN_BRIEF.md              ← from /design
     ├── BACKEND_DESIGN.md            ← from /design
     ├── INFORMATION_ARCHITECTURE.md  ← from /design
@@ -111,9 +111,9 @@ Read `design-review/SKILL.md` and follow it. Tell it to compare against `DESIGN_
 
 ## Done when
 
-- Every phase the user did not skip produced its report in `.design/<slug>/`
+- Every phase the user did not skip produced its report in `.design/YYYY-MM-DD-<slug>/`
 - The plan was checked against the code both ways — nothing the plan asked for is missing, nothing built went unasked
 - The security phase ran, or you said plainly that it could not
 - Nothing was edited — this skill reports only
 
-**Then hand off.** Say: "Reviews saved to `.design/<slug>/`." Give the finding counts per report and the single biggest issue, then: "Next: address the must-fix items, or capture them as follow-ups." 
+**Then hand off.** Say: "Reviews saved to `.design/YYYY-MM-DD-<slug>/`." Give the finding counts per report and the single biggest issue, then: "Next: address the must-fix items, or capture them as follow-ups." 

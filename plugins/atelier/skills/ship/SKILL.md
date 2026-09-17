@@ -1,6 +1,6 @@
 ---
 name: ship
-description: Explicit-invocation-only orchestrator that takes a feature from a completed `.design/<slug>/` folder all the way to a review-ready pull request, unattended — branch off latest main, open a draft PR, build committing per phase, functionally test the result in a real browser, run a warm review, fix, run a cold review in a fresh session against the whole PR, fix, then flip the PR to ready. Invoked ONLY when the user types /ship or explicitly asks to "ship this", "run the ship pipeline", or "build and open a PR unattended". DO NOT auto-trigger from adjacent talk about branches, PRs, building, or reviewing — those have their own skills.
+description: Explicit-invocation-only orchestrator that takes a feature from a completed `.design/YYYY-MM-DD-<slug>/` folder all the way to a review-ready pull request, unattended — branch off latest main, open a draft PR, build committing per phase, functionally test the result in a real browser, run a warm review, fix, run a cold review in a fresh session against the whole PR, fix, then flip the PR to ready. Invoked ONLY when the user types /ship or explicitly asks to "ship this", "run the ship pipeline", or "build and open a PR unattended". DO NOT auto-trigger from adjacent talk about branches, PRs, building, or reviewing — those have their own skills.
 ---
 
 This skill runs the whole delivery loop without asking permission between steps. The user typed `/ship` because they want to come back to a finished pull request, not to a question.
@@ -15,7 +15,7 @@ Where `/build` stops at working code and `/review` stops at a report, this close
 
 ## Prerequisites
 
-- `.design/<slug>/` with at minimum `DESIGN_BRIEF.md` and `TASKS.md`. This gate is real here, unlike in `/build`: ship runs unattended through build, review, fix, and PR, and every one of those stages measures against the plan. Without it there is nothing to check the work against and nothing to write a PR description from.
+- A design folder with at minimum `DESIGN_BRIEF.md` and `TASKS.md`. Find it by globbing `.design/*<slug>*/` — matching both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones; several matches, take the most recent date and say which one you picked. Every stage below reads and writes that folder under the name it already has; `/ship` never creates or renames one. This gate is real here, unlike in `/build`: ship runs unattended through build, review, fix, and PR, and every one of those stages measures against the plan. Without it there is nothing to check the work against and nothing to write a PR description from.
 
   Stop and offer the fork: `/design` if it is a feature, or `/build` then `/atelier:code-review` and a commit if it is small enough not to want a plan. Do not ship a small change through a pipeline built for features.
 - A clean working tree. Uncommitted changes would end up in the PR attributed to this run. Stop and ask.
@@ -157,15 +157,15 @@ Start the dev server first if it is not running, and shut down anything you star
 
 **What to actually test:** walk the primary user journey from the brief. For each interactive element the change touched — does it respond, does it do the right thing, does it handle the empty and invalid case. Check the browser console for errors that the happy path produced anyway.
 
-Save screenshots to `.design/<slug>/screenshots/`, and write what you exercised and what happened to `.design/<slug>/FUNCTIONAL_TEST.md`. A failure here is a finding, fixed in this stage before review — reviewing code you already know is broken wastes the review.
+Save screenshots to `.design/YYYY-MM-DD-<slug>/screenshots/`, and write what you exercised and what happened to `.design/YYYY-MM-DD-<slug>/FUNCTIONAL_TEST.md`. A failure here is a finding, fixed in this stage before review — reviewing code you already know is broken wastes the review.
 
 ## Stage 5: Warm review
 
 Read and follow, in order, against the changes on this branch:
 
-1. `code-review/SKILL.md` → `.design/<slug>/CODE_REVIEW.md`
-2. Claude Code's built-in `security-review` → `.design/<slug>/SECURITY_REVIEW.md`
-3. `design-review/SKILL.md` → `.design/<slug>/DESIGN_REVIEW.md` (skip when there is no UI)
+1. `code-review/SKILL.md` → `.design/YYYY-MM-DD-<slug>/CODE_REVIEW.md`
+2. Claude Code's built-in `security-review` → `.design/YYYY-MM-DD-<slug>/SECURITY_REVIEW.md`
+3. `design-review/SKILL.md` → `.design/YYYY-MM-DD-<slug>/DESIGN_REVIEW.md` (skip when there is no UI)
 
 Run the three skills directly rather than the `/review` orchestrator — it gates on confirmation between phases, which is correct for interactive use and wrong here.
 
@@ -192,7 +192,7 @@ The point of a cold review is that it has no idea what you meant. A reviewer who
 
 **Spawn a subagent with no context from this conversation.** Give it only:
 
-- the **full PR diff** — every change in the PR, not just the most recent phase. **Paste the output of `gh pr diff <number>` into the instruction** rather than telling the agent to run it. Where no PR exists (no remote), paste `git diff main...HEAD` instead — the point is the complete set of changes, not the transport. An agent with a shell will also reach `git log`, the commit messages, and the warm `CODE_REVIEW.md` sitting in the same design folder — and arrives warm, having defeated the entire stage. Tell it explicitly not to read git history or the rest of `.design/<slug>/`.
+- the **full PR diff** — every change in the PR, not just the most recent phase. **Paste the output of `gh pr diff <number>` into the instruction** rather than telling the agent to run it. Where no PR exists (no remote), paste `git diff main...HEAD` instead — the point is the complete set of changes, not the transport. An agent with a shell will also reach `git log`, the commit messages, and the warm `CODE_REVIEW.md` sitting in the same design folder — and arrives warm, having defeated the entire stage. Tell it explicitly not to read git history or the rest of `.design/YYYY-MM-DD-<slug>/`.
 - the **PR title and description**, labelled as *an unverified claim about the code, not a specification*. That label is what stops the reviewer "fixing" correct code to match a stale sentence.
 - the design brief as the statement of intent, and the PRD if one exists — say so plainly when there is none rather than implying it is required.
 - the instruction to read `code-review/SKILL.md` and follow it, then run `security-review`.
@@ -209,7 +209,7 @@ Findings from this stage are numbered `CCR-n` and `CSEC-n` — the cold prefix k
 
 **It reviews the PR text too, not only the code.** A title that describes something other than what shipped, or a description that no longer matches the diff, is a finding — it is what every future reader sees first, and a wrong one sends them into the code with the wrong model. 
 
-Save to `.design/<slug>/COLD_REVIEW.md`.
+Save to `.design/YYYY-MM-DD-<slug>/COLD_REVIEW.md`.
 
 ## Stage 8: Fix the cold findings, then flip to ready
 
@@ -223,7 +223,7 @@ If a security must-fix appeared in the cold review and could not be fixed, **lea
 
 ## What this skill is not
 
-- Not a designer. `.design/<slug>/` must already exist; `/ship` implements it.
+- Not a designer. `.design/YYYY-MM-DD-<slug>/` must already exist; `/ship` implements it.
 - Not a merge. It hands over a PR for a human to read; it never merges and never pushes to main.
 - Not a replacement for `/build` or `/review` alone — reach for those when you want to stop after one of them.
 - Not a wrapper. Every stage runs the real `SKILL.md` of the skill it names, in full.

@@ -42,17 +42,21 @@ This skill creates a design brief through structured conversation. You may skip 
 
 ## File Output
 
-Save the brief to `.design/<feature-slug>/DESIGN_BRIEF.md` where `<feature-slug>` is a short, lowercase, hyphenated name derived from the feature or page being designed (e.g., `onboarding-flow`, `settings-page`, `project-dashboard`).
+Save the brief to `.design/YYYY-MM-DD-<feature-slug>/DESIGN_BRIEF.md` where `<feature-slug>` is a short, lowercase, hyphenated name derived from the feature or page being designed (e.g., `onboarding-flow`, `settings-page`, `project-dashboard`).
 
-This folder structure ensures that running the design flow multiple times for different features does not overwrite previous work. All subsequent skills (information-architecture, design-tokens, brief-to-tasks, design-review) will read from and write to this same subfolder.
+**This skill picks the date, and it is the only one that does.** Read today's date from the environment — run `date +%F` — and use it verbatim. Never guess it, never reuse a date from an example. Once the folder exists the date is frozen: it records when the design started, not when it was last touched.
+
+Before creating anything, glob `.design/*<feature-slug>*/`. If a folder for this feature already exists — dated or a legacy bare `.design/<feature-slug>/` from before this convention — write into it as it is named. Do not mint a second folder and do not rename the existing one.
+
+This folder structure ensures that running the design flow multiple times for different features does not overwrite previous work. All subsequent skills (information-architecture, design-tokens, brief-to-tasks, design-review) discover this folder by globbing and write into it — they never create their own.
 
 Example:
 
 ```
 .design/
-├── onboarding-flow/
+├── 2026-09-20-onboarding-flow/
 │   └── DESIGN_BRIEF.md
-└── settings-page/
+└── 2026-09-21-settings-page/
     └── DESIGN_BRIEF.md
 ```
 
@@ -121,9 +125,9 @@ Things this brief explicitly does not cover. Be specific. This prevents scope cr
 
 ## Done when
 
-- The brief is saved at `.design/<slug>/DESIGN_BRIEF.md`
+- The brief is saved at `.design/YYYY-MM-DD-<slug>/DESIGN_BRIEF.md`
 - The `<slug>` is locked — every later phase writes into this same folder
 - Out of Scope is specific, not "polish and extras"
 - The aesthetic direction names something concrete enough to build from
 
-**Then hand off.** Say: "Brief saved to `.design/<slug>/DESIGN_BRIEF.md`." Then: "Next: **`/atelier:backend-design`** if this needs server work, otherwise **`/atelier:information-architecture`**." 
+**Then hand off.** Say: "Brief saved to `.design/YYYY-MM-DD-<slug>/DESIGN_BRIEF.md`." Then: "Next: **`/atelier:backend-design`** if this needs server work, otherwise **`/atelier:information-architecture`**." 

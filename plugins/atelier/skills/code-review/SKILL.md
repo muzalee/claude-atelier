@@ -96,7 +96,7 @@ Reviews **changed code only** by default (uncommitted + last-N commits since bra
    - Duplication of logic that already exists elsewhere in the codebase
    - Over-abstraction: interfaces / factories for something with one caller
 
-   **Plan gap and plan drift** (when `.design/<slug>/` or `docs/prd/` exists)
+   **Plan gap and plan drift** (when `.design/YYYY-MM-DD-<slug>/` or `docs/prd/` exists)
 
    Read `TASKS.md`, the brief, `TEST_PLAN.md`, and the PRD, and compare them against what the diff actually does. Two failures, opposite directions, both invisible in a pure code read:
 
@@ -177,9 +177,9 @@ Always include a "What's good" section if there's something worth noting. A revi
 ## Done when
 
 - Every finding cites `file:line` and carries a `CR-n` id
-- The plan was checked for gaps and drift where `.design/<slug>/` or `docs/prd/` exists — a checked-off task with no code, and code no task asked for, are both findings
+- The plan was checked for gaps and drift where `.design/YYYY-MM-DD-<slug>/` or `docs/prd/` exists — a checked-off task with no code, and code no task asked for, are both findings
 - Findings are bucketed must-fix / should-fix / consider
-- The report is saved to `.design/<slug>/CODE_REVIEW.md` when a design folder exists
+- The report is saved as `CODE_REVIEW.md` in the feature's design folder when one exists — found by globbing `.design/*/` (matching both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones; most recent date wins, say which) and written to under the name it already has, never a folder you created
 - "What's good" is filled in — a review that only lists problems is unbalanced
 
 **Then hand off.** Say: "Code review done: N must-fix, N should-fix." Name the single biggest issue, then: "Next: fix the must-fix items, or **`/atelier:design-review`** for the visual pass." 

@@ -14,7 +14,7 @@ This skill defines the structural skeleton of a product or site. It sits between
 
 ## Process
 
-1. Look for an existing design brief at `.design/*/DESIGN_BRIEF.md`. If multiple subfolders exist, use the most recently modified one, or ask the user which feature they are working on. If no brief exists, ask the user what they are building and for whom.
+1. Look for an existing design brief at `.design/*/DESIGN_BRIEF.md` — the glob matches both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones. If several match, take the most recent date (undated folders sort oldest) and say which folder you picked. Reuse that name verbatim — never create a new dated folder, never rename an existing one. Or ask the user which feature they are working on. If no brief exists, ask the user what they are building and for whom.
 
 2. Explore the existing codebase to understand what structure already exists:
    - **Routing**: Next.js `app/` or `pages/` directory, React Router config, Vue Router, SvelteKit routes, or static HTML page files
@@ -34,7 +34,7 @@ This skill defines the structural skeleton of a product or site. It sits between
    - Are there distinct user types who need different entry points?
    - What is the one page/view where the user spends 80% of their time?
 
-4. Once you have a shared understanding, produce the IA document using the template below and save it as `INFORMATION_ARCHITECTURE.md` in the same `.design/<feature-slug>/` subfolder as the design brief.
+4. Once you have a shared understanding, produce the IA document using the template below and save it as `INFORMATION_ARCHITECTURE.md` in the same subfolder as the design brief — the one you discovered in step 1, under the name it already has.
 
 ## IA Document Template
 
@@ -112,8 +112,8 @@ Rules for URL construction:
 
 ## Done when
 
-- The IA is saved at `.design/<slug>/INFORMATION_ARCHITECTURE.md`
+- The IA is saved at `.design/YYYY-MM-DD-<slug>/INFORMATION_ARCHITECTURE.md`
 - Navigation, URL patterns, and the primary user flows are all named
 - The flows match the endpoints in `BACKEND_DESIGN.md` where one exists
 
-**Then hand off.** Say: "IA saved to `.design/<slug>/INFORMATION_ARCHITECTURE.md`." Then: "Next: **`/atelier:design-tokens`** to derive the visual system, or skip it if this project already has one." 
+**Then hand off.** Say: "IA saved to `.design/YYYY-MM-DD-<slug>/INFORMATION_ARCHITECTURE.md`." Then: "Next: **`/atelier:design-tokens`** to derive the visual system, or skip it if this project already has one." 

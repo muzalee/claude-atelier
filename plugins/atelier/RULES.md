@@ -9,7 +9,7 @@ If a task maps to an atelier skill, use it — don't reinvent it in freeform:
 - Defining what an initiative is and is not (scope, requirements, success metrics) → `/atelier:prd`
 - Planning a new feature end-to-end → `/atelier:design`
 - Checking whether an existing plan still matches the repo → `/atelier:preflight`
-- Implementing from a completed `.design/<slug>/` → `/atelier:build`
+- Implementing from a completed `.design/YYYY-MM-DD-<slug>/` → `/atelier:build`
 - Reviewing built code against the design → `/atelier:review`
 - Taking a design all the way to a review-ready PR, unattended → `/atelier:ship`
 - Scaffolding a fresh repo → `/atelier:bootstrap`
@@ -25,7 +25,7 @@ State which skill you're about to run before running it, so the user can redirec
 Two atelier skills share a name with something else that may be installed:
 
 - **`design`** — collides with Claude Code's built-in design-canvas skill and with `ui-ux-pro-max:design`. Always invoke the orchestrator as `/atelier:design`. A bare `/design` is ambiguous and may open a canvas instead.
-- **`ui-build`** — renamed from `frontend-design` for exactly this reason; Anthropic ships an official `frontend-design`. If a user says "frontend-design" they may mean either, so ask which when a `.design/<slug>/` folder is in play.
+- **`ui-build`** — renamed from `frontend-design` for exactly this reason; Anthropic ships an official `frontend-design`. If a user says "frontend-design" they may mean either, so ask which when a `.design/YYYY-MM-DD-<slug>/` folder is in play.
 
 ## 3. Never paraphrase a skill
 
@@ -33,8 +33,8 @@ When executing an atelier skill, read its `SKILL.md` and follow it end to end. D
 
 ## 4. Boundaries are hard
 
-- `/atelier:design` and its phases produce **markdown only** in `.design/<slug>/`. No code.
-- `/atelier:build` produces **code**, reading `.design/<slug>/` for intent.
+- `/atelier:design` and its phases produce **markdown only** in `.design/YYYY-MM-DD-<slug>/`. No code.
+- `/atelier:build` produces **code**, reading `.design/YYYY-MM-DD-<slug>/` for intent.
 - `/atelier:review` produces a **report**, editing nothing.
 
 If a user request would cross a boundary mid-skill (e.g. asks you to code during `/design`), pause, name the boundary, and offer to close the current phase before switching modes.
@@ -49,11 +49,11 @@ The user chose `/design` when they wanted to think, and `/build` when they wante
 
 ## 6. Resume, don't restart
 
-On re-invocation of an orchestrator, if `.design/<slug>/` already contains artifacts, list what exists and offer to resume from the next incomplete phase. Never restart from phase 1 without asking.
+On re-invocation of an orchestrator, if `.design/YYYY-MM-DD-<slug>/` already contains artifacts, list what exists and offer to resume from the next incomplete phase. Never restart from phase 1 without asking.
 
 ## 7. The PRD outranks the design docs on scope
 
-If `docs/prd/` holds a PRD for the initiative, it is the scope contract. `.design/<slug>/` decides *how*; the PRD decides *what* and *whether*. When design or build discovers that a requirement is wrong, infeasible, or newly out of scope, amend the PRD (`prd` skill, Amend mode) rather than letting the brief quietly disagree with it. Two documents claiming to define scope is worse than one imperfect one.
+If `docs/prd/` holds a PRD for the initiative, it is the scope contract. `.design/YYYY-MM-DD-<slug>/` decides *how*; the PRD decides *what* and *whether*. When design or build discovers that a requirement is wrong, infeasible, or newly out of scope, amend the PRD (`prd` skill, Amend mode) rather than letting the brief quietly disagree with it. Two documents claiming to define scope is worse than one imperfect one.
 
 ## 8. House conventions bind the code
 
@@ -83,3 +83,12 @@ Two rules about the handoff:
 ## 11. Ambient talk ≠ invocation
 
 The user can discuss design, briefs, tokens, IA, tasks without triggering `/design`. Only fire an orchestrator on explicit invocation (`/design`, "run the design pipeline", etc.). This mirrors each orchestrator's own `description` gating.
+
+## 12. Date the design folder once, then discover it
+
+Design folders are `.design/YYYY-MM-DD-<slug>/`, where the date is the day the folder was first created and never changes.
+
+- **Only the skill that creates the folder picks the date** — `design-brief`, or `backend-design` when it runs standalone with no brief present. Take the date from the environment (`date +%F`), never from memory.
+- **Every other skill discovers the folder** by globbing `.design/*<slug>*/` (or `.design/*/` when no slug is known yet) and reuses the matched name verbatim. Never mint a new date for an existing feature, never rename a folder on disk.
+- **Several matches for one slug** → take the most recent date and say out loud which folder you picked.
+- **Folders from before this convention have no date prefix.** `.design/<slug>/` is still valid and still matched by those globs. Leave them as they are.

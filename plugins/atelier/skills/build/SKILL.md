@@ -1,18 +1,18 @@
 ---
 name: build
-description: Explicit-invocation-only orchestrator that reads a completed `.design/<slug>/` folder and implements the code — frontend + backend — autonomously, without per-phase confirmation. All decisions were made in `/design`; this skill executes them. Invoked ONLY when the user types /build or explicitly asks to "build from the design", "implement the design", "code the feature from the brief", or "run the build pipeline". DO NOT auto-trigger from adjacent talk about writing frontend or backend code — those have their own skills. Works best from a `.design/<slug>/` folder produced by `/design`; without one it asks whether to build directly or run `/design` first, and does whichever the user picks.
+description: Explicit-invocation-only orchestrator that reads a completed `.design/YYYY-MM-DD-<slug>/` folder and implements the code — frontend + backend — autonomously, without per-phase confirmation. All decisions were made in `/design`; this skill executes them. Invoked ONLY when the user types /build or explicitly asks to "build from the design", "implement the design", "code the feature from the brief", or "run the build pipeline". DO NOT auto-trigger from adjacent talk about writing frontend or backend code — those have their own skills. Works best from a `.design/YYYY-MM-DD-<slug>/` folder produced by `/design`; without one it asks whether to build directly or run `/design` first, and does whichever the user picks.
 ---
 
 This skill is the **build** orchestrator. It takes the design docs produced by `/design` and turns them into working code. Two phases, executed back-to-back without confirmation gates — the design phase was the interactive one, this phase just delivers.
 
 The three-part pipeline:
-- `/design` — produces docs in `.design/<slug>/`.
+- `/design` — produces docs in `.design/YYYY-MM-DD-<slug>/`.
 - `/build`  — this skill. Reads those docs, writes the code.
 - `/review` — reviews the code against the docs.
 
 ## Prerequisite
 
-`.design/<slug>/` with at minimum `DESIGN_BRIEF.md` is what this skill is built for: a brief, tasks, and optionally a backend brief + tokens spec.
+`.design/YYYY-MM-DD-<slug>/` with at minimum `DESIGN_BRIEF.md` is what this skill is built for: a brief, tasks, and optionally a backend brief + tokens spec.
 
 **No design folder: ask, then do what they say.** Do not decide this on your own, in either direction — not by refusing, and not by judging the change small enough to wave through. The user knows whether this needs a plan; you are guessing.
 
@@ -44,7 +44,7 @@ Skip either phase if the design didn't include it (e.g. no `BACKEND_DESIGN.md` �
 
 ## Operating Rules
 
-1. **Open with a scan, then proceed.** Auto-detect the slug: if exactly one folder exists under `.design/`, use it; if several, ask once which one. List the artifacts present in `.design/<slug>/` and state which phases will run (frontend if `TASKS.md` exists, backend if `BACKEND_DESIGN.md` exists — skip absent ones). Do not ask permission — the user asked for a build.
+1. **Open with a scan, then proceed.** Discover the design folder — glob `.design/*/`, which matches both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones. Exactly one: use it. Several: ask once which one, listing them newest date first. Whichever you land on, reuse its name verbatim for every read and write — this skill never creates or renames a design folder. Name the folder you picked, list the artifacts present in it, and state which phases will run (frontend if `TASKS.md` exists, backend if `BACKEND_DESIGN.md` exists — skip absent ones). Do not ask permission — the user asked for a build.
 
    No `.design/` at all: ask the Prerequisite question and wait. The scan is still worth doing first — say which files the ask touches and which decisions are unsettled, so the question is one they can actually answer.
 
@@ -58,7 +58,7 @@ Skip either phase if the design didn't include it (e.g. no `BACKEND_DESIGN.md` �
 
 6. **Only stop on real blockers.** A blocker is: the design docs contradict the codebase in a way the brief didn't resolve, a required dependency isn't available and the fallback isn't obvious, a migration would be destructive to existing data, or a check fails and the fix isn't within scope. Chatty check-ins are not blockers — the design phase already answered "should we do this?".
 
-7. **The PRD is scope, not a suggestion.** If `.design/<slug>/` or `docs/prd/` names a PRD, read it. When the build has to deviate from a stated requirement — a MUST turns out to be infeasible, a non-goal turns out to be unavoidable — that is a real blocker under rule 6. Stop, name the requirement ID, and offer to amend the PRD (read `prd/SKILL.md`, Amend mode). Shipping code that contradicts the PRD is how the document dies.
+7. **The PRD is scope, not a suggestion.** If `.design/YYYY-MM-DD-<slug>/` or `docs/prd/` names a PRD, read it. When the build has to deviate from a stated requirement — a MUST turns out to be infeasible, a non-goal turns out to be unavoidable — that is a real blocker under rule 6. Stop, name the requirement ID, and offer to amend the PRD (read `prd/SKILL.md`, Amend mode). Shipping code that contradicts the PRD is how the document dies.
 
 8. **House conventions bind the code you write.** Before writing anything, load the conventions that apply to this repo (see [House Conventions](#house-conventions) below) and follow them. They are not suggestions to weigh against convenience — they are the standards the review phase measures against, so code that ignores them comes back as findings and gets written twice.
 
@@ -104,13 +104,13 @@ A finding you disagree with is not a finding you ignore. Say why you think it is
 
 ## Reading the test plan
 
-If `.design/<slug>/TEST_PLAN.md` exists, read it before writing any tests. It already names the cases, the level each belongs at, what to break to prove them, and — as usefully — what not to test. Writing tests without it means re-deriving all of that from the brief, badly, and usually over-covering the easy paths while missing the failure modes somebody already thought through.
+If `.design/YYYY-MM-DD-<slug>/TEST_PLAN.md` exists, read it before writing any tests. It already names the cases, the level each belongs at, what to break to prove them, and — as usefully — what not to test. Writing tests without it means re-deriving all of that from the brief, badly, and usually over-covering the easy paths while missing the failure modes somebody already thought through.
 
 Where `TASKS.md` attaches cases to tasks, those are the same cases: `brief-to-tasks` carried them over. Read the plan anyway for the "what NOT to test" section, which does not survive that trip.
 
 ## Reading the preflight report
 
-If `.design/<slug>/PREFLIGHT.md` exists, read it before the first task. `/preflight` fixes what it can and asks the user about the rest, so that file holds decisions the plan itself may not show — a gate the user answered, an assumption they confirmed, a step it rewrote and why.
+If `.design/YYYY-MM-DD-<slug>/PREFLIGHT.md` exists, read it before the first task. `/preflight` fixes what it can and asks the user about the rest, so that file holds decisions the plan itself may not show — a gate the user answered, an assumption they confirmed, a step it rewrote and why.
 
 Where it and `TASKS.md` disagree, the plan file wins: preflight edits the plan, so a live disagreement means the report is describing an edit that did not land, and that is worth saying out loud before building on it.
 
@@ -154,7 +154,7 @@ Where a skill's convention and the existing codebase disagree, **the codebase wi
 
 **Before running `ui-build`, materialize the token spec if needed.**
 
-If `.design/<slug>/DESIGN_TOKENS.md` exists AND the project has no existing token file (no `tokens.css`, no populated `theme.extend`, no `theme.ts` from a prior pass), translate the spec into the project's stack-appropriate format:
+If `.design/YYYY-MM-DD-<slug>/DESIGN_TOKENS.md` exists AND the project has no existing token file (no `tokens.css`, no populated `theme.extend`, no `theme.ts` from a prior pass), translate the spec into the project's stack-appropriate format:
 
 - Tailwind project → extend `tailwind.config.js` (colors, spacing, fontFamily, etc.) AND write CSS variables to `globals.css` for anything that needs runtime theming.
 - Plain CSS/HTML → write to `tokens.css`, imported by the root stylesheet.
@@ -171,7 +171,7 @@ Then read `ui-build/SKILL.md` and follow it. Work through the frontend tasks in 
 
 ### Phase 2: Backend Build
 
-Read `backend-build/SKILL.md` and follow it. Hand it `.design/<slug>/BACKEND_DESIGN.md` as the source of truth.
+Read `backend-build/SKILL.md` and follow it. Hand it `.design/YYYY-MM-DD-<slug>/BACKEND_DESIGN.md` as the source of truth.
 
 - **Input**: `BACKEND_DESIGN.md` + existing codebase.
 - **Produces**: server code (routes, plugins, migrations, tests) — build + tests passing.
