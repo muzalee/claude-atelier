@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/muzalee/claude-atelier/compare/atelier-v0.5.1...atelier-v0.6.0) (2026-09-17)
+
+
+### Features
+
+* **atelier:** date-prefix design folders ([#20](https://github.com/muzalee/claude-atelier/issues/20)) ([5c64c2a](https://github.com/muzalee/claude-atelier/commit/5c64c2aa2d805cc7fe881b84f50b51e9cfa6304e))
+
 ## [0.5.1](https://github.com/muzalee/claude-atelier/compare/atelier-v0.5.0...atelier-v0.5.1) (2026-09-17)
 
 
