@@ -26,7 +26,7 @@ The three-part pipeline:
 
 Once they say yes, run:
 
-- **Phase 1 (code review):** everything except plan gap and plan drift, which have nothing to measure against. The conventions (`errors`, `logging`) still bind — those live in the skills, not in the brief, so they are checked either way.
+- **Phase 1 (code review):** everything except plan gap and plan drift, which have nothing to measure against. The conventions (`errors`, `logging`, `keep-it-simple`) still bind — those live in the skills, not in the brief, so they are checked either way.
 - **Phase 2 (security):** unaffected. Never skipped.
 - **Phase 3 (design review):** only if the diff touches UI. With no design file, measure against the codebase's own tokens, components, and patterns — consistency with what's already there, plus the universals: responsive behavior, accessibility, contrast, focus states, error copy. Say you reviewed against the codebase rather than a design.
 
@@ -53,7 +53,7 @@ All three read the same `.design/YYYY-MM-DD-<slug>.md` for intent and write noth
 3. **Run each phase by reading its SKILL.md and following it in full.**
 
 4. **Thread the design docs into each phase.**
-   - Before phase 1, hand `code-review` the design file and the PRD, so it can flag drift from spec (an endpoint shape that doesn't match `## Architecture`), plan gaps (a task ticked with nothing implementing it), and plan drift (code no task asked for). `## Implementation` matters as much as `## Tasks` here. `code-review` loads the `errors` and `logging` conventions itself — the same two `/build` wrote against — so the error and log contract is checked, not assumed.
+   - Before phase 1, hand `code-review` the design file and the PRD, so it can flag drift from spec (an endpoint shape that doesn't match `## Architecture`), plan gaps (a task ticked with nothing implementing it), and plan drift (code no task asked for). `## Implementation` matters as much as `## Tasks` here. `code-review` loads the `errors`, `logging` and `keep-it-simple` conventions itself — the same three `/build` wrote against — so the error contract, the log contract and the comment rules are checked, not assumed.
    - Before phase 3, hand `design-review` the `## Experience` and `## Tokens` sections so it can measure the built UI against the named philosophy and token roles.
 
 5. **End each phase with a checkpoint.** Give the count of findings by severity and the biggest single issue. Then ask: "Address any must-fix items now, or continue?"
@@ -67,7 +67,7 @@ All three read the same `.design/YYYY-MM-DD-<slug>.md` for intent and write noth
 ### Phase 1: Code Review
 
 Read `code-review/SKILL.md` and follow it. Point it at the branch diff (or uncommitted changes, or user-named files). Give it the design file for context so it can flag both bugs AND drift from spec.
-- **Input**: git diff + `.design/YYYY-MM-DD-<slug>.md` (whichever sections are filled) + the PRD if `docs/prd/` has one + the `errors` and `logging` conventions. `## Tasks` and `## Implementation` matter as much as the diff here — the ticked boxes and the implementation lines are what gaps and drift are measured against.
+- **Input**: git diff + `.design/YYYY-MM-DD-<slug>.md` (whichever sections are filled) + the PRD if `docs/prd/` has one + the `errors`, `logging` and `keep-it-simple` conventions. `## Tasks` and `## Implementation` matter as much as the diff here — the ticked boxes and the implementation lines are what gaps and drift are measured against.
 - **Produces**: `CR-n` findings, printed, categorized must-fix / should-fix / consider. No file.
 - **Transition**: "Code review done: N must-fix, N should-fix. Next: the dedicated security pass."
 
