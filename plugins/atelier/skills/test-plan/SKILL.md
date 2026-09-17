@@ -1,6 +1,6 @@
 ---
 name: test-plan
-description: Write a short test plan for a change before implementing — name the cases that must pass, the level each should live at (unit / integration / e2e), what to break to prove them, and what NOT to test. Saves to `.design/YYYY-MM-DD-<slug>/TEST_PLAN.md` when a `.design/YYYY-MM-DD-<slug>/` folder exists (invoked from `/design` or standalone in a design-driven project); otherwise outputs inline. Use before starting non-trivial work, when asked for a "test plan", when reviewing a PR to sanity-check coverage, or as part of the `/design` pipeline.
+description: Write a short test plan for a change before implementing — name the cases that must pass, the level each should live at (unit / integration / e2e), what to break to prove them, and what NOT to test. Fills the `## Tests` section of the feature's `.design/YYYY-MM-DD-<slug>.md` when one exists (invoked from `/design` or standalone in a design-driven project); otherwise outputs inline. Use before starting non-trivial work, when asked for a "test plan", when reviewing a PR to sanity-check coverage, or as part of the `/design` pipeline.
 ---
 
 Before writing code (or before a PR ships), name the cases that must pass — and the *level* they should live at. Picking the wrong level catches bugs but wastes weeks maintaining flaky fake tests.
@@ -32,7 +32,7 @@ Before writing code (or before a PR ships), name the cases that must pass — an
    - Cases where the type system already guarantees the invariant
    - Third-party services (mock the boundary at the highest level, don't retest the vendor)
 
-6. **Save the plan.** Glob `.design/*/` for the feature's folder — the glob matches both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones. If one exists (invoked from `/design`, or the project uses design folders), write `TEST_PLAN.md` into it under the name it already has; say which folder you picked when several match, taking the most recent date. Do not create a design folder just to have somewhere to write — with none, output inline.
+6. **Write the plan into `## Tests`.** Find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). Write the cases into that file's `## Tests` section; in a legacy six-file folder, write `TEST_PLAN.md` beside the old files as before. Do not create a design file just to have somewhere to write — with none, output inline.
 
 ## Test level guide
 
@@ -67,14 +67,11 @@ Tooling options, roughly in order of preference for CI:
 
 ## Output shape
 
-Short markdown, no template ceremony:
+Short markdown, no template ceremony. One case per line, then what you are not testing. **Reference the interactions named in `## Experience` and the failure modes named in `## Architecture` rather than describing them again** — a case that re-tells the interaction is the same decision written twice.
 
 ```markdown
-# Test Plan: [change name]
+## Tests
 
-**What it does**: [one sentence]
-
-## Cases
 - [unit] happy: valid input → returns X
 - [unit] rejects malformed body → 400 with field-level error
 - [integration] token expired → 401, no DB write
@@ -83,7 +80,7 @@ Short markdown, no template ceremony:
   _Walk through with Claude Chrome extension before writing the Playwright case._
 - [regression] existing GET /users still returns unchanged shape
 
-## Not testing
+### Not testing
 - Fastify JSON parsing (framework)
 - Third-party JWT library internals (mocked at boundary)
 - Every combinatoric field of the form (integration + property test if it matters)
@@ -100,10 +97,10 @@ Short markdown, no template ceremony:
 
 ## Read before writing
 
-The failure modes worth testing live in the design docs, not in your imagination. Where a `.design/YYYY-MM-DD-<slug>/` folder exists, read first:
+The failure modes worth testing live in the design file, not in your imagination. Where one exists, read first:
 
-- **`DESIGN_BRIEF.md`** — the Key Interactions are the e2e cases, and Out of Scope tells you what not to cover.
-- **`BACKEND_DESIGN.md`** — the invariants, failure modes, and consistency model are the integration cases. Its Failure Modes table is close to a test list already.
+- **`## Experience`** — the key interactions are the e2e cases, and `## Scope`'s out-of-scope list tells you what not to cover.
+- **`## Architecture`** — the invariants and failure modes are the integration cases. The failure modes list is close to a test list already.
 - **`docs/prd/NNNN-*.md`** — every `FR-n` and `NFR-n` is a requirement someone agreed to. A MUST with no test is a shippable bar nothing checks.
 
 Cite what each case comes from. A case traced to `FR-3` or to a named failure mode survives the argument about whether it is worth writing; one that came from nowhere does not.
@@ -111,8 +108,8 @@ Cite what each case comes from. A case traced to `FR-3` or to a named failure mo
 ## Done when
 
 - The plan names each case, the level it lives at, and what to break to prove it
-- Cases trace back to the brief's interactions, the backend brief's failure modes, or a PRD requirement id
+- Cases trace back to an interaction in `## Experience`, a failure mode in `## Architecture`, or a PRD requirement id — by reference, not by restating them
 - It says what NOT to test, so the build does not gold-plate coverage
-- Saved to `.design/YYYY-MM-DD-<slug>/TEST_PLAN.md` when a design folder exists
+- Written into `## Tests` in `.design/YYYY-MM-DD-<slug>.md` when a design file exists, inline when none does
 
-**Then hand off.** Say: "Test plan saved to `.design/YYYY-MM-DD-<slug>/TEST_PLAN.md`." Then: "Next: **`/atelier:brief-to-tasks`** to turn all of this into an ordered build checklist." 
+**Then hand off.** Say: "Tests written to `.design/YYYY-MM-DD-<slug>.md`." Then: "Next: **`/atelier:brief-to-tasks`** to turn all of this into an ordered build checklist."

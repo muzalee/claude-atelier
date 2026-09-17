@@ -1,20 +1,20 @@
 ---
 name: backend-build
-description: Implement the backend from a BACKEND_DESIGN.md brief — set up plugins, database, routes, tests, and wire everything into the server entry. Biased toward Fastify + Node. Use when user says "build the backend", "implement the server", "code the API from the brief", or after running /backend-design.
+description: Implement the backend from the design file's `## Architecture` section — set up plugins, database, routes, tests, and wire everything into the server entry. Biased toward Fastify + Node. Use when user says "build the backend", "implement the server", "code the API from the brief", or after running /backend-design.
 ---
 
-Turn a `BACKEND_DESIGN.md` brief into a working backend. Read the brief first, follow its decisions, don't invent architecture the brief didn't decide.
+Turn the design file's `## Architecture` section into a working backend. Read it first, follow its decisions, don't invent architecture it didn't decide.
 
 ## Example prompts
 
 - "Build the backend from the brief"
 - "Implement the notifications service"
-- "Code the API defined in BACKEND_DESIGN.md"
+- "Code the API defined in the design file"
 - "Start building the server for checkout"
 
 ## Prerequisites
 
-- A `BACKEND_DESIGN.md` file in the feature's design folder, found by globbing `.design/*/BACKEND_DESIGN.md` — matching both dated `.design/YYYY-MM-DD-<feature-slug>/` folders and legacy undated `.design/<feature-slug>/` ones (produced by `/backend-design`). Several match: take the most recent date and say which. Write back only into that folder, under the name it already has.
+- A filled `## Architecture` section in the feature's design file. Find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). In a legacy six-file folder that section is `BACKEND_DESIGN.md`. Write back only into the file you found, under the name it already has.
 - If none exists, stop and tell the user to run `/backend-design` first — this skill needs a brief, not a vibe.
 
 ## Process
@@ -84,8 +84,8 @@ Turn a `BACKEND_DESIGN.md` brief into a working backend. Read the brief first, f
 ## Done when
 
 - Every route in the API table exists with its schema, and the tests for them pass
-- `TASKS.md` records what each task produced: an `Implemented` line naming the files, and a `Note` line for any decision the diff cannot explain
-- Tests cover the cases named in `TEST_PLAN.md`, and nothing it listed as not worth testing
+- `## Implementation` records what each task produced: the files, and any decision the diff cannot explain
+- Tests cover the cases named in `## Tests`, and nothing its "Not testing" list ruled out
 - Migrations run and are reversible
 - Errors and logging follow the `errors` and `logging` skills, not a local pattern
 - No historical comments anywhere in the code

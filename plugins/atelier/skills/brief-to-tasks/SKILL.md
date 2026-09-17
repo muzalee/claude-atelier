@@ -1,9 +1,9 @@
 ---
 name: brief-to-tasks
-description: Break a design brief into an ordered checklist of independently buildable tasks using vertical slices. Saves as a markdown checklist. Use when user wants to break down work, create tasks from a brief, plan implementation order, or mentions "tasks" or "breakdown".
+description: Break a design into an ordered checklist of independently buildable tasks using vertical slices. Fills the `## Tasks` section of the feature's `.design/YYYY-MM-DD-<slug>.md`. Use when user wants to break down work, create tasks from a brief, plan implementation order, or mentions "tasks" or "breakdown".
 ---
 
-This skill turns a design brief into an ordered, buildable task list. Each task is a vertical slice: a piece of UI that can be built, reviewed, and verified on its own.
+This skill turns a design into an ordered, buildable task list, written into the `## Tasks` section of the feature's `.design/YYYY-MM-DD-<slug>.md`. Each task is a vertical slice: a piece of UI that can be built, reviewed, and verified on its own.
 
 ## Example prompts
 
@@ -14,7 +14,7 @@ This skill turns a design brief into an ordered, buildable task list. Each task 
 
 ## Process
 
-1. Read the design brief. Look for `.design/*/DESIGN_BRIEF.md` — the glob matches both dated `.design/YYYY-MM-DD-<slug>/` folders and legacy undated `.design/<slug>/` ones. If several match, take the most recent date (undated folders sort oldest) and say which folder you picked, or ask the user which feature they are working on. Reuse that folder name verbatim for everything you write — never create a new dated folder, never rename an existing one. Also check for `INFORMATION_ARCHITECTURE.md`, a tokens file, and `TEST_PLAN.md` in the same subfolder. If `TEST_PLAN.md` exists, its cases become test tasks alongside the implementation work — one task per meaningful assertion, grouped in the "Tests" section (see template below). If none exist, ask the user to describe what they are building.
+1. Read the design. Find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). Read every section already filled — `## Problem`, `## Solution`, `## Scope`, `## Experience`, `## Architecture`, `## Structure`, `## Tokens`, `## Tests`. The cases in `## Tests` become test tasks alongside the implementation work: one task per meaningful assertion, grouped in the "Tests" group below. In a legacy six-file folder, read `DESIGN_BRIEF.md` / `INFORMATION_ARCHITECTURE.md` / `DESIGN_TOKENS.md` / `TEST_PLAN.md` and write `TASKS.md` beside them as before. If nothing exists, ask the user to describe what they are building.
 
 2. Explore the existing codebase to understand what is already built. Scan specifically for:
    - **Component directories**: `components/`, `ui/`, `shared/` and list every component by name
@@ -36,40 +36,37 @@ This skill turns a design brief into an ordered, buildable task list. Each task 
    - **Visual priority**: the most prominent UI element early, so the user can validate the aesthetic direction before investing in details.
    - **Risk first**: the hardest or most uncertain piece early, so problems surface before everything else is built around them.
 
-5. Save the task list as `TASKS.md` in the same subfolder as the design brief — the one you discovered in step 1, under the name it already has.
+5. Write the checklist into the `## Tasks` section of the file you discovered in step 1, under the name it already has.
 
-## Task List Template
+## What to write in `## Tasks`
+
+Groups, not sub-documents. Use only the groups this feature needs — a four-task change does not need five headings. **Reference the sections above rather than repeating them**: a task names the interaction from `## Experience` or the endpoint from `## Architecture`, it does not re-describe it.
 
 ```markdown
-# Build Tasks: [Feature/Page Name]
+## Tasks
 
-Generated from: .design/YYYY-MM-DD-<feature-slug>/DESIGN_BRIEF.md
-Date: [date]
-
-## Foundation
+### Foundation
 - [ ] **[Task name]**: [One sentence describing what to build and what "done" looks like]. _Reuses: [existing components/tokens if any]._
 - [ ] **[Task name]**: [Description]. _New component._
 
-## Core UI
+### Core UI
 - [ ] **[Task name]**: [Description]. _Depends on: [task name if any]._
-- [ ] **[Task name]**: [Description].
 
-## Interactions & States
+### Interactions & States
 - [ ] **[Task name]**: [Description]. Covers: [list of states, e.g., hover, loading, error, empty].
-- [ ] **[Task name]**: [Description].
 
-## Responsive & Polish
+### Responsive & Polish
 - [ ] **[Task name]**: [Description]. Breakpoints: [which ones].
-- [ ] **[Task name]**: Accessibility pass. [Specific checks from the brief].
+- [ ] **[Task name]**: Accessibility pass. [specific checks from `## Experience`].
 
-## Tests
-_Derived from `TEST_PLAN.md`. One task per case at the level named there (unit / integration / e2e). Skip this section if no test plan exists._
+### Tests
+_One task per case in `## Tests`, at the level named there. Omit this group when `## Tests` is empty._
 - [ ] **[unit] [case name]**: [assertion in one line].
 - [ ] **[integration] [case name]**: [assertion in one line]. _Real dep: [Postgres / Redis / etc]._
 - [ ] **[e2e] [case name]**: [assertion in one line]. _Tooling: Playwright (or Claude Chrome extension for exploratory walk-through)._
 
-## Review
-- [ ] **Design review**: Run /design-review against the brief.
+### Review
+- [ ] **Design review**: run `/atelier:design-review` against `## Experience`.
 ```
 
 ## Rules
@@ -81,8 +78,9 @@ _Derived from `TEST_PLAN.md`. One task per case at the level named there (unit /
 
 ## Done when
 
-- `.design/YYYY-MM-DD-<slug>/TASKS.md` exists, ordered so each task is independently buildable
+- `## Tasks` in `.design/YYYY-MM-DD-<slug>.md` is filled, ordered so each task is independently buildable
 - Every task is a vertical slice that leaves the app working, not a layer
-- Test cases from `TEST_PLAN.md` are attached to the tasks they cover
+- The cases in `## Tests` are attached to the tasks they cover
+- No task repeats a decision `## Experience` or `## Architecture` already made — it references it
 
-**Then hand off.** Say: "Tasks saved to `.design/YYYY-MM-DD-<slug>/TASKS.md` — N tasks." Then: "Design is done. Next: **`/atelier:preflight`** to check the plan against the repo, then **`/atelier:build`** — or **`/atelier:ship`** to run build, test, review and open a PR unattended." 
+**Then hand off.** Say: "Tasks written to `.design/YYYY-MM-DD-<slug>.md` — N tasks." Then: "Design is done. Next: **`/atelier:preflight`** to check the plan against the repo, then **`/atelier:build`** — or **`/atelier:ship`** to run build, test, review and open a PR unattended." 

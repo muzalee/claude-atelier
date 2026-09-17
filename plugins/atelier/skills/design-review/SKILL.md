@@ -1,13 +1,17 @@
 ---
 name: design-review
-description: Run a structured design critique against the brief and codebase. Checks visual hierarchy, consistency, responsiveness, accessibility, and aesthetic fidelity. Use when user wants a design review, critique, QA pass, polish pass, or mentions "review" after building.
+description: Run a structured design critique against the design file and codebase. Checks visual hierarchy, consistency, responsiveness, accessibility, and aesthetic fidelity. Findings are printed with `DR-n` ids; nothing is written to the repo. Use when user wants a design review, critique, QA pass, polish pass, or mentions "review" after building.
 ---
 
-This skill runs a structured design review of what has been built, measured against the design brief and the chosen aesthetic philosophy.
+This skill runs a structured design review of what has been built, measured against the `## Experience` section of the feature's design file and the aesthetic philosophy named there.
 
-> **CRITICAL — Visual Screenshot Capture**
+> **CRITICAL — look at the running application**
 >
-> You MUST capture screenshots of the running application as part of every design review. Code review alone is insufficient — you need to see what the user sees. Follow the screenshot capture protocol in Step 3 below. This is not optional.
+> You MUST view the running application at each breakpoint as part of every design review. Code review alone is insufficient — you need to see what the user sees. Follow the capture protocol in Step 3 below. This is not optional.
+>
+> **Nothing is saved.** Take a screenshot, look at it, review from it. No `screenshots/` folder, no image committed to the repo. The findings are the output.
+
+**The review is printed, not filed.** Findings carry `DR-n` ids so a fix pass can report against them and a PR can name what is still open. The fix pass records what it did in the design file's `## Implementation` section; this skill writes nothing.
 
 ## Example prompts
 
@@ -19,7 +23,7 @@ This skill runs a structured design review of what has been built, measured agai
 
 ## Process
 
-1. **Read the brief.** Glob `.design/*/DESIGN_BRIEF.md` for the active feature's brief — the glob matches both dated `.design/YYYY-MM-DD-<feature-slug>/` folders and legacy undated `.design/<feature-slug>/` ones. If several match one feature, take the most recent date and say which folder you picked; if several features are in play, ask the user which to review. Everything this skill writes goes back into that folder under the name it already has — never a new dated one, never a rename. If no `.design/` folder exists, fall back to `DESIGN_BRIEF.md` in the project root. If neither exists, ask the user what the intended design direction was.
+1. **Read the design.** Find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). Read `## Experience` for the philosophy and the component list, `## Tokens` for the token roles, and `## Structure` for the routes to visit. If several features are in play, ask the user which to review. If nothing exists, ask the user what the intended design direction was and say in the findings that you reviewed against the codebase rather than a design.
 
 2. **Explore the built code.** Examine every component, page, and style file that was created or modified. Scan specifically for:
    - All new or modified components and their relationship to pre-existing components
@@ -28,11 +32,11 @@ This skill runs a structured design review of what has been built, measured agai
    - File naming and organization: do new files follow the project's conventions?
    - Understand what was actually built, not what was planned.
 
-3. **Capture screenshots of the running application.**
+3. **Look at the running application.**
 
-   This step is **mandatory**. Do not skip it. Do not rely only on user-provided screenshots.
+   This step is **mandatory**. Do not skip it. Do not rely only on a code read.
 
-   ### Screenshot Tool Priority
+   ### Browser driver priority
 
    Try each option in order. Use the first one that is available:
    1. **Orca (preferred where installed).** If `command -v orca` succeeds and `orca status --json` reports the runtime reachable, use it — `orca open` first if Orca is installed but closed. It gives precise viewport control and device emulation from the shell:
@@ -48,101 +52,77 @@ This skill runs a structured design review of what has been built, measured agai
    2. **Playwright MCP.** If the `plugin-playwright-playwright` MCP server is available, use it — precise viewport sizing, full-page captures, file naming.
    3. **Claude-in-Chrome.** The `mcp__claude-in-chrome__*` tools, if available: `navigate`, `resize_window`, `computer` for screenshots.
    4. **Cursor IDE Browser.** The `cursor-ide-browser` MCP server's `browser_take_screenshot` tool.
-   5. **Ask the user (last resort).** If no driver above is available, you MUST ask the user to provide screenshots manually. Be specific about what you need:
-      - "I don't have access to a browser tool. To complete the visual review I need screenshots of the running application. Please provide:"
+   5. **Ask the user (last resort).** If no driver above is available, you MUST ask the user to paste screenshots into the chat. Be specific about what you need:
+      - "I don't have access to a browser tool. To complete the visual review I need screenshots of the running application. Please paste:"
       - A full-page screenshot at **desktop** width (1280px)
       - A full-page screenshot at **tablet** width (768px)
       - A full-page screenshot at **mobile** width (375px)
       - Dark mode variants (if applicable)
       - Any specific component or interactive state you want reviewed
-      - Ask the user to paste/attach the images directly in chat, or to save them into the `screenshots/` folder themselves.
-      - **Do not skip the visual review.** Wait for the user to provide screenshots before proceeding with the checklist.
+      - **Do not skip the visual review.** Wait for the images before proceeding with the checklist.
 
-      **Exception — an unattended run.** When `/ship` or another orchestrator is driving and there is nobody to ask, waiting is not an option: it would stall the whole pipeline on a phase that is not blocking. In that case skip the visual review, record in the report that it did not run and which driver was missing or why the app would not start, and let the run continue. Saying the review was skipped is honest; a checklist filled in from reading the code is not.
+      **Exception — an unattended run.** When `/ship` or another orchestrator is driving and there is nobody to ask, waiting is not an option: it would stall the whole pipeline on a phase that is not blocking. In that case skip the visual review, say plainly that it did not run and which driver was missing or why the app would not start, and let the run continue. Saying the review was skipped is honest; a checklist filled in from reading the code is not.
 
-   ### Screenshot Save Location
+   ### Capture protocol
 
-   All screenshots MUST be saved to a `screenshots/` subfolder inside the feature's `.design/` directory — the same folder where `DESIGN_BRIEF.md` and other design flow files live.
+   **Screenshots are for looking at, not for keeping.** Take them in-session, review from them, and save nothing into the repo. There is no `screenshots/` folder; a screenshot committed next to the code is a stale picture of a UI that changed the following week.
 
-   Path pattern: `.design/YYYY-MM-DD-<feature-slug>/screenshots/` — the date is whatever the brief's folder already carries, copied verbatim.
+   **a. Navigate to the application.** Ask the user for the URL if not obvious from the project (e.g., `http://localhost:3000`), and visit the routes named in `## Structure`.
 
-   If the brief lives at `.design/2026-09-20-onboarding-flow/DESIGN_BRIEF.md`, screenshots go to `.design/2026-09-20-onboarding-flow/screenshots/`. If it lives in a legacy undated `.design/onboarding-flow/`, they go to `.design/onboarding-flow/screenshots/`. Create the `screenshots/` subfolder if it does not exist — but never a new feature folder.
+   **b. Check every responsive breakpoint.** At minimum, view these three viewports for every key page/view:
 
-   If no `.design/` folder exists (legacy project or standalone review), fall back to a `screenshots/` folder in the project root.
+   | Breakpoint | Width × Height |
+   | ---------- | -------------- |
+   | Mobile     | 375 × 812      |
+   | Tablet     | 768 × 1024     |
+   | Desktop    | 1280 × 800     |
 
-   Use descriptive filenames that encode what was captured:
+   Resize the viewport before each capture, and capture the full scrollable page.
 
-   ```
-   .design/
-   └── 2026-09-20-onboarding-flow/
-       ├── DESIGN_BRIEF.md
-       ├── DESIGN_REVIEW.md
-       └── screenshots/
-           ├── review-homepage-desktop-1280.png
-           ├── review-homepage-tablet-768.png
-           ├── review-homepage-mobile-375.png
-           ├── review-homepage-dark-mode-desktop-1280.png
-           └── review-card-component-hover.png
-   ```
-
-   ### Screenshot Capture Protocol
-
-   **a. Navigate to the application.** Ask the user for the URL if not obvious from the project (e.g., `http://localhost:3000`). Use `browser_navigate` to open it.
-
-   **b. Capture responsive breakpoints.** At minimum, capture these three viewports for every key page/view:
-
-   | Breakpoint | Width × Height | Filename suffix |
-   | ---------- | -------------- | --------------- |
-   | Mobile     | 375 × 812      | `-mobile-375`   |
-   | Tablet     | 768 × 1024     | `-tablet-768`   |
-   | Desktop    | 1280 × 800     | `-desktop-1280` |
-
-   Use `browser_resize` to set the viewport before each screenshot. Use `browser_take_screenshot` with `fullPage: true` to capture the entire scrollable page, and save with the `filename` parameter pointing to the `screenshots/` folder.
-
-   **Example sequence with Playwright MCP** (the same shape applies to any driver above) (assuming feature slug is `onboarding-flow`):
+   **Example sequence with Playwright MCP** (the same shape applies to any driver above):
 
    ```
    1. browser_navigate → { url: "http://localhost:3000" }
    2. browser_resize   → { width: 1280, height: 800 }
-   3. browser_take_screenshot → { type: "png", filename: ".design/2026-09-20-onboarding-flow/screenshots/review-homepage-desktop-1280.png", fullPage: true }
+   3. browser_take_screenshot → { type: "png", fullPage: true }      # look at it, keep nothing
    4. browser_resize   → { width: 768, height: 1024 }
-   5. browser_take_screenshot → { type: "png", filename: ".design/2026-09-20-onboarding-flow/screenshots/review-homepage-tablet-768.png", fullPage: true }
+   5. browser_take_screenshot → { type: "png", fullPage: true }
    6. browser_resize   → { width: 375, height: 812 }
-   7. browser_take_screenshot → { type: "png", filename: ".design/2026-09-20-onboarding-flow/screenshots/review-homepage-mobile-375.png", fullPage: true }
+   7. browser_take_screenshot → { type: "png", fullPage: true }
    ```
 
-   **c. Capture interactive states (when relevant).**
+   **c. Check interactive states (when relevant).**
    - Hover states on buttons, cards, links
    - Focus states on form fields
    - Open states on dropdowns, modals, menus
    - Error/success states on forms — read the copy, not just the styling. A user-facing message that says "An error occurred" is a finding, and so is one rendering a raw exception or a bare HTTP status. It should say what happened, what to do next, and carry a quotable `ref` + `trace_id` (see `errors`).
    - Loading and empty states
 
-   **d. Capture dark mode (if the project supports it).** Toggle dark mode and repeat the responsive breakpoint captures with `-dark-mode` in the filename.
+   **d. Check dark mode (if the project supports it).** Toggle it and repeat the breakpoint pass.
 
-   **e. Capture specific components.** If the review focuses on a particular component, use the `element` and `ref` parameters to screenshot just that element.
+   **e. Check specific components.** Where the review focuses on one component, capture just that element.
 
-   ### Analyze Every Screenshot
+   ### Analyze every capture
 
-   After capturing, visually analyze each screenshot against the design brief. For each screenshot:
-   - Compare against the brief's aesthetic direction
+   Look at each one against `## Experience`. For each:
+   - Compare against the aesthetic direction named there
    - Check visual hierarchy: is the most important element the most prominent?
    - Check spacing consistency: do margins and padding look even and intentional?
-   - Check color: does the palette match the brief's direction?
+   - Check color: does the palette match the direction named there?
    - Check typography: are font sizes, weights, and spacing visually correct?
    - Check responsive adaptation: does the layout properly reorganize (not just shrink)?
    - Note rendering issues that code review alone would miss (font loading failures, broken images, layout overflow, z-index problems, incorrect border-radius, color mismatches)
 
-   Reference specific screenshots by filename in the review output so findings are traceable.
+   Findings name the route, the breakpoint and the component — "`/settings`, 375px, the save button" — not a filename. There is no file.
 
-4. **Run the review checklist below.** For each category, note what passes and what needs refinement. Be specific. Reference exact components, files, line numbers, and screenshot filenames.
+4. **Run the review checklist below.** For each category, note what passes and what needs refinement. Be specific. Reference exact components, files and line numbers, plus the route and breakpoint where you saw it.
 
 5. **Produce a prioritized refinement list.** Group issues by severity:
    - **Must fix**: Broken functionality, accessibility failures, major deviations from the brief.
    - **Should fix**: Inconsistencies, missing states, responsive issues.
    - **Could improve**: Polish, animation refinement, typography fine-tuning.
 
-6. Save the review as `DESIGN_REVIEW.md` inside the feature's design folder, next to `DESIGN_BRIEF.md` — the folder discovered in step 1, under the name it already has. If no `.design/` folder exists, save to the project root. Include a "Screenshots Captured" section listing all screenshots taken with their paths. Present the review directly as well if the user prefers.
+6. **Print the review.** No file, beside the design file or anywhere else. Say which routes and breakpoints you actually looked at, so a reader can tell a real pass from a code read.
 
 ## Review Checklist
 
@@ -223,52 +203,33 @@ This skill runs a structured design review of what has been built, measured agai
 
 ## Output Format
 
+Printed, not saved:
+
 ```markdown
-# Design Review: [Feature/Page Name]
+## Design review: [Feature/Page Name]
 
-Reviewed against: DESIGN_BRIEF.md
-Philosophy: [named philosophy]
-Date: [date]
+Reviewed against `## Experience` in `.design/YYYY-MM-DD-<slug>.md`. Philosophy: [named philosophy].
+Viewed: `/settings` and `/settings/profile` at 375 / 768 / 1280, light and dark.
 
-## Screenshots Captured
+### Must fix
+- **DR-1** `src/features/settings/SaveButton.tsx` — `/settings` at 375px, the save button falls below the fold with no sticky footer. _Fix: pin the action bar on mobile._
 
-| Screenshot                                   | Breakpoint         | Description     |
-| -------------------------------------------- | ------------------ | --------------- |
-| `screenshots/review-[page]-desktop-1280.png` | Desktop (1280×800) | [what it shows] |
-| `screenshots/review-[page]-tablet-768.png`   | Tablet (768×1024)  | [what it shows] |
-| `screenshots/review-[page]-mobile-375.png`   | Mobile (375×812)   | [what it shows] |
+### Should fix
+- **DR-2** `src/features/settings/ProfileCard.tsx:40` — hardcoded `#555` instead of `color-text-secondary`; it does not switch in dark mode.
 
-> All screenshots are in `.design/YYYY-MM-DD-<feature-slug>/screenshots/`.
+### Could improve
+- **DR-3** — the section headings could take `letter-spacing-wide` to match the philosophy's label treatment.
 
-## Summary
-
-[2-3 sentences on overall quality and the biggest finding.]
-
-## Must Fix
-
-1. **[Issue]**: [Specific description with file/component reference]. See [`screenshots/[relevant-screenshot].png`]. _Fix: [concrete suggestion]._
-
-## Should Fix
-
-1. **[Issue]**: [Description]. See [`screenshots/[relevant-screenshot].png`]. _Fix: [suggestion]._
-
-## Could Improve
-
-1. **[Issue]**: [Description]. _Suggestion: [idea]._
-
-## Finding ids
-
-Number every finding `DR-1`, `DR-2`, in the order you found them, never reused within a review. `/ship` and any fix pass report against them one by one, and a follow-up review can say "DR-3 is still there" instead of re-describing it. A finding without an id cannot be tracked through a fix, which is how findings quietly get lost.
-
-## What Works Well
-
-[Note the strongest aspects of the implementation. This is not padding. Designers need to know what to keep doing.]
+### What works well
+[The strongest aspects of the implementation. Not padding — designers need to know what to keep doing.]
 ```
+
+**Number every finding `DR-1`, `DR-2`**, in the order you found them, never reused within a review. `/ship` and any fix pass report against them one by one, and a follow-up review can say "DR-3 is still there" instead of re-describing it. A finding without an id cannot be tracked through a fix, which is how findings quietly get lost.
 
 ## Done when
 
-- Screenshots exist at mobile, tablet, and desktop, saved under `.design/YYYY-MM-DD-<slug>/screenshots/`
-- Every finding carries a `DR-n` id and is measured against the brief and the token spec, not against taste
-- The report is saved to `.design/YYYY-MM-DD-<slug>/DESIGN_REVIEW.md`
+- The running app was viewed at mobile, tablet, and desktop — and you said which routes
+- Every finding carries a `DR-n` id and is measured against `## Experience` and `## Tokens`, not against taste
+- **Nothing was written to the repo** — no report, no screenshots. The fix pass records what it fixed in `## Implementation`
 
-**Then hand off.** Say: "Design review done: N findings, screenshots in `.design/YYYY-MM-DD-<slug>/screenshots/`." Then: "Next: fix the must-fix items, then re-run this to confirm." 
+**Then hand off.** Say: "Design review done: N findings." Then: "Next: fix the must-fix items with **`/atelier:build`**, then re-run this to confirm." 

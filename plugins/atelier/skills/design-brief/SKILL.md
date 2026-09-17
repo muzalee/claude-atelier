@@ -1,9 +1,11 @@
 ---
 name: design-brief
-description: Create a design brief through an interactive interview, codebase exploration, and experience design decisions. Saved as a markdown file in the project. Use when user wants to write a design brief, plan a new feature or page, define a UI direction, or mentions "brief".
+description: Create a design brief through an interactive interview, codebase exploration, and experience design decisions. Fills the `## Problem`, `## Solution`, `## Scope` and `## Experience` sections of the feature's `.design/YYYY-MM-DD-<slug>.md`. Use when user wants to write a design brief, plan a new feature or page, define a UI direction, or mentions "brief".
 ---
 
 This skill creates a design brief through structured conversation. You may skip steps if they are not necessary.
+
+The brief is not a document of its own — it is the first four sections of the feature's one design file, `.design/YYYY-MM-DD-<slug>.md`. This skill creates that file.
 
 ## Example prompts
 
@@ -38,96 +40,93 @@ This skill creates a design brief through structured conversation. You may skip 
    - What are the hard constraints? (devices, accessibility requirements, performance budgets, brand guidelines)
    - What content will this interface contain? What is placeholder vs. real?
 
-4. Once you have a complete understanding, write the brief using the template below.
+4. Once you have a complete understanding, fill the sections using the guidance below.
 
 ## File Output
 
-Save the brief to `.design/YYYY-MM-DD-<feature-slug>/DESIGN_BRIEF.md` where `<feature-slug>` is a short, lowercase, hyphenated name derived from the feature or page being designed (e.g., `onboarding-flow`, `settings-page`, `project-dashboard`).
+Write into the `## Problem`, `## Solution`, `## Scope` and `## Experience` sections of `.design/YYYY-MM-DD-<feature-slug>.md`, where `<feature-slug>` is a short, lowercase, hyphenated name derived from the feature or page being designed (e.g., `onboarding-flow`, `settings-page`, `project-dashboard`).
+
+**This skill creates the file, and it is the only one that does.** It also writes the `# Design: <feature>` title, the `> PRD: docs/prd/NNNN-<slug>.md` line when a PRD covers this work (omit the line entirely when none does), and the remaining empty headings in their fixed order so later phases have somewhere to write:
+
+```markdown
+# Design: <feature>
+
+## Problem
+## Solution
+## Scope
+## Experience
+## Architecture
+## Structure
+## Tokens
+## Tests
+## Tasks
+## Implementation
+```
+
+On the **short form** (`/design` decides which — one screen, no new data, no new route, no new dependency, no auth or money path), write only `## Problem`, `## Solution`, `## Tasks` and `## Implementation`, and omit the other six headings entirely rather than stubbing them.
 
 **This skill picks the date, and it is the only one that does.** Read today's date from the environment — run `date +%F` — and use it verbatim. Never guess it, never reuse a date from an example. Once the folder exists the date is frozen: it records when the design started, not when it was last touched.
 
 Before creating anything, glob `.design/*<feature-slug>*/`. If a folder for this feature already exists — dated or a legacy bare `.design/<feature-slug>/` from before this convention — write into it as it is named. Do not mint a second folder and do not rename the existing one.
 
-This folder structure ensures that running the design flow multiple times for different features does not overwrite previous work. All subsequent skills (information-architecture, design-tokens, brief-to-tasks, design-review) discover this folder by globbing and write into it — they never create their own.
+**A legacy folder keeps its old shape.** If the folder you found has no `DESIGN.md` but does have `DESIGN_BRIEF.md`, keep writing to `DESIGN_BRIEF.md`. Do not convert the folder and do not start a `DESIGN.md` beside the old files.
+
+This folder structure ensures that running the design flow multiple times for different features does not overwrite previous work. All subsequent skills (backend-design, information-architecture, design-tokens, test-plan, brief-to-tasks, build, review) discover this folder by globbing and write into the same file — they never create their own.
 
 Example:
 
 ```
 .design/
 ├── 2026-09-20-onboarding-flow/
-│   └── DESIGN_BRIEF.md
+│   └── DESIGN.md
 └── 2026-09-21-settings-page/
-    └── DESIGN_BRIEF.md
+    └── DESIGN.md
 ```
 
-## Brief Template
+## What to write in each section
+
+The headings below are the four this skill owns. Everything the old standalone brief covered still gets decided — it just lands in one of these four rather than in a document of its own. **Write only what this feature actually touches**: a sub-heading with nothing real under it is worse than an absent one, and a table of `[name] | Exists / Modify / New | [detail]` placeholders is not a component inventory.
 
 ```markdown
-# Design Brief: [Feature/Page Name]
-
 ## Problem
 
-What problem is the user facing, described from their perspective. Not technical. Not business metrics. The human friction.
+What problem is the user facing, from their perspective. Not technical. Not business metrics. The human friction.
 
 ## Solution
 
-What this interface does to solve that problem, described as an experience, not a feature list.
+What this interface does about it, described as an experience, not a feature list.
 
-## Experience Principles
+## Scope
 
-Three principles maximum that guide every design decision. Each principle should resolve a tension.
-Example: "Progressive disclosure over upfront complexity" or "Confidence over speed."
+**In scope**: what this design covers.
+**Out of scope**: what it explicitly does not. Be specific — "polish and extras" prevents nothing. This is what stops scope creep during the build.
 
-1. [Principle] -- [What this means in practice]
-2. [Principle] -- [What this means in practice]
-3. [Principle] -- [What this means in practice]
+## Experience
 
-## Aesthetic Direction
+**Philosophy**: named philosophy or described vibe (see `ui-build` for reference), plus the emotional tone, what it should feel like, and what it should NOT.
 
-- **Philosophy**: [Named philosophy or described vibe. See /ui-build skill for reference.]
-- **Tone**: [Emotional register]
-- **Reference points**: [Existing products, sites, or styles this should feel like]
-- **Anti-references**: [What this should NOT feel like]
+**Principles** (at most three, only if they earn their place): each one resolves a tension — "progressive disclosure over upfront complexity", "confidence over speed" — and says what it means in practice.
 
-## Existing Patterns
+**Existing patterns**: the typography, colors, spacing and components already in the codebase that this design extends rather than replaces.
 
-Components, tokens, and conventions already in the codebase that this design must respect or extend.
+**Components**: which the feature needs, and for each whether it exists, needs modifying, or is new. A list is fine; a table is fine; a table of placeholders is not.
 
-- Typography: [what is currently used]
-- Colors: [current palette/variables]
-- Spacing: [current scale]
-- Components: [existing components that will be reused or extended]
+**Key interactions**: what the user does and what the interface does back — state changes, transitions, feedback. **Name each one**, because `## Tests` and `## Tasks` refer to them by name instead of describing them again.
 
-## Component Inventory
+**Responsive**: how the layout adapts, and which components change *behavior* rather than just size on mobile.
 
-A list of the UI components this feature requires. For each, note whether it exists already, needs modification, or is new.
-
-| Component | Status                | Notes    |
-| --------- | --------------------- | -------- |
-| [name]    | Exists / Modify / New | [detail] |
-
-## Key Interactions
-
-The critical interaction patterns. Describe what the user does and what the interface does in response. Focus on state changes, transitions, and feedback.
-
-## Responsive Behavior
-
-How the layout adapts across breakpoints. Note any components that change behavior (not just size) on mobile.
-
-## Accessibility Requirements
-
-Minimum requirements for this interface. Include contrast ratios, keyboard navigation, screen reader considerations, and focus management.
-
-## Out of Scope
-
-Things this brief explicitly does not cover. Be specific. This prevents scope creep during build.
+**Accessibility**: contrast ratios, keyboard navigation, screen reader needs, focus management — the minimum this interface must meet.
 ```
+
+On the short form there is no `## Scope` or `## Experience`. Fold anything genuinely decided into `## Solution` in a line or two and move on.
 
 ## Done when
 
-- The brief is saved at `.design/YYYY-MM-DD-<slug>/DESIGN_BRIEF.md`
-- The `<slug>` is locked — every later phase writes into this same folder
+- `.design/YYYY-MM-DD-<slug>.md` exists, with the title, the PRD line when there is a PRD, and the headings for the chosen form in order
+- `## Problem`, `## Solution`, `## Scope` and `## Experience` are filled (short form: `## Problem` and `## Solution`)
+- The `<slug>` is locked — every later phase writes into this same file
 - Out of Scope is specific, not "polish and extras"
 - The aesthetic direction names something concrete enough to build from
+- Nothing is a placeholder — every line says something about this feature
 
-**Then hand off.** Say: "Brief saved to `.design/YYYY-MM-DD-<slug>/DESIGN_BRIEF.md`." Then: "Next: **`/atelier:backend-design`** if this needs server work, otherwise **`/atelier:information-architecture`**." 
+**Then hand off.** Say: "Brief sections written to `.design/YYYY-MM-DD-<slug>.md`." Then: "Next: **`/atelier:backend-design`** if this needs server work, otherwise **`/atelier:information-architecture`**."

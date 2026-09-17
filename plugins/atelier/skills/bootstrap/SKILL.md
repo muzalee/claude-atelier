@@ -109,7 +109,7 @@ Add per stack:
 - **Go**: `bin/`, `*.exe`, `vendor/`
 - **Static**: nothing extra beyond the always-include set.
 
-**Never ignore `.design/`.** It is tracked on purpose — screenshots and all — because it is the intent record that ships with the code. It looks like generated scratch and it is not.
+**Never ignore `.design/`.** It is tracked on purpose, because it is the intent record that ships with the code. It looks like generated scratch and it is not.
 
 ## README template
 
