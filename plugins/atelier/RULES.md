@@ -90,7 +90,7 @@ The user can discuss design, briefs, tokens, IA, tasks without triggering `/desi
 
 A design is one file, `.design/YYYY-MM-DD-<slug>.md`, where the date is the day it was created and never changes.
 
-- **Only `design-brief` creates one** — or `backend-design` running standalone with nothing to match. It takes the date from the environment (`date +%F`), never from memory.
+- **Only `design-brief` creates one**, as phase 2 of `/atelier:design`. It takes the date from the environment (`date +%F`), never from memory. No other skill creates a design file — the rest discover one or say there is none.
 - **Every other skill discovers it** by the single procedure in `design/SKILL.md` → **Finding the design file**, and reuses the matched name verbatim. That section is the one description of discovery; skills reference it rather than restating it.
 - **Two legacy shapes still read and are never written fresh**: `.design/<slug>/DESIGN.md`, and the original `.design/<slug>/DESIGN_BRIEF.md` plus siblings, dated or undated. Read and edit them where they lie. Do not convert them, do not migrate them, do not start a flat file beside one.
 - **Never create `.design/` just to have somewhere to write.**

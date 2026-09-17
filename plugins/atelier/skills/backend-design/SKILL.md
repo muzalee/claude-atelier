@@ -117,7 +117,11 @@ Fill the `## Architecture` section of the feature's `.design/YYYY-MM-DD-<feature
 
 In a legacy six-file folder, keep writing to `BACKEND_DESIGN.md` beside the other old files.
 
-**Only when nothing matches** do you create the file yourself, as `.design/YYYY-MM-DD-<feature-slug>.md` — the date read from the environment (`date +%F`), never guessed — with a slug derived from the feature name (e.g., `notifications-service`, `checkout-api`, `video-processor`). That date is then frozen for the life of the file. Write the full set of headings in order, and fill `## Architecture`.
+**When nothing matches, do not create one.** `design-brief` is the only skill that creates a design file, and it does so as phase 2 of `/atelier:design`. Say what you found and ask one question:
+
+> No design file here. Run `/atelier:design` first — it creates the file and settles the problem and scope before the data model — or shall I work through the architecture now and print it, for you to paste in later?
+
+Then do whichever they pick. Printing it inline is a real answer for a backend-only service nobody wants a full design pass for; minting a file from this skill is not, because the date, the slug and the sections above `## Architecture` would all be guesses this skill is in no position to make.
 
 Read the sections already written — `## Problem`, `## Solution`, `## Scope`, `## Experience` — before you write. The data model and API must serve the flows and components named there.
 

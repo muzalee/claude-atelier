@@ -35,7 +35,7 @@ Rules, the same in every skill:
 - **Several matches** → take the most recent date, and say out loud which one you picked. Undated sorts oldest.
 - **Reuse the name verbatim.** Never rename a file or folder, never re-date one, never create a second file for a feature that already has one.
 - **A legacy shape is read where it lies and written where it lies.** A folder holding `DESIGN_BRIEF.md` keeps taking `DESIGN_BRIEF.md` edits; a folder holding `DESIGN.md` keeps taking `DESIGN.md` edits. Do not convert, do not migrate, do not start a flat file beside one.
-- **Only `design-brief` creates a design file** — or `backend-design` when it runs standalone on a backend-only feature and nothing matches. Whichever creates it takes the date from the environment (`date +%F`), never from memory, and that date is frozen for the life of the file. No other skill creates one, and none creates `.design/` just to have somewhere to write.
+- **Only `design-brief` creates a design file**, and only when nothing matches. It takes the date from the environment (`date +%F`), never from memory, and that date is frozen for the life of the file. **No other skill creates one** — a phase skill that finds nothing to write into says so and offers `/atelier:design`, and none of them creates `.design/` just to have somewhere to write.
 
 ## Pick the shape first — before phase 1
 
