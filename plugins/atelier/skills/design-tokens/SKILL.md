@@ -1,9 +1,9 @@
 ---
 name: design-tokens
-description: Produce a design token spec — colors (light + dark), spacing, typography, layout, motion, breakpoints — derived from a chosen aesthetic philosophy. Fills the `## Tokens` section of the feature's `.design/YYYY-MM-DD-<slug>.md` with names / values / semantic roles, NOT an actual CSS or Tailwind config file. Materialization into the project's real token file happens later in `/build` (or when `ui-build` runs standalone). Use when starting a new project, establishing a visual system, setting up tokens, or the user mentions "tokens" or "design system".
+description: Produce a design token spec — color (light + dark), spacing, type, layout, motion, breakpoints — derived from a named aesthetic philosophy. Fills `### Tokens` under `## Experience` in the feature's `.design/YYYY-MM-DD-<slug>.md` — names, values, roles, never a CSS or Tailwind file. Use when establishing a visual system, setting up tokens, or the user mentions "tokens" or "design system".
 ---
 
-This skill produces the design tokens **spec**. Run it after the brief sections and before building any components. It fills one section — `## Tokens` — of the feature's `.design/YYYY-MM-DD-<slug>.md`. Not a CSS or Tailwind file: `/build` materializes the spec into the project's stack-appropriate format.
+This skill produces the design tokens **spec**. Run it after the brief sections and before building any components. It fills one block — `### Tokens`, the last part of `## Experience` — of the feature's `.design/YYYY-MM-DD-<slug>.md`. (An older file with a top-level `## Tokens` keeps it; write there.) Not a CSS or Tailwind file: `/build` materializes the spec into the project's stack-appropriate format.
 
 **Write only what this feature adds or changes.** A project that already has a token file and needs nothing new gets one line — name that file, write "no new tokens" — and this skill is done. Restating a palette the repo already defines creates a second source of truth that drifts the moment someone edits the real one. The full tables below are for a project that does not have a token system yet.
 
@@ -26,11 +26,11 @@ This skill produces the design tokens **spec**. Run it after the brief sections 
 
    If tokens already exist, **extend the spec to cover gaps** (missing dark mode, incomplete spacing scale, no motion tokens) rather than replacing.
 
-2. **Read the design file.** Find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). Or ask the user which feature this is. If `## Experience` names a philosophy, derive token values from it; if nothing exists, ask the user what direction they want.
+2. **Read the design file.** Find the feature's design file by the procedure in `${CLAUDE_SKILL_DIR}/../design/SKILL.md` → **Finding the design file**. Or ask the user which feature this is. If `## Experience` names a philosophy, derive token values from it; if nothing exists, ask the user what direction they want.
 
    In a legacy six-file folder, read `DESIGN_BRIEF.md` and write `DESIGN_TOKENS.md` beside it, as before.
 
-3. **Write the `## Tokens` section** of the file you discovered in step 2. Every token gets a name, a value, and a semantic role — the role is what tells the builder *why* this token exists, so it isn't renamed away. Include only categories this feature actually needs; say in one line when a category is deliberately untouched.
+3. **Write the `### Tokens` block** of the file you discovered in step 2. Every token gets a name, a value, and a semantic role — the role is what tells the builder *why* this token exists, so it isn't renamed away. Include only categories this feature actually needs; say in one line when a category is deliberately untouched.
 
 4. **Note the intended stack.** End the section with materialization notes: the project's stack (Tailwind, CSS, CSS-in-JS) and where the materialized file should live. `/build` uses this to translate the spec into real code. When the token file already exists, this is the whole section.
 
@@ -41,7 +41,7 @@ Two shapes, and the first is the common one.
 **The project already has tokens** — one line, and you are done:
 
 ```markdown
-## Tokens
+### Tokens
 
 No new tokens. The project's scale and palette live in `tailwind.config.ts` and `app/globals.css`; this feature uses them as they are.
 ```
@@ -51,12 +51,14 @@ Add a short table only for the tokens this feature genuinely introduces — a ne
 **The project has no token system yet** — the full spec. Skip categories the design doesn't need (e.g. no motion tokens for a print-heavy layout — but say so explicitly).
 
 ```markdown
-## Tokens
+### Tokens
 
-Philosophy: [named philosophy, e.g. "Dieter Rams"]
-Base grid: [4px / 8px]
+| Basis | Value |
+| ----- | ----- |
+| Philosophy | Dieter Rams |
+| Base grid | 4px |
 
-## Color — Light
+#### Color — Light
 
 | Token                        | Value        | Role                                         |
 | ---------------------------- | ------------ | -------------------------------------------- |
@@ -81,7 +83,7 @@ Base grid: [4px / 8px]
 | `color-status-info`          | `#1E6BB4`    | Info feedback                                |
 | `color-surface-overlay`      | `rgba(0,0,0,0.4)` | Modal/dropdown backdrop                 |
 
-## Color — Dark
+#### Color — Dark
 
 | Token                        | Value        | Role                                         |
 | ---------------------------- | ------------ | -------------------------------------------- |
@@ -91,7 +93,7 @@ Base grid: [4px / 8px]
 
 Notes: dark palette is not a raw inversion — [describe how it was tuned for the philosophy].
 
-## Spacing
+#### Spacing
 
 Base grid: [4px / 8px]. Rationale: [why this base fits the philosophy].
 
@@ -109,7 +111,7 @@ Base grid: [4px / 8px]. Rationale: [why this base fits the philosophy].
 | `space-9`   | `96px` |                               |
 | `space-10`  | `128px`|                               |
 
-## Typography
+#### Typography
 
 | Token                  | Value                                    | Role                     |
 | ---------------------- | ---------------------------------------- | ------------------------ |
@@ -130,7 +132,7 @@ Base grid: [4px / 8px]. Rationale: [why this base fits the philosophy].
 | `letter-spacing-normal`| `0`                                      |                          |
 | `letter-spacing-wide`  | `0.08em`                                 | Small caps / labels      |
 
-## Layout
+#### Layout
 
 | Token                | Value      | Role                                    |
 | -------------------- | ---------- | --------------------------------------- |
@@ -146,7 +148,7 @@ Base grid: [4px / 8px]. Rationale: [why this base fits the philosophy].
 | `shadow-lg`          | `0 12px 32px rgba(0,0,0,0.12)` |                     |
 | `shadow-focus`       | `0 0 0 3px rgba(0,87,255,0.3)` |                     |
 
-## Motion
+#### Motion
 
 | Token               | Value                              | Role                     |
 | ------------------- | ---------------------------------- | ------------------------ |
@@ -160,7 +162,7 @@ Base grid: [4px / 8px]. Rationale: [why this base fits the philosophy].
 | `easing-out`        | `cubic-bezier(0, 0, 0.2, 1)`       | Exit                     |
 | `easing-bounce`     | `cubic-bezier(0.34, 1.56, 0.64, 1)`| Playful                  |
 
-## Breakpoints
+#### Breakpoints
 
 | Token           | Value    | Role                    |
 | --------------- | -------- | ----------------------- |
@@ -170,14 +172,16 @@ Base grid: [4px / 8px]. Rationale: [why this base fits the philosophy].
 | `breakpoint-xl` | `1280px` | Desktop                 |
 | `breakpoint-2xl`| `1536px` | Wide desktop            |
 
-## Materialization notes
+#### Materialization notes
 
-- **Stack detected**: [e.g. "Tailwind CSS 3.x + Next.js"]
-- **Target files**:
-  - Extend `tailwind.config.ts` under `theme.extend` for colors, spacing, fontFamily, fontSize, borderRadius, boxShadow, transitionDuration, transitionTimingFunction, screens.
-  - Write CSS variables to `app/globals.css` under `:root` and `[data-theme="dark"]` for anything that needs runtime theming (typically colors).
-- **Dark mode strategy**: `[data-theme="dark"]` attribute + `prefers-color-scheme` media query fallback.
-- **Do not** duplicate values between Tailwind config and CSS variables — Tailwind can reference the CSS var directly (e.g. `colors: { 'bg-primary': 'var(--color-bg-primary)' }`).
+| Note | Value |
+| ---- | ----- |
+| Stack detected | Tailwind CSS 3.x + Next.js |
+| Tailwind target | `tailwind.config.ts` → `theme.extend`: colors, spacing, fontFamily, fontSize, borderRadius, boxShadow, transitionDuration, transitionTimingFunction, screens |
+| CSS variables target | `app/globals.css` under `:root` and `[data-theme="dark"]`, for anything that needs runtime theming (typically colors) |
+| Dark mode strategy | `[data-theme="dark"]` attribute + `prefers-color-scheme` fallback |
+
+Do not duplicate values between Tailwind config and CSS variables — Tailwind can reference the CSS var directly (`colors: { 'bg-primary': 'var(--color-bg-primary)' }`).
 ```
 
 ## Guidance for filling the spec
@@ -206,7 +210,7 @@ Base grid: [4px / 8px]. Rationale: [why this base fits the philosophy].
 
 ## Output
 
-Write the `## Tokens` section of the design file you discovered (`.design/YYYY-MM-DD-<slug>.md`, discovered not invented). State the philosophy the tokens derive from and note any deviations or judgment calls. Do **not** write a `tokens.css`, `tailwind.config.js`, or `theme.ts` — that's `/build`'s job.
+Write the `### Tokens` block of the design file you discovered (`.design/YYYY-MM-DD-<slug>.md`, discovered not invented). State the philosophy the tokens derive from and note any deviations or judgment calls. Do **not** write a `tokens.css`, `tailwind.config.js`, or `theme.ts` — that's `/build`'s job.
 
 ## Read before writing
 
@@ -214,7 +218,7 @@ Read `## Experience` for the aesthetic direction the tokens must express, and `#
 
 ## Done when
 
-- `## Tokens` in `.design/YYYY-MM-DD-<slug>.md` is filled — either the new and changed tokens, or one line naming the project's existing token file and "no new tokens"
+- `### Tokens` under `## Experience` in `.design/YYYY-MM-DD-<slug>.md` is filled — either the new and changed tokens, or one line naming the project's existing token file and "no new tokens"
 - Every token listed has a name, a value, and a semantic role — a value with no role is a hex code, not a token
 - Light and dark are both covered where the spec is new
 - Nothing restates tokens the repo already defines

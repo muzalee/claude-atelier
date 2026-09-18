@@ -14,7 +14,7 @@ This skill defines the structural skeleton of a product or site. It sits between
 
 ## Process
 
-1. Find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). Or ask the user which feature they are working on; if nothing exists, ask what they are building and for whom.
+1. Find the feature's design file by the procedure in `${CLAUDE_SKILL_DIR}/../design/SKILL.md` → **Finding the design file**. Or ask the user which feature they are working on; if nothing exists, ask what they are building and for whom.
 
    In a legacy six-file folder, read `DESIGN_BRIEF.md` and write `INFORMATION_ARCHITECTURE.md` beside it, as before.
 
@@ -46,30 +46,55 @@ This skill defines the structural skeleton of a product or site. It sits between
 
 Do not restate interactions already named in `## Experience`. Reference them.
 
+Tables for everything enumerable; the example rows show the shape — replace them with this feature's.
+
 ```markdown
 ## Structure
 
-**Routes**: every page or view this feature adds or changes, with its URL pattern. Nest with indentation where the hierarchy matters.
+**Routes** — every page or view this feature adds or changes.
 
-- Settings `/settings`
-  - Profile `/settings/profile`
+| Page | URL | Change |
+| ---- | --- | ------ |
+| Settings | `/settings` | New |
+| Settings › Profile | `/settings/profile` | New, nested under Settings |
 
-**Navigation**: where these hang off what already exists — primary nav, a sidebar, a menu item, nothing at all. For a new product: primary / secondary / utility / mobile, and the maximum item count for each.
+**Navigation** — where these hang off what already exists. For a new product, one row per nav (primary / secondary / utility / mobile) with its maximum item count.
 
-**Flows**: the critical paths, as numbered steps with the decision points marked.
+| Entry point | Nav | Position |
+| ----------- | --- | -------- |
+| Settings | Avatar menu | Last item, above Sign out |
 
-1. User lands on `/settings`
-2. User edits display name and saves
-   - valid → saved, inline confirmation
-   - empty → inline error under the field, nothing written
+**Flows** — the critical paths, one table per flow, decision points as their own rows.
 
-**Component reuse**: which existing layouts, containers and navigation elements this reuses, and any behavior differences. This is what stops the build reimplementing a shell that already exists.
+| Step | User | System |
+| ---- | ---- | ------ |
+| 1 | Lands on `/settings` | Loads saved profile |
+| 2 | Edits display name, saves | Valid → saved, inline confirmation |
+| 2a | Saves an empty name | Inline error under the field, nothing written |
 
-**Content priority** (per page, when a page has enough on it to need ordering): what comes first, second, third, and why.
+**Component reuse** — what stops the build reimplementing a shell that already exists.
 
-**URL rules** (only when this feature introduces a pattern): dynamic segments, query parameters for filtering / sorting / pagination.
+| Existing component | Reused for | Behavior difference |
+| ------------------ | ---------- | ------------------- |
+| `AppShell` | Settings layout | None |
 
-**Naming**: the terms the UI uses for this feature's concepts, when a concept has more than one plausible label. One word, used everywhere.
+**Content priority** (per page, when a page has enough on it to need ordering):
+
+| Order | Content | Why here |
+| ----- | ------- | -------- |
+| 1 | Display name | Most-edited field |
+
+**URL rules** (only when this feature introduces a pattern):
+
+| Pattern | Meaning |
+| ------- | ------- |
+| `?tab=` | Selected settings tab; default `profile` |
+
+**Naming** — when a concept has more than one plausible label. One word, used everywhere.
+
+| Concept | UI term | Not |
+| ------- | ------- | --- |
+| The user's shown name | Display name | Username, handle |
 ```
 
 ## Done when

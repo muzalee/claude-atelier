@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: build-go-all-skips-gates
+description: "The instruction says 'go all'. /build must say once that gates are off, run the frontend and backend phases back to back, and never stop to ask 'Next phase: X. Go?' — a gated build inside an unattended run halts /ship at phase 1."
+tags: [build]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "build from the design, go all — no gates, nobody is here to answer: .design/2026-09-02-user-settings.md"
+  max_turns: 60
+  timeout_seconds: 1800
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

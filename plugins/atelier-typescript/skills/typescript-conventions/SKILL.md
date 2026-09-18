@@ -1,6 +1,6 @@
 ---
 name: typescript-conventions
-description: House conventions for TypeScript code — type discipline, module shape, async rules, validation boundaries, plus React (frontend) and Fastify/Node (backend) specifics in the reference files. Use this skill whenever writing, refactoring, or reviewing TypeScript, TSX, React components, or Fastify routes and plugins, and whenever `/build` implements a task in a TypeScript repo. Also use when deciding between `type` and `interface`, whether to memoize a component, where validation belongs, or how to shape a module's exports.
+description: House conventions for TypeScript — type discipline, module shape, async, validation boundaries — with React and Fastify specifics in reference files. Use when writing, refactoring or reviewing TypeScript, TSX, React components, or Fastify routes and plugins, including every `/build` task in a TS repo; also for type vs interface, memoization, or where validation belongs.
 ---
 
 Conventions for TypeScript in this house style. The point is not to be comprehensive — it is to settle the handful of decisions that otherwise get made differently every time and then cost a reviewer an argument.

@@ -1,6 +1,6 @@
 ---
 name: flutter-conventions
-description: House conventions for Flutter and Dart — project structure, layering, state management boundaries, widget composition, and testing. Use this skill whenever writing, refactoring, or reviewing Flutter or Dart code, when deciding where a new file belongs in a Flutter project, when scaffolding a Flutter app, and whenever `/build` or `/bootstrap` works in a Flutter repo. Also use when the user asks where a repository, ViewModel, model, or widget belongs, or where to put a repository, model, or widget.
+description: House conventions for Flutter and Dart — project structure, layering, state boundaries, widget composition, testing. Use when writing, refactoring or reviewing Flutter or Dart code, scaffolding a Flutter app, deciding where a repository, ViewModel, model or widget belongs, and whenever `/build` or `/bootstrap` works in a Flutter repo.
 ---
 
 Conventions for Flutter work in this house style. The structural decisions are the ones that matter most here — Flutter projects go wrong at the folder level long before they go wrong at the widget level, and by then moving files means touching every import.

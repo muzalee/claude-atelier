@@ -1,6 +1,6 @@
 ---
 name: prd
-description: Write or amend a Product Requirements Document — the project-level scope contract covering problem, users, requirements, success metrics, non-goals, milestones, and dependencies. Saved as a numbered markdown file in `docs/prd/`. Use this skill whenever the user mentions a PRD, product spec, project scope, requirements doc, "what are we building", "define the scope", "write up the requirements", or wants to pin down in-scope vs out-of-scope before design or build starts — even if they never say the word "PRD". Also use it to amend an existing PRD when requirements change mid-project — a requirement cut or added, a "change of plan", something declared dead for this cycle, a legal or partner constraint landing late, or a plain "update the doc" when the doc in question is the scope contract.
+description: Write or amend a PRD — the scope contract covering problem, users, requirements, metrics, non-goals, milestones, dependencies — as a numbered file in `docs/prd/`. Use when the user mentions a PRD, product spec, requirements or project scope, or wants in/out of scope pinned before design, even without saying "PRD". Also to amend one when requirements change — something cut or added, a change of plan, a late constraint.
 ---
 
 A PRD answers **what we are building, for whom, and why** — and just as importantly, **what we are not building**. It is the scope contract for an initiative. Design briefs and backend briefs sit downstream of it and decide *how*; this document decides *what* and *whether*.
@@ -53,7 +53,7 @@ Read the repo before the interview so you do not ask questions the code already 
 
 - `README.md`, `docs/` — stated product purpose, existing feature set
 - `docs/prd/` — prior PRDs; a new one must not contradict a live one
-- `.design/*.md` — features already designed, and the non-goals in their `## Scope` sections. Two legacy folder shapes also exist and still read; see **Finding the design file** in `design/SKILL.md`
+- `.design/*.md` — features already designed, and the non-goals in their `## Scope` sections (a design under a PRD has none — the PRD is its scope). Two legacy folder shapes also exist and still read; see **Finding the design file** in `${CLAUDE_SKILL_DIR}/../design/SKILL.md`
 - `package.json` / dependency manifests — what the product currently *is* (SaaS app, CLI, library, mobile)
 - Auth, billing, or tenancy code — reveals the existing user model, which constrains who a new feature can serve
 - Open `TODO`/`FIXME` clusters and issue templates — the backlog the user is implicitly working around
@@ -131,7 +131,7 @@ Create `docs/prd/` if it does not exist. Do not add an index file — `ls` is th
 
 ### 6. Cross-link with design
 
-If a design file exists for work under this PRD — found by the procedure in `design/SKILL.md` → **Finding the design file** — link both directions so any skill entering from either side can find the other. Copy the name exactly as it is on disk; this skill never creates or renames one:
+If a design file exists for work under this PRD — found by the procedure in `${CLAUDE_SKILL_DIR}/../design/SKILL.md` → **Finding the design file** — link both directions so any skill entering from either side can find the other. Copy the name exactly as it is on disk; this skill never creates or renames one:
 
 - In the PRD front matter: `design: .design/2026-09-08-billing-portal.md`
 - Under the title of each `.design/YYYY-MM-DD-<slug>.md` covered by this PRD: `> PRD: docs/prd/0001-billing-portal.md`

@@ -1,6 +1,6 @@
 ---
 name: design
-description: Explicit-invocation-only orchestrator that runs the pure-design phase end-to-end — grill → brief → backend-design → IA → tokens → test-plan → tasks — with confirmation gates between every phase. Every phase fills a section of one markdown file, `.design/YYYY-MM-DD-<slug>.md`, in a short form for a small change or the full form for a feature — chosen with the user before phase 1. NO CODE is written in this skill. Invoked ONLY when the user types /design or explicitly asks to "run the design pipeline" / "run the design orchestrator". After this, the user runs `/build` to implement and `/review` to check the result. DO NOT auto-trigger from adjacent talk about briefs, IA, tokens, tests, tasks, or building — those have their own skills.
+description: Explicit-invocation-only orchestrator for the pure-design pipeline — grill → brief → backend-design → IA → tokens → test-plan → tasks, gated between phases — filling one file, `.design/YYYY-MM-DD-<slug>.md`, in short or full form. Writes no code. Invoke as `/atelier:design`; a bare `/design` can hit the built-in design canvas or `ui-ux-pro-max:design`. Use ONLY on /atelier:design, /design, or "run the design pipeline". DO NOT auto-trigger from talk about briefs, IA, tokens, tests or tasks — those have their own skills.
 ---
 
 This skill is the **pure-design** orchestrator. It runs seven phases in strict order and produces one markdown document — no code. Everything lands in `.design/YYYY-MM-DD-<slug>.md` and becomes the input to `/build`.
@@ -35,11 +35,12 @@ Rules, the same in every skill:
 - **Several matches** → take the most recent date, and say out loud which one you picked. Undated sorts oldest.
 - **Reuse the name verbatim.** Never rename a file or folder, never re-date one, never create a second file for a feature that already has one.
 - **A legacy shape is read where it lies and written where it lies.** A folder holding `DESIGN_BRIEF.md` keeps taking `DESIGN_BRIEF.md` edits; a folder holding `DESIGN.md` keeps taking `DESIGN.md` edits. Do not convert, do not migrate, do not start a flat file beside one.
+- **An older current-shape file may carry a top-level `## Tokens`, a `## Scope` beside a PRD line, or bullet lists where the templates now show tables.** All three were standard before tokens moved under `## Experience`, scope moved to the PRD, and enumerable content moved to tables. Read them where they are and keep writing there in the shape they already have — do not move or convert them.
 - **Only `design-brief` creates a design file**, and only when nothing matches. It takes the date from the environment (`date +%F`), never from memory, and that date is frozen for the life of the file. **No other skill creates one** — a phase skill that finds nothing to write into says so and offers `/atelier:design`, and none of them creates `.design/` just to have somewhere to write.
 
 ## Pick the shape first — before phase 1
 
-The ten-section document is right for a feature and absurd for a copy tweak. A small change should not produce a file that is 70% "N/A" — that reads as a design nobody did, not a design that was not needed.
+The full document is right for a feature and absurd for a copy tweak. A small change should not produce a file that is 70% "N/A" — that reads as a design nobody did, not a design that was not needed.
 
 So before phase 1, judge the size of the change **with the user** and pick one of two shapes. **Say which form you picked and why, in one line, before writing anything.**
 
@@ -54,13 +55,13 @@ So before phase 1, judge the size of the change **with the user** and pick one o
 ## Implementation
 ```
 
-Omit the other six headings **entirely**. Do not write them with "N/A" underneath — an absent heading says "not relevant", a stubbed one says "skipped".
+Omit the other headings **entirely**. Do not write them with "N/A" underneath — an absent heading says "not relevant", a stubbed one says "skipped".
 
-**Full form** — everything else. The ten sections below.
+**Full form** — everything else. The sections below.
 
 - **Growing from short to full mid-build is normal and cheap.** Add the headings when the work turns out to need them, and say so. Starting full "just in case" is the thing to avoid.
 - **The short form still goes through the same gates and the same `/build`, `/review` and `/ship` pipeline.** It is a shorter document, not a lighter process.
-- **If even the short form feels like ceremony, say so** and recommend `/atelier:build` plus `/atelier:code-review` directly — `ship/SKILL.md` offers that same fork in its prerequisites. A one-line change does not need a document.
+- **If even the short form feels like ceremony, say so** and recommend `/atelier:build` plus `/atelier:code-review` directly — `${CLAUDE_SKILL_DIR}/../ship/SKILL.md` offers that same fork in its prerequisites. A one-line change does not need a document.
 
 ## Full form
 
@@ -69,14 +70,14 @@ Omit the other six headings **entirely**. Do not write them with "N/A" underneat
 > PRD: docs/prd/NNNN-<slug>.md      ← omit the line entirely when there is no PRD
 
 ## Problem
-## Solution
-## Scope              — in scope / out of scope
-## Experience         — philosophy, key interactions, responsive, accessibility
+## Solution           — ends with "Considered and rejected": what lost, and why
+## Scope              — in scope / out of scope; ONLY when there is no PRD
+## Experience         — philosophy, key interactions, responsive, accessibility,
+                        and a ### Tokens block: only new or changed tokens, or the
+                        project's existing token file and "no new tokens"
 ## Architecture       — data model, API surface, auth, invariants, failure modes
 ## Structure          — routes, user flows, component reuse
-## Tokens             — only new or changed tokens; otherwise name the project's
-                        existing token file and write "no new tokens"
-## Tests              — one case per line, plus a "Not testing" list
+## Tests              — a table, one case per row, plus a "Not testing" table
 ## Tasks              — the build checklist
 ## Implementation     — filled in during /build and /review, empty until then
 ```
@@ -87,11 +88,11 @@ The section order above is fixed. Write the headings in that order and leave the
 
 ```
 0. Pick the shape           → short form or full form, said out loud
-1. Grill Me                 → shared understanding (no file)
-2. Design Brief             → creates the file; fills ## Problem, ## Solution, ## Scope, ## Experience
+1. Grill Me                 → decisions, and the alternatives they beat (no file yet)
+2. Design Brief             → creates the file; fills ## Problem, ## Solution, ## Scope (no PRD only), ## Experience
 3. Backend Design           → fills ## Architecture
 4. Information Architecture → fills ## Structure
-5. Design Tokens            → fills ## Tokens     (spec, not code)
+5. Design Tokens            → fills ### Tokens under ## Experience   (spec, not code)
 6. Test Plan                → fills ## Tests
 7. Brief to Tasks           → fills ## Tasks
 ```
@@ -100,11 +101,13 @@ The section order above is fixed. Write the headings in that order and leave the
 
 At the end there is one markdown file in `.design/`. Nothing has been implemented. The user then runs `/build`.
 
+**The full form leans frontend.** `## Experience` and `## Structure` are UI sections. A backend-only feature still writes both headings, each with one line — "No UI; callers are the services named in `## Architecture`." — and puts its weight in `## Architecture` and `## Tests`. That is the form working as intended, not a design with holes in it.
+
 ## Writing rules — these are the point
 
 1. **In the full form, a phase that does not apply gets its heading and one line saying why.** "No server work." "No new tokens — the project's scale lives in `tailwind.config.ts`." Never a heading full of TODOs, never a placeholder table with `[type]` in the cells. An empty section with a reason is information; a template nobody filled is noise a later reader has to re-check.
 
-   **In the short form the six extra headings are absent, not empty.** That is the difference between the two shapes: full form says "we considered the backend and there isn't one", short form says "this was never a question".
+   **In the short form the extra headings are absent, not empty.** That is the difference between the two shapes: full form says "we considered the backend and there isn't one", short form says "this was never a question".
 
 2. **Only write what this feature actually touches.** The sub-skills' templates are menus, not forms. `backend-design`'s Deployment / Observability / Scale / Consistency headings exist for a **new service**; a feature on an existing backend collapses them to one line each or drops them. Same for the rest — a component inventory table with two rows is better than one with two rows and eight placeholders.
 
@@ -112,12 +115,16 @@ At the end there is one markdown file in `.design/`. Nothing has been implemente
 
 4. **`## Implementation` stays empty during design.** `/build` and the fix passes fill it. Write the heading and nothing under it.
 
+5. **Tables for anything enumerable.** Components, interactions, entities, endpoints, failure modes, routes, test cases, rejected alternatives, findings — anything with a fixed set of fields goes in a table, because a table is what a human scans first. Prose only where the content is reasoning rather than a list: the problem, the philosophy, a decision's why. Each sub-skill's template shows its tables.
+
+   **`## Tasks` is the one exception: it stays a checklist.** `/build` ticks the boxes as it goes, and a markdown table has no checkbox — GitHub stops counting progress, and a one-character tick becomes a whole-row edit.
+
 ## Operating Rules
 
 1. **Open with the shape, then the map.** Say which form this change gets and why, in one line. Then tell the user the phase sequence for that form, name the section each phase fills, and ask if any phase should be skipped. Common skips (full form):
    - Already have a clear idea → skip grill-me
    - Pure-frontend feature with no server work → skip backend-design (`## Architecture` gets "No server work.")
-   - Backend-only service → skip IA + tokens
+   - Backend-only service → skip IA + tokens (see **The full form leans frontend** above)
    - Single component, not a full page → skip information-architecture
    - Existing project with an established token system → skip design-tokens
    - Trivial change (typo fix, one-line copy tweak, no logic) → skip test-plan
@@ -128,7 +135,7 @@ At the end there is one markdown file in `.design/`. Nothing has been implemente
 
 3. **Run each phase by reading its SKILL.md and following it in full.** Do not summarize, paraphrase, or skip steps — the sub-skills exist to be executed, not narrated. Their interview process and content guidance are unchanged; only where the output lands has changed.
 
-4. **This skill writes no code.** Even the tokens phase fills a `## Tokens` spec section, not a `.css` or `tailwind.config`. Materialization happens in `/build`. If the user starts asking you to code mid-`/design`, remind them that `/build` is the next step and offer to close out design first.
+4. **This skill writes no code.** Even the tokens phase fills a `### Tokens` spec block, not a `.css` or `tailwind.config`. Materialization happens in `/build`. If the user starts asking you to code mid-`/design`, remind them that `/build` is the next step and offer to close out design first.
 
 5. **Thread the file forward.** Each phase reads the sections already written before filling its own — that is how `## Tests` can reference interactions by name instead of re-deriving them, and how `## Tasks` covers every decision. Hand the file path and the section name to each sub-skill.
 
@@ -140,7 +147,9 @@ At the end there is one markdown file in `.design/`. Nothing has been implemente
 
 9. **Respect the PRD if one exists.** Check `docs/prd/` at the start. If a PRD covers this initiative, read it before phase 1 and treat its requirements and non-goals as the scope contract — the design decides *how*, not *whether*. Name the PRD file in the opening map, and put `> PRD: docs/prd/NNNN-<slug>.md` directly under the `# Design:` title. With no PRD, omit the line — do not write "none".
 
-10. **Design can change requirements — but say so out loud.** Design routinely reveals that a requirement was wrong, impossible, or more expensive than it looked. When that happens, stop, tell the user which PRD requirement is affected, and offer to amend the PRD (read `prd/SKILL.md`, Amend mode) before continuing. A design that silently contradicts its PRD leaves two documents claiming to be the scope, and the team then argues about which one counts.
+   **With a PRD, there is no `## Scope`.** The PRD's requirements and non-goals are the scope, and the `> PRD:` line points at them. A second scope section in the design is a second surface to drift — the exact failure rule 10 exists to stop. Without a PRD, `## Scope` is where in/out of scope lives.
+
+10. **Design can change requirements — but say so out loud.** Design routinely reveals that a requirement was wrong, impossible, or more expensive than it looked. When that happens, stop, tell the user which PRD requirement is affected, and offer to amend the PRD (read `${CLAUDE_SKILL_DIR}/../prd/SKILL.md`, Amend mode) before continuing. A design that silently contradicts its PRD leaves two documents claiming to be the scope, and the team then argues about which one counts.
 
 11. **Commit the file.** `.design/YYYY-MM-DD-<slug>.md` is part of the repo, not scratch — it is what a PR reviewer reads to see what the code was meant to do. When the last phase closes, commit it per `keep-it-simple` (`docs(design): <slug> design`) and say you did. It also leaves the tree clean for `/ship`, which stops on a dirty one.
 
@@ -150,50 +159,50 @@ At the end there is one markdown file in `.design/`. Nothing has been implemente
 
 ### Phase 1: Grill Me
 
-Read `grill-me/SKILL.md` and follow it. Surface and resolve open decisions before they bake into a design.
+Read `${CLAUDE_SKILL_DIR}/../grill-me/SKILL.md` and follow it. Surface and resolve open decisions before they bake into a design.
 - **Input**: user's initial prompt + codebase.
-- **Produces**: shared understanding. No file.
+- **Produces**: resolved decisions, plus the alternatives each one beat and why. No file yet — phase 2 writes the rejected alternatives under `## Solution` as "Considered and rejected", so "why didn't we do X?" still has an answer six weeks out.
 - **Transition**: "Decisions resolved. Capture this as a design doc?"
 
 ### Phase 2: Design Brief
 
-Read `design-brief/SKILL.md` and follow it.
-- **Input**: outcome of phase 1 + any existing `.design/` content.
-- **Fills**: `## Problem`, `## Solution`, `## Scope`, `## Experience` — and writes the `# Design:` title and the PRD line. On the short form: `## Problem` and `## Solution` only. **This is the only phase that names the file and creates it.** `design-brief` takes the date from the environment (`date +%F`) — unless a file or legacy folder for this slug already exists, in which case it writes into that one. Lock the resulting name here, date and all, and hand it verbatim to every later phase; none of them mints a date of its own.
+Read `${CLAUDE_SKILL_DIR}/../design-brief/SKILL.md` and follow it.
+- **Input**: outcome of phase 1 — including the rejected alternatives — + any existing `.design/` content.
+- **Fills**: `## Problem`, `## Solution`, `## Scope` (only when there is no PRD), `## Experience` — and writes the `# Design:` title and the PRD line. On the short form: `## Problem` and `## Solution` only. **This is the only phase that names the file and creates it.** `design-brief` takes the date from the environment (`date +%F`) — unless a file or legacy folder for this slug already exists, in which case it writes into that one. Lock the resulting name here, date and all, and hand it verbatim to every later phase; none of them mints a date of its own.
 - **Transition**: "Brief sections written. Next is the architecture section — skip if this feature has no server work. Continue?"
 
 ### Phase 3: Backend Design
 
-Read `backend-design/SKILL.md` and follow it. Tell it to read the sections already in `DESIGN.md` first so the data model and endpoints serve the flows already named.
-- **Input**: `DESIGN.md` + codebase.
+Read `${CLAUDE_SKILL_DIR}/../backend-design/SKILL.md` and follow it. Tell it to read the sections already in the design file first so the data model and endpoints serve the flows already named.
+- **Input**: the design file + codebase.
 - **Fills**: `## Architecture` — data model, API surface, auth, invariants, failure modes. On an existing backend, that is what the section is: the four or five things this feature adds. Deployment, observability, scale and consistency only appear when this feature actually changes them.
 - **Transition**: "Architecture written. Next: structure. Continue?"
 
 ### Phase 4: Information Architecture
 
-Read `information-architecture/SKILL.md` and follow it. Tell it to read `## Experience` and `## Architecture` so routes and flows align with the API.
-- **Input**: `DESIGN.md`.
+Read `${CLAUDE_SKILL_DIR}/../information-architecture/SKILL.md` and follow it. Tell it to read `## Experience` and `## Architecture` so routes and flows align with the API.
+- **Input**: the design file.
 - **Fills**: `## Structure` — routes, user flows, component reuse.
 - **Transition**: "Structure defined. Next: tokens. Continue?"
 
 ### Phase 5: Design Tokens
 
-Read `design-tokens/SKILL.md` and follow it. Name the philosophy from `## Experience` up front so tokens derive from it. The output is a **spec** (token name, value, role) — **not** an actual CSS or Tailwind file. Materialization happens in `/build`.
-- **Input**: `DESIGN.md` (philosophy) + codebase (for existing token conventions).
-- **Fills**: `## Tokens` — **only tokens this feature adds or changes.** A project that already has a token file and needs nothing new gets one line naming that file and "no new tokens". Do not restate a palette the repo already defines.
+Read `${CLAUDE_SKILL_DIR}/../design-tokens/SKILL.md` and follow it. Name the philosophy from `## Experience` up front so tokens derive from it. The output is a **spec** (token name, value, role) — **not** an actual CSS or Tailwind file. Materialization happens in `/build`.
+- **Input**: the design file (philosophy) + codebase (for existing token conventions).
+- **Fills**: `### Tokens` at the end of `## Experience` — **only tokens this feature adds or changes.** A project that already has a token file and needs nothing new gets one line naming that file and "no new tokens". Do not restate a palette the repo already defines.
 - **Transition**: "Tokens written. Next: tests. Continue?"
 
 ### Phase 6: Test Plan
 
-Read `test-plan/SKILL.md` and follow it. Tell it to read `## Experience` and `## Architecture` so failure modes are named across the whole stack, not just the surface. This is where testing decisions get made — level (unit / integration / e2e), what to assert, and what NOT to test.
-- **Input**: `DESIGN.md`.
-- **Fills**: `## Tests` — one case per line, plus a "Not testing" list. Reference the interactions in `## Experience` by name; do not re-describe them.
+Read `${CLAUDE_SKILL_DIR}/../test-plan/SKILL.md` and follow it. Tell it to read `## Experience` and `## Architecture` so failure modes are named across the whole stack, not just the surface. This is where testing decisions get made — level (unit / integration / e2e), what to assert, and what NOT to test.
+- **Input**: the design file.
+- **Fills**: `## Tests` — a table, one case per row, plus a "Not testing" table. Reference the interactions in `## Experience` by name; do not re-describe them.
 - **Transition**: "Tests written. Next: the task checklist. Continue?"
 
 ### Phase 7: Brief to Tasks
 
-Read `brief-to-tasks/SKILL.md` and follow it. Tell it to read every section above so tasks reflect every decision so far — including the test cases, which become task line items alongside the implementation work.
-- **Input**: `DESIGN.md`.
+Read `${CLAUDE_SKILL_DIR}/../brief-to-tasks/SKILL.md` and follow it. Tell it to read every section above so tasks reflect every decision so far — including the test cases, which become task line items alongside the implementation work.
+- **Input**: the design file.
 - **Fills**: `## Tasks` — the build checklist, referencing the sections above rather than repeating them.
 - **Transition**: "Tasks ready. Design phase complete. Run `/build` to implement, then `/review` to check the code."
 
@@ -218,7 +227,7 @@ One file per feature. Markdown. No folder, no code.
 
 - `.design/YYYY-MM-DD-<slug>.md` exists with the headings its form calls for, in order
 - The form was named out loud before anything was written
-- Every phase the user did not skip has filled its section; in the full form every skipped one has its heading and a one-line reason, and in the short form the six extra headings are absent rather than stubbed
+- Every phase the user did not skip has filled its section; in the full form every skipped one has its heading and a one-line reason, and in the short form the extra headings are absent rather than stubbed
 - `## Implementation` is present and empty
 - No section restates a decision another section already made
 - Nothing was implemented — this skill writes markdown only

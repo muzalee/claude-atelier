@@ -1,6 +1,6 @@
 ---
 name: ui-build
-description: Build the frontend half of a feature from the atelier design file — implements `## Tasks` against `## Experience`, `## Structure` and the materialized design tokens, guided by a named aesthetic philosophy so the output avoids generic AI styling. This is the frontend phase of `/atelier:build`, the sibling of `backend-build`. Use when implementing UI from a `.design/YYYY-MM-DD-<slug>.md`, or when the user asks to build components, pages, or screens in a project that has an atelier design file.
+description: Build a feature's frontend from its `.design/YYYY-MM-DD-<slug>.md` — `## Tasks` against `## Experience`, `## Structure` and the tokens — guided by a named aesthetic philosophy, never generic AI styling. The frontend phase of `/atelier:build`. Use when implementing UI from an atelier design file, or building components, pages or screens in a project that has one.
 ---
 
 This skill guides creation of distinctive, production-grade frontend interfaces. Implement real working code with exceptional attention to aesthetic detail.
@@ -14,7 +14,7 @@ This skill guides creation of distinctive, production-grade frontend interfaces.
 
 ## Before You Write Any Code
 
-0. **Materialize a token spec if one exists but no token file does.** Find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). If its `## Tokens` section names new tokens AND the project has no existing token file (no `tokens.css`, no populated `theme.extend`, no `theme.ts` populated from a prior pass), translate the spec into the project's stack-appropriate format first:
+0. **Materialize a token spec if one exists but no token file does.** Find the feature's design file by the procedure in `${CLAUDE_SKILL_DIR}/../design/SKILL.md` → **Finding the design file**. If its `### Tokens` block (under `## Experience`; a top-level `## Tokens` in older files) names new tokens AND the project has no existing token file (no `tokens.css`, no populated `theme.extend`, no `theme.ts` populated from a prior pass), translate the spec into the project's stack-appropriate format first:
    - Tailwind project → extend `tailwind.config.js|ts` under `theme.extend` AND write CSS variables to `globals.css` for anything that needs runtime theming.
    - Plain CSS/HTML → write to `tokens.css`, imported by the root stylesheet.
    - CSS-in-JS (Material UI / Chakra / Emotion) → write to `theme.ts` in the expected shape for the library.
@@ -38,83 +38,11 @@ This skill guides creation of distinctive, production-grade frontend interfaces.
    - What is the intended emotional tone?
    - What are the hard constraints (framework, devices, performance, accessibility)?
 
-3. **Commit to an aesthetic direction.** Either the user names one (see philosophies below) or you choose one that fits the context. State your choice and why before writing code.
+3. **Commit to an aesthetic direction.** Either the user names one (see [Aesthetic Philosophies](#aesthetic-philosophies)) or you choose one that fits the context. State your choice and why before writing code.
 
 ## Aesthetic Philosophies
 
-When the user names a philosophy or describes a vibe, use these as concrete implementation guides. Each philosophy defines typography, color, layout, spacing, motion, and detail treatment.
-
-### Dieter Rams (Functionalist)
-Less but better. Every element earns its place. Nothing decorative without function.
-- **Typography**: Clean sans-serif (Helvetica Neue, Suisse Intl, Akkurat). Tight letterspacing on headings. Generous line height on body. One size scale, used strictly.
-- **Color**: Restrained. Monochromatic with a single functional accent. White or light grey backgrounds. Color is information, not decoration.
-- **Layout**: Strict grid. Clear functional hierarchy. Components aligned to a spatial system. No asymmetry for its own sake.
-- **Spacing**: Consistent, mathematical scale (4px/8px base). Generous padding. Breathing room between elements.
-- **Motion**: Minimal. Purposeful transitions only (state changes, reveals). No decorative animation.
-- **Details**: Subtle borders and dividers over shadows. Precise alignment. Rounded corners used sparingly and consistently.
-
-### Swiss / International Typographic
-Objectivity through structure. The grid is sacred. Content is king.
-- **Typography**: Strong sans-serifs (Neue Haas Grotesk, Univers, Aktiv Grotesk). Dramatic scale contrast between headings and body. All-caps subheadings with generous letterspacing.
-- **Color**: High contrast. Black, white, and one primary color. Bold color blocks as compositional elements.
-- **Layout**: Rigid multi-column grid. Asymmetric balance. Text and image in dialogue. Alignment across elements is non-negotiable.
-- **Spacing**: Defined by the grid module. Gutters are part of the design, not afterthought.
-- **Motion**: Page transitions and scroll-triggered reveals that respect the grid. No playful bounce.
-- **Details**: Rules (horizontal lines) as structural elements. No gradients. No shadows. Flatness is the point.
-
-### Japanese Minimalism (Ma)
-Negative space is content. Restraint communicates sophistication. Quiet over loud.
-- **Typography**: Thin-weight sans-serifs or elegant serifs (Noto Sans, Cormorant). Generous line height (1.8-2.0). Small body size with large whitespace margins.
-- **Color**: Muted naturals (warm greys, stone, sage, washi). Subtle tonal shifts over hard contrasts. Near-monochrome.
-- **Layout**: Asymmetric but balanced. Off-center content. Large empty areas are intentional. Content floats in space.
-- **Spacing**: Extreme whitespace. Padding and margins 2-3x what feels "normal." Elements breathe.
-- **Motion**: Slow, gentle fades (400-600ms). No bounce, no overshoot. Opacity transitions over position shifts.
-- **Details**: Hairline borders. Subtle texture (paper grain, linen). No sharp shadows. Soft, diffused effects.
-
-### Brutalist / Raw
-Structure is visible. No polish. Anti-aesthetic is the aesthetic.
-- **Typography**: System fonts, monospace (JetBrains Mono, IBM Plex Mono, Courier), or aggressive display faces. Mixed sizes. Text as texture.
-- **Color**: Black and white primary. If color, it is raw and clashing (construction yellow, hazard orange, terminal green). No gradients.
-- **Layout**: Visible borders. Box model exposed. Stacked blocks. Deliberate roughness. Content first, beauty never.
-- **Spacing**: Tight or intentionally uneven. Padding that feels compressed.
-- **Motion**: None, or jarring (instant state changes, hard cuts). No easing.
-- **Details**: Visible outlines. Default browser form elements can be intentional. Text-only interfaces. No icons unless functional.
-
-### Scandinavian
-Warmth plus restraint. Functional beauty. Accessible by default.
-- **Typography**: Rounded, friendly sans-serifs (Nunito, Poppins, Circular, Cera Pro). Medium weights. Comfortable reading sizes.
-- **Color**: Natural palette. Warm whites, soft blues, muted greens, clay. Pastel accents. No pure black (use charcoal).
-- **Layout**: Clean and open. Card-based. Rounded corners (8-12px). Comfortable, generous layouts.
-- **Spacing**: Generous but not extreme. Everything feels approachable and uncluttered.
-- **Motion**: Gentle, natural easing. Subtle hover lifts. Content that settles into place.
-- **Details**: Soft shadows (large blur, low opacity). Rounded elements. Warm undertones in greys. Illustration-friendly.
-
-### Art Deco / Geometric
-Bold symmetry. Decorative precision. Statement and luxury.
-- **Typography**: Geometric display faces (Futura, Poiret One, Josefin Sans). All-caps headlines with extreme letterspacing. Serif body text for contrast.
-- **Color**: Rich and deep. Gold/champagne, emerald, navy, burgundy, black. Metallic accents (gold gradients, shimmer effects).
-- **Layout**: Symmetrical and centered. Strong vertical axis. Decorative frames and borders. Layered depth.
-- **Spacing**: Structured and formal. Padding is architectural.
-- **Motion**: Elegant reveals. Staggered entrance animations. Parallax depth.
-- **Details**: Geometric patterns (chevrons, sunbursts, fan shapes). Ornamental borders. Texture (marble, brushed metal). Statement typography at hero scale.
-
-### Neo-Memphis
-Playful chaos. Anti-corporate. Shapes as characters.
-- **Typography**: Mix of weights and styles. Clashing fonts is intentional. Oversized headlines. Text at angles.
-- **Color**: Bold primaries and neons. Clashing combinations (pink and yellow, blue and orange). No muted tones. Flat color, no gradients.
-- **Layout**: Broken grid. Overlapping elements. Shapes (circles, triangles, squiggles) as compositional elements. Asymmetric on purpose.
-- **Spacing**: Dense in some areas, empty in others. Rhythm is irregular.
-- **Motion**: Bouncy, playful. Exaggerated hover effects. Elements that wiggle, rotate, or pop.
-- **Details**: Thick borders. Geometric shapes as decoration. Patterns (dots, dashes, zigzags). Drop shadows with hard edges and bright colors.
-
-### Editorial / Magazine
-Content-led design. Typography does the heavy lifting. Every page is a spread.
-- **Typography**: Display serif for headlines (Playfair Display, Fraunces, Instrument Serif). Clean sans for body (DM Sans, Source Sans). Dramatic scale (hero headlines at 72-120px). Pull quotes. Drop caps.
-- **Color**: Minimal. Black and white with one accent. Color used editorially (to highlight, not decorate).
-- **Layout**: Strong column grid (3-5 columns). Full-bleed images. Text wrapping. Mixed column widths. Vertical rhythm.
-- **Spacing**: Generous margins. Tight leading on headlines, open on body. Whitespace as a compositional tool.
-- **Motion**: Scroll-triggered reveals. Parallax on images. Smooth page transitions.
-- **Details**: Thin rules as dividers. Caption typography. Issue/date metadata. Print-inspired details (folio numbers, running headers).
+When the user names a philosophy or describes a vibe, read its entry in [references/philosophies.md](references/philosophies.md) and build from it: Dieter Rams, Swiss / International Typographic, Japanese Minimalism (Ma), Brutalist, Scandinavian, Art Deco, Neo-Memphis, Editorial / Magazine. Each entry fixes typography, color, layout, spacing, motion and details — concrete enough to implement, not a mood board.
 
 ## Implementation Guidelines
 

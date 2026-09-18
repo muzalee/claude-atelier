@@ -1,6 +1,6 @@
 ---
 name: preflight
-description: Check a plan against the actual repository before anyone builds it and drive it to a buildable state — verify every file, symbol, dependency, command, and assumption the plan names, fix what has one right answer, ask about what has several, and stop only at decisions that are genuinely the user's. Use this skill whenever the user has a plan, task list, TASKS.md, PRD, design doc, migration plan, or issue breakdown and wants to know if it is still accurate, will actually run, or has gone stale — and whenever they say "check this plan", "can this run", "is this plan still valid", "sanity check this before I build", or hand over a plan written in an earlier session.
+description: Check a plan against the actual repo before it is built and drive it to buildable — verify every file, symbol, dependency and command it names; fix what has one right answer, ask about the rest. Use when a plan, task list, PRD or design doc might be stale or might not run ("check this plan", "sanity check before I build"), or when handed a plan from an earlier session.
 ---
 
 A plan is a set of claims about a repository: this file exists, that function takes these arguments, this dependency is installed, this command runs. Every one of those claims is checkable, and a plan is only as good as the claims it got right.
@@ -23,7 +23,7 @@ So the output of a good pass is not a document. It is a plan file that a build c
 
 ## Step 1: Locate the plan
 
-If the user named a file, use it. Otherwise look, in order: the `## Tasks` section of a design file, then `docs/prd/*.md`, `PLAN.md`, `TODO.md`, a plan pasted into the conversation. Find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). If several exist, list them and ask which one — checking the wrong plan wastes the whole pass.
+If the user named a file, use it. Otherwise look, in order: the `## Tasks` section of a design file, then `docs/prd/*.md`, `PLAN.md`, `TODO.md`, a plan pasted into the conversation. Find the feature's design file by the procedure in `${CLAUDE_SKILL_DIR}/../design/SKILL.md` → **Finding the design file**. If several exist, list them and ask which one — checking the wrong plan wastes the whole pass.
 
 Note when it was last modified and, **if this is a git repo**, how many commits have landed since. A plan written thirty commits ago is a different risk profile from one written this morning, and it tells you how hard to look. Outside a git repo, or where mtimes are uniform because everything was checked out at once, say the plan's age is unverifiable rather than guessing — a wrong guess makes the whole pass shallower or slower than it should be.
 

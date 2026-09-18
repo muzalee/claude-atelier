@@ -14,7 +14,7 @@ Turn the design file's `## Architecture` section into a working backend. Read it
 
 ## Prerequisites
 
-- A filled `## Architecture` section in the feature's design file. Find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). In a legacy six-file folder that section is `BACKEND_DESIGN.md`. Write back only into the file you found, under the name it already has.
+- A filled `## Architecture` section in the feature's design file. Find the feature's design file by the procedure in `${CLAUDE_SKILL_DIR}/../design/SKILL.md` → **Finding the design file**. In a legacy six-file folder that section is `BACKEND_DESIGN.md`. Write back only into the file you found, under the name it already has.
 - If none exists, stop and tell the user to run `/backend-design` first — this skill needs a brief, not a vibe.
 
 ## Process

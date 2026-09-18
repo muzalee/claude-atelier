@@ -12,7 +12,7 @@
 # Concurrency does not change total token spend, only how long it takes.
 #
 # One ceiling per suite is the point: a budget hit costs one suite's results,
-# not the whole 17-case pass. Results and the JSON land in evals/results/.
+# not the whole 21-case pass. Results and the JSON land in evals/results/.
 #
 # The judge defaults to sonnet, not the CLI's haiku. Haiku mis-votes a whole
 # class of assertion -- bare negatives ("does not suggest X") and anything
@@ -22,8 +22,8 @@
 # $0.0117 of a $0.31 run, so the fidelity is nearly free.
 set -euo pipefail
 
-TAGS=(errors logging prd preflight ship)
-tag=${1:?usage: run.sh <errors|logging|prd|preflight|ship|all> [extra flags...]}
+TAGS=(errors logging prd preflight ship design build)
+tag=${1:?usage: run.sh <errors|logging|prd|preflight|ship|design|build|all> [extra flags...]}
 shift
 
 evals=$(cd "$(dirname "$0")" && pwd)
