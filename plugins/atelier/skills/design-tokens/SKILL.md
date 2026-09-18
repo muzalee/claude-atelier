@@ -1,6 +1,6 @@
 ---
 name: design-tokens
-description: Produce a design token spec — color (light + dark), spacing, type, layout, motion, breakpoints — derived from a named aesthetic philosophy. Fills `### Tokens` under `## Experience` in the feature's `.design/YYYY-MM-DD-<slug>.md`: names, values, roles, never a CSS or Tailwind file. Use when establishing a visual system, setting up tokens, or the user mentions "tokens" or "design system".
+description: Produce a design token spec — color (light + dark), spacing, type, layout, motion, breakpoints — derived from a named aesthetic philosophy. Fills `### Tokens` under `## Experience` in the feature's `.design/YYYY-MM-DD-<slug>.md` — names, values, roles, never a CSS or Tailwind file. Use when establishing a visual system, setting up tokens, or the user mentions "tokens" or "design system".
 ---
 
 This skill produces the design tokens **spec**. Run it after the brief sections and before building any components. It fills one block — `### Tokens`, the last part of `## Experience` — of the feature's `.design/YYYY-MM-DD-<slug>.md`. (An older file with a top-level `## Tokens` keeps it; write there.) Not a CSS or Tailwind file: `/build` materializes the spec into the project's stack-appropriate format.

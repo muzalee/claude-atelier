@@ -1,6 +1,6 @@
 ---
 name: logging
-description: Emit structured logs that tell a story — who, where, what, how it ended — so you can debug without rerunning. Every entry: trace-id, identity anchor, operation, specific message; errors carry their cause chain; no secrets or PII. Use when adding a log line, setting up a logger, carrying a trace across a queue, reviewing observability, or cutting duplicate and noisy logs.
+description: Emit structured logs that tell a story — who, where, what, how it ended — so you can debug without rerunning. Every entry carries trace-id, identity anchor, operation, specific message; errors carry their cause chain; no secrets or PII. Use when adding a log line, setting up a logger, carrying a trace across a queue, reviewing observability, or cutting duplicate and noisy logs.
 ---
 
 Logs are the evidence trail. The bar: from a single log line, plus its siblings sharing the same trace-id, a reader should be able to reconstruct what happened without re-running the code. That's the whole game. Everything else in this skill is in service of that.

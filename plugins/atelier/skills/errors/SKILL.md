@@ -1,6 +1,6 @@
 ---
 name: errors
-description: Design errors that self-explain — stable code, internal and user messages, public ref code, cause chain, retryable flag, HTTP status. Use when adding an error type, fixing or reviewing error handling, deciding throw vs return vs wrap, or writing an API route — also in scripts, jobs, queue workers, CLIs, batch loops, and when maintaining a ref-code registry. YAGNI: no taxonomy for one endpoint.
+description: Design errors that self-explain — stable code, internal and user messages, public ref code, cause chain, retryable flag, HTTP status. Use when adding an error type, fixing or reviewing error handling, deciding throw vs return vs wrap, or writing an API route — also in scripts, jobs, queue workers, CLIs, batch loops, and when maintaining a ref-code registry. YAGNI — no taxonomy for one endpoint.
 ---
 
 The point of an error is to make debugging cheap. If reading the log line doesn't tell you what happened, what was expected, and where to look — the error failed at its job. This skill covers how to design and throw errors that carry that information every time.

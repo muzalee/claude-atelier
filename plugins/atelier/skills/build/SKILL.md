@@ -1,6 +1,6 @@
 ---
 name: build
-description: Explicit-invocation-only orchestrator that implements a completed `.design/YYYY-MM-DD-<slug>.md` — frontend, then backend — with a go/no-go between phases unless told "go all". Decisions were made in `/design`; this executes them. Use ONLY on /build or an explicit "build from the design", "implement the design", or "run the build pipeline". DO NOT auto-trigger from talk about writing frontend or backend code — those have their own skills. With no design file it asks: build directly, or `/design` first.
+description: Explicit-invocation-only orchestrator that implements a completed `.design/YYYY-MM-DD-<slug>.md` — frontend, then backend — with a go/no-go between phases unless told "go all". Decisions were made in `/design`; this executes them. Use ONLY on /build or an explicit "build from the design", "implement the design", or "run the build pipeline". DO NOT auto-trigger from talk about writing frontend or backend code — those have their own skills. With no design file it asks whether to build directly, or `/design` first.
 ---
 
 This skill is the **build** orchestrator. It takes the design produced by `/design` and turns it into working code. Two phases, with a go/no-go between them unless the caller says to run them all.

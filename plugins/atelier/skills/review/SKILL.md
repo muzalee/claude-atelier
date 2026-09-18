@@ -1,6 +1,6 @@
 ---
 name: review
-description: Explicit-invocation-only orchestrator: code review, security review and design review of the built code, measured against `.design/YYYY-MM-DD-<slug>.md` when one exists. Prints findings with ids; writes nothing. Use ONLY on /review or an explicit "run the review pipeline" / "review the build". For one technical review use `code-review`; for one visual review, `design-review`. DO NOT auto-trigger from adjacent talk about reviewing code.
+description: Explicit-invocation-only orchestrator that runs code review, security review and design review of the built code, measured against `.design/YYYY-MM-DD-<slug>.md` when one exists. Prints findings with ids; writes nothing. Use ONLY on /review or an explicit "run the review pipeline" / "review the build". For one technical review use `code-review`; for one visual review, `design-review`. DO NOT auto-trigger from adjacent talk about reviewing code.
 ---
 
 This skill is the **review** orchestrator. It runs three reviews — technical, security, then visual — against the code produced by `/build`, using `.design/YYYY-MM-DD-<slug>.md` as the yardstick.

@@ -1,6 +1,6 @@
 ---
 name: prd
-description: Write or amend a PRD — the scope contract: problem, users, requirements, metrics, non-goals, milestones, dependencies — as a numbered file in `docs/prd/`. Use when the user mentions a PRD, product spec, requirements or project scope, or wants in/out of scope pinned before design, even without saying "PRD". Also to amend one when requirements change: something cut or added, a change of plan, a late constraint.
+description: Write or amend a PRD — the scope contract covering problem, users, requirements, metrics, non-goals, milestones, dependencies — as a numbered file in `docs/prd/`. Use when the user mentions a PRD, product spec, requirements or project scope, or wants in/out of scope pinned before design, even without saying "PRD". Also to amend one when requirements change — something cut or added, a change of plan, a late constraint.
 ---
 
 A PRD answers **what we are building, for whom, and why** — and just as importantly, **what we are not building**. It is the scope contract for an initiative. Design briefs and backend briefs sit downstream of it and decide *how*; this document decides *what* and *whether*.

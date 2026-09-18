@@ -1,6 +1,6 @@
 ---
 name: keep-it-simple
-description: House rules for everything written: conventional commits and matching branch names (respecting `.commitlintrc`), PR titles and bodies, code comments (none by default, never historical, a low ratio), and docs. Short, why-focused, no Claude trailers. Use on any git commit, `gh pr create` or `git checkout -b`, and whenever writing or reviewing code comments, docstrings, or README/docs.
+description: House rules for everything written — conventional commits and matching branch names (respecting `.commitlintrc`), PR titles and bodies, code comments (none by default, never historical, a low ratio), and docs. Short, why-focused, no Claude trailers. Use on any git commit, `gh pr create` or `git checkout -b`, and whenever writing or reviewing code comments, docstrings, or README/docs.
 ---
 
 Default to the shortest form that still conveys the point. Structure follows a convention where one exists; tone stays terse everywhere.
