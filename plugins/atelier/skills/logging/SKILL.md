@@ -1,13 +1,13 @@
 ---
 name: logging
-description: Emit logs that are structured, contextual, and tell a story — who did what, where, and how it ended — so you can debug from them without rerunning the code. Every log carries trace-id, an identity anchor (user-id, session-id, tenant-id) so one user's report is filterable, an operation name, and a specific message: never "an error occurred". Errors are logged with the full cause chain from the `errors` skill. Level discipline (DEBUG dev-only, INFO business events, WARN recoverable, ERROR needs-attention). Never log secrets, PII, tokens, cookies. Use when adding a log line, setting up a logger, reviewing a service for observability, or debugging a "why isn't there a log for this" gap. Also use for the inverse — too much logging: the same failure logged two or three times, duplicate or noisy entries, logs that make dashboards useless, or deciding which layer owns a log line.
+description: Emit structured logs that tell a story — who, where, what, how it ended — so you can debug without rerunning. Every entry: trace-id, identity anchor, operation, specific message; errors carry their cause chain; no secrets or PII. Use when adding a log line, setting up a logger, carrying a trace across a queue, reviewing observability, or cutting duplicate and noisy logs.
 ---
 
 Logs are the evidence trail. The bar: from a single log line, plus its siblings sharing the same trace-id, a reader should be able to reconstruct what happened without re-running the code. That's the whole game. Everything else in this skill is in service of that.
 
 **A log line is one sentence in a story.** Read on its own it answers four questions — *who* (identity anchor), *where* (service, operation), *what* (the specific event), *how it ended* (outcome, duration, error). Read in trace order with its siblings it becomes a narrative: request arrived → user resolved → payment attempted → card declined → 402 returned. If a line can't answer its four questions, or the sequence has a hole where something clearly happened, the story is broken and the next incident costs hours.
 
-Pairs with `errors` — the error is *designed* over there; here it gets *emitted*. Neither works without the other.
+Pairs with `errors` — the error is *designed* over there; here it gets *emitted*. Neither works without the other. The trace-id lives here; `errors` references it.
 
 ## Example prompts
 
@@ -145,13 +145,23 @@ Most of this skill says "request", because that is where the framework does the 
 | CLI invocation      | `main`               | `trace_id` (fresh), `command`, `args` (no secrets)       |
 | Mobile / desktop    | Per user action      | `trace_id` (fresh, client-side), `session_id`, `user_id`, `app_version`, `platform` |
 
-**Trace-ids cross boundaries or the story ends.** When you enqueue, put the current `trace_id` in the message. When the consumer picks it up, bind that id rather than minting a new one. A queued email then traces back to the click that caused it, across two processes and twenty minutes. Same for job payloads and outbound HTTP.
+The trace-id rules for all of these are in [The trace-id, end to end](#the-trace-id-end-to-end).
 
-Mint a fresh id only where a unit of work genuinely starts on its own — a cron tick, a cold app launch, a user typing a command. And log the parent id alongside (`parent_trace_id`) when a job fans out into children, or you get a thousand unrelated traces that were all one thing.
-
-**Clients log too.** A mobile or desktop app is a log emitter, not just a UI. Generate the trace-id client-side per user action and send it as a header, so the client-side log and the server-side log share an id — otherwise "the app showed an error" and "the server logged a failure" are two facts nobody can join. Then the local specifics: buffer and upload rather than logging per line over the network, bind `app_version` and `platform` (the bug is usually one build or one OS), and drop the buffer on logout. An offline client's logs arrive late and out of order — order by the event's own timestamp, never by arrival.
+**Clients log too.** A mobile or desktop app is a log emitter, not just a UI. Its trace-id is minted client-side (step 1 below). Then the local specifics: buffer and upload rather than logging per line over the network, bind `app_version` and `platform` (the bug is usually one build or one OS), and drop the buffer on logout. An offline client's logs arrive late and out of order — order by the event's own timestamp, never by arrival.
 
 **Nothing is watching a background failure.** A request failure has a user retrying and telling you. A job that dies at 3am has nobody, so the log is the *only* evidence — log the start and the end of every run, not just failures, or "did it run at all?" becomes unanswerable. Include `attempt` on retried work, so a poison message is visible as one message failing forty times rather than forty failures.
+
+## The trace-id, end to end
+
+This skill owns the trace-id; `errors` defers here. `ref` tells support *what kind* of failure, `trace_id` tells them *which one*, and the chain only works if every link exists:
+
+1. **Mint at the edge — once.** The first service to see the request mints one, unless the caller sent `x-request-id` or a W3C `traceparent` — then honor theirs. Fastify's `req.id` does this. Outside a request, mint a fresh one only where a unit of work genuinely starts on its own: a cron tick, a cold app launch, a user typing a command, a user action in a client app (sent up as a header, so the client log and the server log share an id).
+2. **Bind it to the scoped logger** so every line carries it without anyone passing it around.
+3. **Forward it on every outgoing call** — `x-request-id` (or `traceparent` for OpenTelemetry) on HTTP, an attribute on the queue message, a field in the job payload. The consumer binds the id it received rather than minting a new one, so a queued email traces back to the click that caused it, across two processes and twenty minutes. When a job fans out, log `parent_trace_id` on the children, or a thousand traces that were one thing look unrelated.
+4. **Return it in the response**, in the body and as a response header, on success as well as failure. Support asks for it on "the page was slow" too.
+5. **Show it in the UI** next to the user-facing message, selectable and copyable. A trace-id nobody can read off the screen is one nobody will ever quote.
+
+Step 5 is the one that gets skipped, and skipping it quietly wastes the other four.
 
 ## Setup — the once-per-service work
 
@@ -167,8 +177,6 @@ const logger = pino({
 fastify.register(require("@fastify/http-proxy"), { logger });
 // req.log is a child logger with req_id + trace_id already bound
 ```
-
-**Anywhere:** propagate the trace-id via an `x-request-id` (or `traceparent` for OpenTelemetry) header on every outgoing call, so downstream services correlate.
 
 ## The story with errors
 

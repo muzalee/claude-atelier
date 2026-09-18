@@ -29,7 +29,7 @@ Reviews **changed code only** by default (uncommitted + last-N commits since bra
 
 2. **Read the changed files in full** (not just the diff hunks). Context matters — a 3-line change in a security-sensitive function needs the whole function.
 
-3. **Load the conventions you are reviewing against.** Read `errors/SKILL.md` and `logging/SKILL.md` — always, in every repo. They define the error and log contract this checklist measures against, and reviewing from memory is how a convention quietly stops being one. Then the project's own rules (`.claude/rules/`) and the stack conventions if installed (`typescript-conventions`, `flutter-conventions`). A convention nobody reviews against is a suggestion.
+3. **Load the conventions you are reviewing against.** Read `${CLAUDE_SKILL_DIR}/../errors/SKILL.md` and `${CLAUDE_SKILL_DIR}/../logging/SKILL.md` — always, in every repo. They define the error and log contract this checklist measures against, and reviewing from memory is how a convention quietly stops being one. Then the project's own rules (`.claude/rules/`) and the stack conventions if installed (`typescript-conventions`, `flutter-conventions`). A convention nobody reviews against is a suggestion.
 
 4. **Run the checklist** (skip categories that don't apply):
 
@@ -102,7 +102,7 @@ Reviews **changed code only** by default (uncommitted + last-N commits since bra
 
    Read the design file — `## Tasks`, `## Tests`, `## Implementation` and the sections above them — and the PRD, and compare them against what the diff actually does. Two failures, opposite directions, both invisible in a pure code read:
 
-   - **Gap — the plan asked for it and it is not there.** A task ticked with no code implementing it. A requirement (`FR-n`) nothing satisfies. A case in `## Tests` with no test. A line in `## Implementation` naming a file that does not exist or does not do what the line claims. Gaps are what make a build look finished while the feature is half-built, and a ticked checkbox is the thing that hides them.
+   - **Gap — the plan asked for it and it is not there.** A task ticked with no code implementing it. A requirement (`FR-n`) nothing satisfies. A case in `## Tests` with no test. A row in `## Implementation` naming a file that does not exist or does not do what the line claims. Gaps are what make a build look finished while the feature is half-built, and a ticked checkbox is the thing that hides them.
    - **Drift — it is there and the plan never asked for it.** A file nobody's task called for. A feature beyond the brief. Something the PRD listed under Non-Goals that got built anyway. Drift is rarely malicious; it is usually a good idea had mid-build. It still means the thing shipped is not the thing agreed, and the PRD or brief should be amended to match — or the code dropped.
 
    Report each as a finding citing both sides: the plan location and the code location, or the code location and the absence. "FR-3 requires rate limiting; nothing in the diff implements it" is a finding. "The code looks incomplete" is not.

@@ -1,11 +1,11 @@
 ---
 name: errors
-description: Design and throw errors that self-explain, so debugging from a log line is possible without rerunning the code. Every error carries a stable internal code, a precise internal message, a friendly user-facing message, a short public reference code, the cause chain, and (for API errors) an HTTP status. Distinguishes expected errors (validation, auth, not-found) from unexpected (bugs, infra down). Pairs with the `logging` skill — errors get logged with full context by the global handler. Use when adding a new error type, refactoring or fixing error handling anywhere, deciding whether to throw / return / wrap, writing an API route, or reviewing code for error discipline. Not only HTTP: covers scripts, backfills and one-off jobs, CLI tools, cron, queue consumers and workers (jobs vanishing, work silently acked, swallowed catches), and batch loops over N items. Also use when maintaining existing error codes or a ref-code registry — renumbering, gaps, or a code filed under the wrong domain. Do not build a taxonomy for one endpoint — YAGNI applies.
+description: Design errors that self-explain — stable code, internal and user messages, public ref code, cause chain, retryable flag, HTTP status. Use when adding an error type, fixing or reviewing error handling, deciding throw vs return vs wrap, or writing an API route — also in scripts, jobs, queue workers, CLIs, batch loops, and when maintaining a ref-code registry. YAGNI: no taxonomy for one endpoint.
 ---
 
 The point of an error is to make debugging cheap. If reading the log line doesn't tell you what happened, what was expected, and where to look — the error failed at its job. This skill covers how to design and throw errors that carry that information every time.
 
-Pairs with `logging` — errors get emitted through the global handler that adds request context, trace-id, and the full cause chain. Neither skill works without the other.
+Pairs with `logging` — errors get emitted through the global handler that adds request context, trace-id, and the full cause chain. The trace-id itself belongs to `logging`; this skill only carries it into the response.
 
 ## Example prompts
 
@@ -171,17 +171,11 @@ fastify.setErrorHandler((err, req, reply) => {
 });
 ```
 
-## The trace-id, end to end
+## The trace-id
 
-`ref` tells support *what kind* of failure. `trace_id` tells them *which one* — this user, this click, this second. Neither substitutes for the other, and the chain only works if every link exists:
+`ref` tells support *what kind* of failure; `trace_id` tells them *which one* — this user, this click, this second. Neither substitutes for the other. The error contract's part is above: the handler returns `trace_id` beside `ref`, and the UI shows both.
 
-1. **Generate at the edge.** The first service to see the request mints one, unless the caller already sent `x-request-id` or a W3C `traceparent` — then honor theirs. Fastify's `req.id` does this; most frameworks have an equivalent.
-2. **Bind it to the request-scoped logger** so every log line carries it without anyone passing it around. See `logging`.
-3. **Forward it on every outgoing call** — HTTP header, queue message attribute, job payload. A trace that stops at your service boundary is half a story.
-4. **Return it in the response**, in the body and as a response header, on success as well as failure. Support asks for it on "the page was slow" too, not just on errors.
-5. **Show it in the UI** next to the user-facing message, selectable and copyable. A trace-id nobody can read off the screen is a trace-id nobody will ever quote.
-
-Step 5 is the one that gets skipped, and skipping it quietly wastes the other four.
+Everything else about the id — minting it at the edge, binding it to the logger, forwarding it on outgoing calls and queued work, minting a fresh one only where work genuinely starts, generating it client-side — is the `logging` skill's: `logging` → **The trace-id, end to end**. It lives there once so the two skills cannot drift.
 
 ## Outside HTTP
 
@@ -201,10 +195,9 @@ Rules that hold everywhere:
 
 - **Partial failure is still failure.** In a loop over N items, catching per item is right — swallowing is not. Collect what failed, name each one so the run can be resumed, and let the exit code or the job's failure marker say the batch did not fully succeed. The dangerous shape is a `catch` that logs and continues into a green exit.
 - **`retryable` does the work here.** With no caller to hand a status to, the flag is what decides nack vs dead-letter, and what stops a poison message cycling forever. Cap attempts regardless, and log the attempt number.
-- **Every unit of work gets a trace-id.** A job run, a message, a CLI invocation, a user action in an app. Not just requests. See `logging`.
-- **Carry it across the boundary.** Put the `trace_id` in the queue message, the job payload, the outbound header. A background failure should trace back to the click that queued it — otherwise the story ends at "something queued this, once".
+- **Every unit of work gets a trace-id, carried across the boundary** — job runs, messages, CLI invocations, user actions in an app. How, and when to mint a fresh one: `logging` → **The trace-id, end to end**.
 - **The user still exists, just later.** A failed job often has a person waiting on its result. The `userMessage` is what the notification, the status page, or the retry banner shows — write it even though nothing renders it synchronously.
-- **A client is both.** A mobile app renders errors *and* emits logs. Generate the trace-id client-side per user action and send it up, so the client-side log and the server-side log share an id. Without that, "the app showed an error" and "the server logged a failure" are two facts nobody can join.
+- **A client is both.** A mobile app renders errors *and* emits logs — it shows `userMessage` and `ref`, and its trace-id is minted client-side per `logging`.
 
 ## Testing the error path
 

@@ -6,7 +6,7 @@ A workshop of personal Claude Code skills — design, build, review, and writing
 
 ### Recommended — as Claude Code plugins
 
-One marketplace, two plugins:
+One marketplace, three plugins:
 
 - **`atelier`** — the stack-agnostic core: design → build → review pipeline + writing-craft skills.
 - **`atelier-typescript`** — TypeScript skills (React + Fastify conventions, route scaffolding). Install in TypeScript projects.
@@ -18,9 +18,10 @@ Inside Claude Code:
 /plugin marketplace add muzalee/claude-atelier
 /plugin install atelier@atelier
 /plugin install atelier-typescript@atelier   # optional, TS/Fastify only
+/plugin install atelier-flutter@atelier      # optional, Flutter only
 ```
 
-Skills are namespaced under each plugin, e.g. `/atelier:design`, `/atelier-typescript:fastify-route`.
+Skills are namespaced under each plugin, e.g. `/atelier:design`, `/atelier-typescript:fastify-route`. **Always type `/atelier:design`, not `/design`** — a bare `/design` collides with Claude Code's built-in design canvas and with `ui-ux-pro-max:design`.
 
 **Turn on auto-update** (third-party marketplaces default off): `/plugin` → **Marketplaces** → `atelier` → **Enable auto-update**. New versions land in the background; you'll be prompted to `/reload-plugins` when they do.
 
@@ -75,7 +76,7 @@ Clone somewhere durable and link each skill into `~/.claude/skills/`:
 ```bash
 git clone https://github.com/muzalee/claude-atelier.git ~/code/claude-atelier
 cd ~/code/claude-atelier
-for s in skills/*/; do ln -sfn "$(pwd)/$s" "$HOME/.claude/skills/$(basename "$s")"; done
+for s in plugins/*/skills/*/; do ln -sfn "$(pwd)/$s" "$HOME/.claude/skills/$(basename "$s")"; done
 ```
 
 For a single project only, swap `$HOME/.claude/skills` for `/path/to/project/.claude/skills`. Re-run the loop after `git pull` to pick up new skills.
@@ -91,35 +92,53 @@ Five orchestrators run the show. Everything else is a phase skill callable direc
 /prd     →  scope contract in docs/prd/NNNN-<slug>.md   (optional, project-level)
         │
         ▼
-/design  →  docs in .design/YYYY-MM-DD-<slug>/  (no code)
+/design  →  one file, .design/YYYY-MM-DD-<slug>.md  (no code)
         │
         ▼
 /preflight → checks the plan still matches the repo   (optional, before building)
         │
         ▼
-/build   →  reads those docs, writes code
+/build   →  reads it, writes code
         │
         ▼
-/review  →  reviews the code against the docs
+/review  →  reviews the code against it
 ```
 
-`/ship` replaces the last two steps. Given a finished `.design/YYYY-MM-DD-<slug>/`, it runs
+`/ship` replaces the last two steps. Given a finished `.design/YYYY-MM-DD-<slug>.md`, it runs
 build → browser test → review → fix → cold review → fix unattended, and leaves a
 review-ready PR behind. It does not design anything — `/design` still comes first.
 
 ```
-.design/YYYY-MM-DD-<slug>/  →  /ship  →  a PR you only have to read
+.design/YYYY-MM-DD-<slug>.md  →  /ship  →  a PR you only have to read
 ```
 
 ## Orchestrators
 
 - `bootstrap` — scaffold a new project: folder, stack starter, the right folder structure for that stack written to `.claude/rules/0001-structure.md` + CLAUDE.md, `.gitignore`, README, LICENSE, git init, optional GitHub repo with topics
-- `design` — pure-design pipeline: grill-me → brief → backend-design → IA → tokens → test-plan → tasks. Output is markdown only, saved to `.design/YYYY-MM-DD-<slug>/`.
-- `build` — reads `.design/YYYY-MM-DD-<slug>/` and implements: materializes the tokens spec, runs ui-build against `TASKS.md`, then backend-build against `BACKEND_DESIGN.md`.
-- `review` — runs code-review + security-review + design-review against the built code, using the design docs as the yardstick. Reports back into `.design/YYYY-MM-DD-<slug>/`.
-- `ship` — `/build` + `/review` run unattended, ending in a PR: branch off main, draft PR, build committing per phase, functional browser test (Orca or Claude-in-Chrome), warm review, fix, cold review in a fresh session against the whole PR, fix, flip to ready. Needs a finished `.design/YYYY-MM-DD-<slug>/` — it builds, it does not design.
+- `design` — pure-design pipeline: grill-me → brief → backend-design → IA → tokens → test-plan → tasks. Output is one markdown file, `.design/YYYY-MM-DD-<slug>.md` — a short form (Problem, Solution, Tasks, Implementation) for small changes, the full form for features. Invoke as `/atelier:design`.
+- `build` — reads `.design/YYYY-MM-DD-<slug>.md` and implements: materializes the `### Tokens` spec, runs ui-build against `## Tasks`, then backend-build against `## Architecture`, recording what it built in `## Implementation`.
+- `review` — runs code-review + security-review + design-review against the built code, using the design file as the yardstick. Prints findings with stable ids and writes nothing.
+- `ship` — `/build` + `/review` run unattended, ending in a PR: branch off main, draft PR, build committing per phase, functional browser test (Orca or Claude-in-Chrome), warm review, fix, cold review in a fresh session against the whole PR, fix, flip to ready. Needs a finished `.design/YYYY-MM-DD-<slug>.md` — it builds, it does not design.
 
-`/prd` is not part of the `/design` pipeline — it sits above it. One PRD covers an initiative; several `.design/YYYY-MM-DD-<slug>/` folders can hang off it. When design or build discovers a requirement is wrong, they stop and offer to amend the PRD rather than quietly diverging from it.
+`/prd` is not part of the `/design` pipeline — it sits above it. One PRD covers an initiative; several `.design/YYYY-MM-DD-<slug>.md` files can hang off it, and a design under a PRD has no `## Scope` of its own — the PRD is its scope. When design or build discovers a requirement is wrong, they stop and offer to amend the PRD rather than quietly diverging from it.
+
+## The design file
+
+One markdown file per feature, committed with the code. Each phase skill owns one section, and anything enumerable is a table so a human can scan it.
+
+| Section | Filled by | Holds |
+| ------- | --------- | ----- |
+| `## Problem` | `design-brief` | The human friction |
+| `## Solution` | `design-brief` | The experience, plus a "Considered and rejected" table |
+| `## Scope` | `design-brief` | In / out of scope — only when there is no PRD |
+| `## Experience` | `design-brief`, `design-tokens` | Philosophy, components, key interactions, responsive, accessibility, and a `### Tokens` block |
+| `## Architecture` | `backend-design` | Data model, API surface, auth, invariants, failure modes |
+| `## Structure` | `information-architecture` | Routes, navigation, flows, component reuse |
+| `## Tests` | `test-plan` | One case per row, plus a "Not testing" table |
+| `## Tasks` | `brief-to-tasks` | The build checklist — checkboxes, not a table, so `/build` can tick them |
+| `## Implementation` | `/build` and fix passes | A **Built** table per task, and a **Findings** table per review finding fixed |
+
+The short form keeps only Problem, Solution, Tasks and Implementation.
 
 ## Phase skills (callable directly)
 
@@ -132,13 +151,13 @@ review-ready PR behind. It does not design anything — `/design` still comes fi
 - `design-brief` — write a design brief through interview + codebase scan
 - `backend-design` — data model, API, auth, scale, observability
 - `information-architecture` — structure, nav, flows before visuals
-- `design-tokens` — colors, spacing, typography, motion as a `DESIGN_TOKENS.md` spec (not code)
+- `design-tokens` — colors, spacing, typography, motion as a spec in the `### Tokens` block of `## Experience` (not code)
 - `test-plan` — name the cases (unit / integration / e2e), what to assert, and what NOT to test
 - `brief-to-tasks` — break a brief (and test plan) into vertical-slice tasks
 
 **Build phase:**
-- `ui-build` — build the frontend from `TASKS.md` with strong aesthetics; materializes the token spec if needed. Renamed from `frontend-design` to avoid colliding with Anthropic's official plugin of that name.
-- `backend-build` — implement a backend from `BACKEND_DESIGN.md` (plugins, routes, migrations, tests)
+- `ui-build` — build the frontend from `## Tasks` with strong aesthetics; materializes the token spec if needed. Renamed from `frontend-design` to avoid colliding with Anthropic's official plugin of that name.
+- `backend-build` — implement a backend from `## Architecture` (plugins, routes, migrations, tests)
 
 **Runtime discipline (callable anytime during design or build):**
 - `errors` — design typed errors with stable codes and cause chains, so a log line tells the full story
@@ -152,6 +171,10 @@ review-ready PR behind. It does not design anything — `/design` still comes fi
 ## Writing craft
 
 - `keep-it-simple` — conventional commit format, PR titles/bodies, branch names, code comments (necessity bar, not brevity bar), and terse docs
+
+## When no skill fits
+
+Atelier does not replace everything. For anything a skill does not cover — a language-specific bug, a stdlib question, a git command, a one-off script, a config tweak — Claude should use its own knowledge rather than force an ill-fitting skill onto it. Skills for the named workflows above, baseline knowledge for everything else.
 
 ## atelier-flutter skills
 
@@ -187,7 +210,7 @@ EVAL_ABLATION=with-without plugins/atelier/evals/run.sh prd
 
 `run.sh` wraps the CLI with the flags that are easy to get wrong and a
 `--max-cost-usd` ceiling **per suite**, so a budget hit costs one suite's
-results rather than the whole 17-case pass. The raw form is:
+results rather than the whole 21-case pass. The raw form is:
 
 ```bash
 claude plugin eval plugins/atelier --tag logging --runs 1 \
@@ -230,8 +253,8 @@ negative assertion ("the postgres message is NOT returned") passes whenever the 
 is shown nothing.
 
 Assertions about what the agent *said* — what it noticed, asked, recommended, or
-refused — correctly stay on `last_message`. 64 of the 127 graders read a file; the
-other 63 are genuinely about the reply.
+refused — correctly stay on `last_message`. 72 of the 148 judged graders read a file; the
+other 76 are genuinely about the reply.
 
 Grader `type` is one of `regex`, `tool_order`, `tool_used`, `file_exists`, `llm`,
 `baseline`. Only `llm` and `baseline` cost a judge call, but the free ones cannot

@@ -1,6 +1,6 @@
 ---
 name: test-plan
-description: Write a short test plan for a change before implementing — name the cases that must pass, the level each should live at (unit / integration / e2e), what to break to prove them, and what NOT to test. Fills the `## Tests` section of the feature's `.design/YYYY-MM-DD-<slug>.md` when one exists (invoked from `/design` or standalone in a design-driven project); otherwise outputs inline. Use before starting non-trivial work, when asked for a "test plan", when reviewing a PR to sanity-check coverage, or as part of the `/design` pipeline.
+description: Write a short test plan before implementing — the cases that must pass, the level each lives at (unit / integration / e2e), what to break to prove them, and what NOT to test. Fills `## Tests` in the feature's `.design/YYYY-MM-DD-<slug>.md` when one exists, otherwise prints inline. Use before non-trivial work, when asked for a "test plan", or to sanity-check a PR's coverage.
 ---
 
 Before writing code (or before a PR ships), name the cases that must pass — and the *level* they should live at. Picking the wrong level catches bugs but wastes weeks maintaining flaky fake tests.
@@ -32,7 +32,7 @@ Before writing code (or before a PR ships), name the cases that must pass — an
    - Cases where the type system already guarantees the invariant
    - Third-party services (mock the boundary at the highest level, don't retest the vendor)
 
-6. **Write the plan into `## Tests`.** Find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). Write the cases into that file's `## Tests` section; in a legacy six-file folder, write `TEST_PLAN.md` beside the old files as before. Do not create a design file just to have somewhere to write — with none, output inline.
+6. **Write the plan into `## Tests`.** Find the feature's design file by the procedure in `${CLAUDE_SKILL_DIR}/../design/SKILL.md` → **Finding the design file**. Write the cases into that file's `## Tests` section; in a legacy six-file folder, write `TEST_PLAN.md` beside the old files as before. Do not create a design file just to have somewhere to write — with none, output inline.
 
 ## Test level guide
 
@@ -67,30 +67,34 @@ Tooling options, roughly in order of preference for CI:
 
 ## Output shape
 
-Short markdown, no template ceremony. One case per line, then what you are not testing. **Reference the interactions named in `## Experience` and the failure modes named in `## Architecture` rather than describing them again** — a case that re-tells the interaction is the same decision written twice.
+Two tables, no template ceremony: the cases, then what you are not testing. **Reference the interactions named in `## Experience` and the failure modes named in `## Architecture` rather than describing them again** — a case that re-tells the interaction is the same decision written twice. The `From` column is where that reference goes.
 
 ```markdown
 ## Tests
 
-- [unit] happy: valid input → returns X
-- [unit] rejects malformed body → 400 with field-level error
-- [integration] token expired → 401, no DB write
-- [integration] downstream 503 → returns 503 to caller, does not retry
-- [e2e] user completes checkout → order row in DB, receipt email queued
-  _Walk through with Claude Chrome extension before writing the Playwright case._
-- [regression] existing GET /users still returns unchanged shape
+| Level | Case | Assertion | From |
+| ----- | ---- | --------- | ---- |
+| unit | happy path | valid input → returns X | FR-1 |
+| unit | malformed body | 400 with field-level error | FR-2 |
+| integration | token expired | 401, no DB write | Auth |
+| integration | downstream 503 | returns 503 to caller, does not retry | Failure modes |
+| e2e | checkout completes | order row in DB, receipt email queued — walk it with the Chrome extension before writing the Playwright case | Checkout (interaction) |
+| regression | existing `GET /users` | response shape unchanged | — |
 
 ### Not testing
-- Fastify JSON parsing (framework)
-- Third-party JWT library internals (mocked at boundary)
-- Every combinatoric field of the form (integration + property test if it matters)
+
+| What | Why |
+| ---- | --- |
+| Fastify JSON parsing | Framework behavior |
+| JWT library internals | Mocked at the boundary |
+| Every field combination of the form | Integration + property test if it matters |
 ```
 
 ## Rules
 
 - **Assertions, not intentions.** "Handles bad input" is not a test case. "Returns 400 when `email` is missing" is.
-- **One case per line.** If a bullet needs an "and," split it.
-- **Don't design the tests, name them.** The plan is a checklist, not code. If you can't name the case in one line, the case isn't clear enough.
+- **One case per row.** If a case needs an "and," split it.
+- **Don't design the tests, name them.** The plan is a table, not code. If you can't name the case in one row, the case isn't clear enough.
 - **A plan with only happy-path cases is a bad plan.** If you can't think of a failure mode, ask the user what the failure modes are. That's the whole reason this skill exists.
 - **Never pick "unit" for a case that needs a mock.** Move it to integration and run it against the real thing.
 - **Coverage percentage is a vanity metric.** The number that matters is how many prod incidents your tests catch before deploy. Optimize for that.
@@ -99,7 +103,7 @@ Short markdown, no template ceremony. One case per line, then what you are not t
 
 The failure modes worth testing live in the design file, not in your imagination. Where one exists, read first:
 
-- **`## Experience`** — the key interactions are the e2e cases, and `## Scope`'s out-of-scope list tells you what not to cover.
+- **`## Experience`** — the key interactions are the e2e cases, and the out-of-scope column of `## Scope` — or the PRD's non-goals, when there is a PRD — tells you what not to cover.
 - **`## Architecture`** — the invariants and failure modes are the integration cases. The failure modes list is close to a test list already.
 - **`docs/prd/NNNN-*.md`** — every `FR-n` and `NFR-n` is a requirement someone agreed to. A MUST with no test is a shippable bar nothing checks.
 

@@ -4,6 +4,7 @@
     "name": "muza",
     "url": "https://github.com/muzalee"
   },
+  "description": "Personal Claude Code skills: a design → build → review pipeline with writing craft (atelier), plus TypeScript and Flutter conventions.",
   "plugins": [
     {
       "name": "atelier",

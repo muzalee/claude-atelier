@@ -1,6 +1,6 @@
 ---
 name: ship
-description: Explicit-invocation-only orchestrator that takes a feature from a completed `.design/YYYY-MM-DD-<slug>.md` all the way to a review-ready pull request, unattended — branch off latest main, open a draft PR, build committing per phase, functionally test the result in a real browser, run a warm review, fix, run a cold review in a fresh session against the whole PR, fix, then flip the PR to ready. Invoked ONLY when the user types /ship or explicitly asks to "ship this", "run the ship pipeline", or "build and open a PR unattended". DO NOT auto-trigger from adjacent talk about branches, PRs, building, or reviewing — those have their own skills.
+description: Explicit-invocation-only orchestrator that takes a completed `.design/YYYY-MM-DD-<slug>.md` to a review-ready PR, unattended — branch off main, draft PR, build per phase, browser-test, warm review, fix, cold review of the whole PR in a fresh session, fix, flip to ready. Use ONLY on /ship or an explicit "ship this", "run the ship pipeline", or "build and open a PR unattended". DO NOT auto-trigger from talk about branches, PRs, building or reviewing — those have their own skills.
 ---
 
 This skill runs the whole delivery loop without asking permission between steps. The user typed `/ship` because they want to come back to a finished pull request, not to a question.
@@ -15,7 +15,7 @@ Where `/build` stops at working code and `/review` stops at a report, this close
 
 ## Prerequisites
 
-- A design file with at minimum `## Problem`, `## Solution` and `## Tasks` filled. Find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). Every stage below reads it and writes only its `## Implementation` section; `/ship` never creates or renames a design file. This gate is real here, unlike in `/build`: ship runs unattended through build, review, fix, and PR, and every one of those stages measures against the plan. Without it there is nothing to check the work against and nothing to write a PR description from.
+- A design file with at minimum `## Problem`, `## Solution` and `## Tasks` filled. Find the feature's design file by the procedure in `${CLAUDE_SKILL_DIR}/../design/SKILL.md` → **Finding the design file**. Every stage below reads it and writes only its `## Implementation` section; `/ship` never creates or renames a design file. This gate is real here, unlike in `/build`: ship runs unattended through build, review, fix, and PR, and every one of those stages measures against the plan. Without it there is nothing to check the work against and nothing to write a PR description from.
 
   Stop and offer the fork: `/design` if it is a feature, or `/build` then `/atelier:code-review` and a commit if it is small enough not to want a plan. Do not ship a small change through a pipeline built for features.
 - A clean working tree. Uncommitted changes would end up in the PR attributed to this run. Stop and ask.
@@ -53,7 +53,7 @@ Where `/build` stops at working code and `/review` stops at a report, this close
 
 6. **Commit per phase, never in one lump.** Each build phase is its own commit, following `keep-it-simple`. A reviewer reading a 40-file single commit cannot tell the frontend work from the backend work, and neither can `git bisect`.
 
-   The commit carries that phase's code **and** the `## Implementation` lines recorded for it. The log and the diff it explains land together, or a reviewer reads them a commit apart and the record trails the work it describes.
+   The commit carries that phase's code **and** the `## Implementation` rows recorded for it. The log and the diff it explains land together, or a reviewer reads them a commit apart and the record trails the work it describes.
 
 7. **The build runs with its gates off, and you say so in the instruction.** `/build` asks "Next phase: X. Go?" between phases by default. Nobody is at this terminal to answer, so **every instruction this skill sends to a build begins with `go all phases — do not gate between them, there is nobody at this terminal to answer`** — in the literal text, not implied by the fact that an orchestrator sent it. A build that gates inside an unattended run stops at phase 1, stage 3 reads that prompt as a question, and rule 2 halts the whole run over a checkpoint nobody needed.
 
@@ -84,7 +84,7 @@ A reachable runtime is not the same as a usable terminal: Orca scopes terminals 
 
 **The terminal is the normal path. Inline is the exception.** It buys isolation, lets a long build run without occupying this session, and makes the build's state observable from outside — which is the whole point of the state detection below. Do not fall back to inline because inline looks simpler; fall back only when one of the three conditions actually failed.
 
-**When you do fall back, name which of the three failed** — "`orca` is not installed", "`orca status` reports the runtime unreachable", "`orca terminal create` returned `selector_not_found`; this directory is not an Orca worktree" — in one line, then follow `build/SKILL.md` directly in this session and skip the state-detection procedure entirely; there is no separate session to inspect, so "finished, errored, or waiting" is simply whatever you observe as you go. Everything else in the pipeline is unchanged: same stages, same blockers, same PR. A fallback with no reason given reads like a choice, and the next reader cannot tell whether Orca was broken or just unexamined.
+**When you do fall back, name which of the three failed** — "`orca` is not installed", "`orca status` reports the runtime unreachable", "`orca terminal create` returned `selector_not_found`; this directory is not an Orca worktree" — in one line, then follow `${CLAUDE_SKILL_DIR}/../build/SKILL.md` directly in this session and skip the state-detection procedure entirely; there is no separate session to inspect, so "finished, errored, or waiting" is simply whatever you observe as you go. Everything else in the pipeline is unchanged: same stages, same blockers, same PR. A fallback with no reason given reads like a choice, and the next reader cannot tell whether Orca was broken or just unexamined.
 
 ### Spawning it
 
@@ -103,10 +103,10 @@ Every build instruction sent from this skill, at stage 2, stage 3, and the fix s
 2. The **design file path**, `.design/YYYY-MM-DD-<slug>.md`.
 3. The **house conventions it must load** — its own House Conventions section lists them.
 4. The **no-historical-comments rule**, restated: comments describe the code as it is, never how it got here.
-5. The instruction to **commit at the end of each phase**, carrying that phase's `## Implementation` lines.
+5. The instruction to **commit at the end of each phase**, carrying that phase's `## Implementation` rows.
 
 ```bash
-orca terminal send --terminal <h> --enter --text "Read build/SKILL.md and follow it. go all phases — do not gate between them, there is nobody at this terminal to answer. Design file: .design/2026-09-02-user-settings.md. Load the house conventions from build's House Conventions section — errors, logging, keep-it-simple, plus the stack conventions. No historical comments: comments describe the code as it is, never how it got here. Commit at the end of each phase, with that phase's ## Implementation lines in the same commit."
+orca terminal send --terminal <h> --enter --text "Read ${CLAUDE_SKILL_DIR}/../build/SKILL.md and follow it. go all phases — do not gate between them, there is nobody at this terminal to answer. Design file: .design/2026-09-02-user-settings.md. Load the house conventions from build's House Conventions section — errors, logging, keep-it-simple, plus the stack conventions. No historical comments: comments describe the code as it is, never how it got here. Commit at the end of each phase, with that phase's ## Implementation rows in the same commit."
 ```
 
 ### Telling finished from errored from waiting (terminal mode only)
@@ -177,7 +177,7 @@ Skip this stage only when the change genuinely has no user-facing surface — a 
 2. **Claude-in-Chrome** — the `mcp__claude-in-chrome__*` tools, if available.
 3. **Neither available** — say so, skip the stage, and note in the PR that the changes were not exercised in a browser. Do not pretend a code read is a functional test.
 
-**Driving Orca** (verified command surface):
+**Driving Orca** (every `orca` command in this skill, terminal and browser, verified against Orca CLI 1.4.203 — if a command here fails, check `orca <command> --help` before assuming the page is broken; Orca may have moved):
 
 ```bash
 orca tab create --url http://localhost:3000/<route>
@@ -206,7 +206,7 @@ Reviewing code you already know is broken wastes the review. So this stage does 
 1. **Number each defect `FT-1`, `FT-2`,** in the order found. The `FT-` prefix keeps a browser defect distinct from `CR-n` and `DR-n`, so the PR and `## Implementation` can tell which pass caught what.
 2. **Fix them through `build`'s "from a review report" path**, exactly as stages 6 and 8 do — same house conventions, same ban on historical comments, same `go all` instruction if you spawn a terminal for it.
 3. **Commit** (`fix:` per `keep-it-simple`), re-run the tests, push.
-4. **Record each one in `## Implementation`**: the id, what was broken, what fixed it — one line each, the same shape as a review finding.
+4. **Record each one in `## Implementation` → `### Findings`**: the id, what was broken, what fixed it — one row each, the same table as a review finding.
 5. **Only then enter stage 5.**
 
 **A defect you cannot fix inside the task's scope** is a rule 2 blocker if it breaks the primary journey, and a Known findings entry in the PR — its id and a one-line reason — if it does not. Do not enter the warm review with a known-broken journey, and do not carry an `FT-n` forward silently: every one is fixed and recorded, blocked on, or listed in the PR.
@@ -215,9 +215,9 @@ Reviewing code you already know is broken wastes the review. So this stage does 
 
 Read and follow, in order, against the changes on this branch:
 
-1. `code-review/SKILL.md` → `CR-n` findings
+1. `${CLAUDE_SKILL_DIR}/../code-review/SKILL.md` → `CR-n` findings
 2. Claude Code's built-in `security-review` → `SEC-n` findings
-3. `design-review/SKILL.md` → `DR-n` findings (skip when there is no UI)
+3. `${CLAUDE_SKILL_DIR}/../design-review/SKILL.md` → `DR-n` findings (skip when there is no UI)
 
 **The findings stay in this session.** No report files: what gets fixed in stage 6 is recorded in `## Implementation`, what stays open goes in the PR's Known findings. Keep the full list to hand until stage 6 has worked through it.
 
@@ -234,11 +234,11 @@ This review is **warm**: you built this, so you know what every line was meant t
 
 ## Stage 6: Fix the warm findings
 
-Read `build/SKILL.md` and follow its **"from a review report"** path — fixing findings is a build pass, and it carries the same conventions, the same ban on historical comments, the same `go all` instruction when you spawn a terminal for it, and the same duty to record what changed in `## Implementation`, one line per finding id.
+Read `${CLAUDE_SKILL_DIR}/../build/SKILL.md` and follow its **"from a review report"** path — fixing findings is a build pass, and it carries the same conventions, the same ban on historical comments, the same `go all` instruction when you spawn a terminal for it, and the same duty to record what changed in `## Implementation` → `### Findings`, one row per finding id.
 
 Fix must-fix and should-fix findings. Consider-level ones are optional; take the cheap ones. A finding you disagree with is not one you ignore: say why in a line and leave it, which is a position the user can overrule.
 
-Commit the fixes (`fix:` per `keep-it-simple`), re-run the tests, and push. Report each finding as fixed, or as not-fixed with a one-line reason. Every fix gets its line in `## Implementation`; anything not fixed goes to the PR's Known findings. Those two places are the entire record — there is no report file to update.
+Commit the fixes (`fix:` per `keep-it-simple`), re-run the tests, and push. Report each finding as fixed, or as not-fixed with a one-line reason. Every fix gets its row in `## Implementation` → `### Findings`; anything not fixed goes to the PR's Known findings. Those two places are the entire record — there is no report file to update.
 
 ## Stage 7: Cold review
 
@@ -249,7 +249,7 @@ The point of a cold review is that it has no idea what you meant. A reviewer who
 - the **full PR diff** — every change in the PR, not just the most recent phase. **Paste the output of `gh pr diff <number>` into the instruction** rather than telling the agent to run it. Where no PR exists (no remote), paste `git diff main...HEAD` instead — the point is the complete set of changes, not the transport. An agent with a shell will also reach `git log`, the commit messages, and the `## Implementation` section of the design file — each of which arrives warm, having defeated the entire stage. Tell it explicitly not to read git history, and to read `## Problem`, `## Solution`, `## Scope` and `## Experience` of the design file but **not** `## Implementation`.
 - the **PR title and description**, labelled as *an unverified claim about the code, not a specification*. That label is what stops the reviewer "fixing" correct code to match a stale sentence.
 - the design file's intent sections — `## Problem`, `## Solution`, `## Scope`, `## Experience` — as the statement of intent, and the PRD if one exists; say so plainly when there is none rather than implying it is required.
-- the instruction to read `code-review/SKILL.md` and follow it, then run `security-review`.
+- the instruction to read `${CLAUDE_SKILL_DIR}/../code-review/SKILL.md` and follow it, then run `security-review`.
 
 Spawn a **fresh general-purpose agent, never a fork** — a fork inherits this conversation, which is the one thing the stage exists to prevent.
 

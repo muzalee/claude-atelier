@@ -1,6 +1,6 @@
 ---
 name: keep-it-simple
-description: Apply to all written output — commit messages, PR titles/descriptions, branch names, code comments, documentation, and explanations. Enforces conventional-commit format for git (feat/fix/chore/etc. + scope + short subject) with matching branch prefix (`feat/`, `fix/`, etc.), respects project convention if `.commitlintrc.*` is present, keeps everything short and why-focused, and never adds "Co-Authored-By Claude" or "Generated with Claude Code" trailers. Trigger on any writing task, especially git commit, gh pr create, git checkout -b, adding comments/docstrings, or writing README/docs.
+description: House rules for everything written: conventional commits and matching branch names (respecting `.commitlintrc`), PR titles and bodies, code comments (none by default, never historical, a low ratio), and docs. Short, why-focused, no Claude trailers. Use on any git commit, `gh pr create` or `git checkout -b`, and whenever writing or reviewing code comments, docstrings, or README/docs.
 ---
 
 Default to the shortest form that still conveys the point. Structure follows a convention where one exists; tone stays terse everywhere.

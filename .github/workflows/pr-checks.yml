@@ -49,6 +49,7 @@ jobs:
           scopes: |
             atelier
             atelier-typescript
+            atelier-flutter
             marketplace
             ci
             docs

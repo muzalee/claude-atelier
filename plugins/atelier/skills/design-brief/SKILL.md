@@ -46,7 +46,11 @@ The brief is not a document of its own — it is the first four sections of the 
 
 Write into the `## Problem`, `## Solution`, `## Scope` and `## Experience` sections of `.design/YYYY-MM-DD-<feature-slug>.md`, where `<feature-slug>` is a short, lowercase, hyphenated name derived from the feature or page being designed (e.g., `onboarding-flow`, `settings-page`, `project-dashboard`).
 
-**This skill creates the file, and it is the only one that does.** It also writes the `# Design: <feature>` title, the `> PRD: docs/prd/NNNN-<slug>.md` line when a PRD covers this work (omit the line entirely when none does), and the remaining empty headings in their fixed order so later phases have somewhere to write:
+**Find before you create.** Look for an existing design file by the procedure in `${CLAUDE_SKILL_DIR}/../design/SKILL.md` → **Finding the design file**, matching this feature's slug. If one exists — flat, or either legacy folder shape — write into it under the name it already has, in the shape it already has. Do not mint a second file, do not rename or re-date the one you found, and do not convert a legacy folder.
+
+**Only when nothing matches, create the file — this skill is the only one that does.** Take the date from the environment — run `date +%F` — and use it verbatim. Never guess it, never reuse a date from an example. Once the file exists the date is frozen: it records when the design started, not when it was last touched.
+
+A new file gets the `# Design: <feature>` title, the `> PRD: docs/prd/NNNN-<slug>.md` line when a PRD covers this work (omit the line entirely when none does), and the remaining empty headings in their fixed order so later phases have somewhere to write:
 
 ```markdown
 # Design: <feature>
@@ -57,35 +61,28 @@ Write into the `## Problem`, `## Solution`, `## Scope` and `## Experience` secti
 ## Experience
 ## Architecture
 ## Structure
-## Tokens
 ## Tests
 ## Tasks
 ## Implementation
 ```
 
-On the **short form** (`/design` decides which — one screen, no new data, no new route, no new dependency, no auth or money path), write only `## Problem`, `## Solution`, `## Tasks` and `## Implementation`, and omit the other six headings entirely rather than stubbing them.
+**With a PRD, leave `## Scope` out.** The PRD's requirements and non-goals are the scope, and the `> PRD:` line already points there. A second scope section is a second surface to drift.
 
-**This skill picks the date, and it is the only one that does.** Read today's date from the environment — run `date +%F` — and use it verbatim. Never guess it, never reuse a date from an example. Once the folder exists the date is frozen: it records when the design started, not when it was last touched.
+On the **short form** (`/design` decides which — one screen, no new data, no new route, no new dependency, no auth or money path), write only `## Problem`, `## Solution`, `## Tasks` and `## Implementation`, and omit the other headings entirely rather than stubbing them.
 
-Before creating anything, glob `.design/*<feature-slug>*/`. If a folder for this feature already exists — dated or a legacy bare `.design/<feature-slug>/` from before this convention — write into it as it is named. Do not mint a second folder and do not rename the existing one.
-
-**A legacy folder keeps its old shape.** If the folder you found has no `DESIGN.md` but does have `DESIGN_BRIEF.md`, keep writing to `DESIGN_BRIEF.md`. Do not convert the folder and do not start a `DESIGN.md` beside the old files.
-
-This folder structure ensures that running the design flow multiple times for different features does not overwrite previous work. All subsequent skills (backend-design, information-architecture, design-tokens, test-plan, brief-to-tasks, build, review) discover this folder by globbing and write into the same file — they never create their own.
-
-Example:
+Every later skill (backend-design, information-architecture, design-tokens, test-plan, brief-to-tasks, build, review) finds this file by the same procedure and writes into it — none of them creates its own.
 
 ```
 .design/
-├── 2026-09-20-onboarding-flow/
-│   └── DESIGN.md
-└── 2026-09-21-settings-page/
-    └── DESIGN.md
+├── 2026-09-20-onboarding-flow.md
+└── 2026-09-21-settings-page.md
 ```
 
 ## What to write in each section
 
-The headings below are the four this skill owns. Everything the old standalone brief covered still gets decided — it just lands in one of these four rather than in a document of its own. **Write only what this feature actually touches**: a sub-heading with nothing real under it is worse than an absent one, and a table of `[name] | Exists / Modify / New | [detail]` placeholders is not a component inventory.
+The headings below are the ones this skill owns — four without a PRD, three with one. Everything the old standalone brief covered still gets decided — it just lands in one of these four rather than in a document of its own. **Write only what this feature actually touches**: a sub-heading with nothing real under it is worse than an absent one, and a table of `[name] | Exists / Modify / New | [detail]` placeholders is not a component inventory.
+
+**Tables for anything enumerable** — they are what a human scans first. The example rows below show the shape; replace them with this feature's, and drop a table that would have no real rows. Prose only where the content is reasoning, not a list.
 
 ```markdown
 ## Problem
@@ -96,36 +93,80 @@ What problem is the user facing, from their perspective. Not technical. Not busi
 
 What this interface does about it, described as an experience, not a feature list.
 
+**Considered and rejected** — up to three rows. Grill-me's summary is where these come from. Without them, "why didn't we do X?" has no answer six weeks out.
+
+| Alternative | Why it lost |
+| ----------- | ----------- |
+| Autosave every field | Races the profile save; an explicit save is the smaller state model |
+
 ## Scope
 
-**In scope**: what this design covers.
-**Out of scope**: what it explicitly does not. Be specific — "polish and extras" prevents nothing. This is what stops scope creep during the build.
+_Only when there is no PRD._
+
+| In scope | Out of scope |
+| -------- | ------------ |
+| Display name and avatar edits | Email change — needs re-verification, separate design |
+
+Be specific — "polish and extras" prevents nothing. This is what stops scope creep during the build.
 
 ## Experience
 
-**Philosophy**: named philosophy or described vibe (see `ui-build` for reference), plus the emotional tone, what it should feel like, and what it should NOT.
+**Philosophy**: named philosophy or described vibe (the menu is `ui-build`'s `references/philosophies.md`), plus the emotional tone, what it should feel like, and what it should NOT. Prose — this is the one part that is not a list.
 
-**Principles** (at most three, only if they earn their place): each one resolves a tension — "progressive disclosure over upfront complexity", "confidence over speed" — and says what it means in practice.
+**Principles** — at most three, only if they earn their place. Each resolves a tension.
 
-**Existing patterns**: the typography, colors, spacing and components already in the codebase that this design extends rather than replaces.
+| Principle | In practice |
+| --------- | ----------- |
+| Confidence over speed | Every destructive action gets a confirm step |
 
-**Components**: which the feature needs, and for each whether it exists, needs modifying, or is new. A list is fine; a table is fine; a table of placeholders is not.
+**Existing patterns** — what this design extends rather than replaces.
 
-**Key interactions**: what the user does and what the interface does back — state changes, transitions, feedback. **Name each one**, because `## Tests` and `## Tasks` refer to them by name instead of describing them again.
+| Pattern | Lives in |
+| ------- | -------- |
+| Card surface + 8px grid | `src/components/Card.tsx`, `tailwind.config.ts` |
 
-**Responsive**: how the layout adapts, and which components change *behavior* rather than just size on mobile.
+**Components**
 
-**Accessibility**: contrast ratios, keyboard navigation, screen reader needs, focus management — the minimum this interface must meet.
+| Component | Status | Notes |
+| --------- | ------ | ----- |
+| `ProfileCard` | New | Wraps the existing `Card` |
+| `AvatarMenu` | Modify | Adds a "Settings" item |
+
+**Key interactions** — **name each one**, because `## Tests` and `## Tasks` refer to them by name instead of describing them again.
+
+| Name | User does | Interface does |
+| ---- | --------- | -------------- |
+| Save name | Edits the field, clicks Save | Disables the button, saves, shows inline "Saved" |
+
+**Responsive** — only components that change *behavior*, not just size.
+
+| Component | Mobile | Desktop |
+| --------- | ------ | ------- |
+| Settings nav | Bottom sheet | Left rail |
+
+**Accessibility** — the minimum this interface must meet.
+
+| Requirement | Target |
+| ----------- | ------ |
+| Contrast | WCAG AA, 4.5:1 body text |
+| Focus | Save returns focus to the edited field |
+
+### Tokens
+
+Left for `design-tokens` to fill. Write the sub-heading and nothing under it.
 ```
 
 On the short form there is no `## Scope` or `## Experience`. Fold anything genuinely decided into `## Solution` in a line or two and move on.
 
+A backend-only feature in the full form writes `## Experience` as one line naming the callers instead of a UI — see **The full form leans frontend** in `${CLAUDE_SKILL_DIR}/../design/SKILL.md`.
+
 ## Done when
 
-- `.design/YYYY-MM-DD-<slug>.md` exists, with the title, the PRD line when there is a PRD, and the headings for the chosen form in order
-- `## Problem`, `## Solution`, `## Scope` and `## Experience` are filled (short form: `## Problem` and `## Solution`)
+- `.design/YYYY-MM-DD-<slug>.md` exists — found, or created only because nothing matched — with the title, the PRD line when there is a PRD, and the headings for the chosen form in order
+- `## Problem`, `## Solution`, `## Scope` (no PRD only) and `## Experience` are filled (short form: `## Problem` and `## Solution`)
+- `## Solution` names the alternatives that lost, when there were any
 - The `<slug>` is locked — every later phase writes into this same file
-- Out of Scope is specific, not "polish and extras"
+- Out of scope is specific, not "polish and extras" — in `## Scope`, or in the PRD's non-goals
 - The aesthetic direction names something concrete enough to build from
 - Nothing is a placeholder — every line says something about this feature
 

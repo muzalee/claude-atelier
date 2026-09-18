@@ -1,6 +1,6 @@
 ---
 name: backend-design
-description: Create a backend design through an interactive interview, codebase exploration, and decisions about data model, auth, invariants and failure modes. Biased toward Fastify (Node) but works for any backend stack. Fills the `## Architecture` section of the feature's `.design/YYYY-MM-DD-<slug>.md`. Use when user wants to plan a backend, design an API, define a data model, mention "backend brief", or pair with a frontend design brief.
+description: Design the server side of a feature through interview and codebase scan — data model, API surface, auth, invariants, failure modes. Fastify-biased, any stack. Fills `## Architecture` in the feature's `.design/YYYY-MM-DD-<slug>.md`. Use when the user wants to plan a backend, design an API or data model, or mentions a "backend brief".
 ---
 
 This skill designs the server side through structured conversation. It is the counterpart to `design-brief`, and it fills one section — `## Architecture` — of the feature's `.design/YYYY-MM-DD-<slug>.md`. Skip any question the codebase already answers — read first, then ask only what is unresolved.
@@ -56,7 +56,7 @@ This skill designs the server side through structured conversation. It is the co
 
    **Config / secrets**
    - `@fastify/env` with JSON Schema validation, `dotenv`, secret managers, feature flag clients
-   - If the feature already has a design file, read it — find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). The data model and routes must serve the flows named there.
+   - If the feature already has a design file, read it — find the feature's design file by the procedure in `${CLAUDE_SKILL_DIR}/../design/SKILL.md` → **Finding the design file**. The data model and routes must serve the flows named there.
    - Treat what exists as the starting vocabulary. Extend, don't replace.
 
 3. Interview the user on each unresolved area below. Ask one question at a time. For each, propose a recommended answer and explain the tradeoff so the user can push back. Skip any area the codebase scan answered definitively.
@@ -113,7 +113,7 @@ This skill designs the server side through structured conversation. It is the co
 
 Fill the `## Architecture` section of the feature's `.design/YYYY-MM-DD-<feature-slug>.md`.
 
-**Find the file before you make one.** Find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). The frontend brief usually got here first and already created it.
+**Find the file before you make one.** Find the feature's design file by the procedure in `${CLAUDE_SKILL_DIR}/../design/SKILL.md` → **Finding the design file**. The frontend brief usually got here first and already created it.
 
 In a legacy six-file folder, keep writing to `BACKEND_DESIGN.md` beside the other old files.
 
@@ -131,22 +131,46 @@ Read the sections already written — `## Problem`, `## Solution`, `## Scope`, `
 
 Never leave a placeholder table. A two-row API table is a design; a two-row API table plus six `| [type] | ... |` rows is a form nobody filled.
 
+Tables for everything enumerable; prose only for the shape and the reasoning. The example rows show the shape — replace them with this feature's.
+
 ```markdown
 ## Architecture
 
 **Shape**: what kind of system this is (CRUD API, event processor, job runner, gateway) and the one or two architectural choices that define it. On an existing backend: which plugin/module this lands in.
 
-**Callers**: who calls this, how (request/response, webhook, subscribe), and with what auth. Skip when it is only the frontend already named in `## Experience`.
+**Callers** — skip when it is only the frontend already named in `## Experience`.
 
-**Data model**: the entities this feature adds or changes — fields, types, required/optional, indexes, relationships. Only the delta; the rest of the schema is in the repo.
+| Caller | How | Auth |
+| ------ | --- | ---- |
+| Billing service | Webhook `POST /hooks/invoice` | HMAC signature |
 
-**Invariants**: the business rules the schema must enforce — uniqueness, referential integrity, state machines, allowed transitions. Note which are enforced at the DB layer vs. the application layer and why.
+**Data model** — only the delta; the rest of the schema is in the repo.
 
-**API surface**: method, path, purpose, auth, idempotency. Sketch request/response shape inline for the non-trivial ones.
+| Entity | Field | Type | Required | Notes |
+| ------ | ----- | ---- | -------- | ----- |
+| `user_settings` | `digest_enabled` | boolean | yes | default `true` |
+| `user_settings` | `user_id` | uuid | yes | FK `users.id`, unique |
+
+**Invariants** — the business rules the schema must enforce.
+
+| Invariant | Enforced at | Why there |
+| --------- | ----------- | --------- |
+| One settings row per user | DB unique index | Two concurrent first saves must not both insert |
+
+**API surface** — sketch request/response shape under the table for the non-trivial ones.
+
+| Method | Path | Purpose | Auth | Idempotent |
+| ------ | ---- | ------- | ---- | ---------- |
+| `PATCH` | `/api/me/settings` | Update own settings | session | yes |
 
 **Auth**: authentication mechanism, authorization model, tenancy, and what the threat model worries about here — credential leak, replay, IDOR, enumeration. On an existing backend this is usually one line: which existing guard the routes sit behind.
 
-**Failure modes**: the top 3-5 ways this goes wrong and the chosen response — retry, fail loud, degrade, queue for later. These become integration cases in `## Tests`, so name them.
+**Failure modes** — the top 3-5. These become integration cases in `## Tests`, so name them.
+
+| Failure | Response |
+| ------- | -------- |
+| Concurrent first save | Upsert on the unique index; second write wins |
+| DB unavailable | 503 `D0001`, retryable |
 
 **Growth / consistency / deployment / observability**: only when this feature changes them. A new table with a retention policy, a write that needs a transaction, a migration with a zero-downtime requirement, a new signal worth alerting on. Nothing to say means these do not appear.
 ```

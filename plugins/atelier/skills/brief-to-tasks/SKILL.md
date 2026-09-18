@@ -14,7 +14,7 @@ This skill turns a design into an ordered, buildable task list, written into the
 
 ## Process
 
-1. Read the design. Find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). Read every section already filled — `## Problem`, `## Solution`, `## Scope`, `## Experience`, `## Architecture`, `## Structure`, `## Tokens`, `## Tests`. The cases in `## Tests` become test tasks alongside the implementation work: one task per meaningful assertion, grouped in the "Tests" group below. In a legacy six-file folder, read `DESIGN_BRIEF.md` / `INFORMATION_ARCHITECTURE.md` / `DESIGN_TOKENS.md` / `TEST_PLAN.md` and write `TASKS.md` beside them as before. If nothing exists, ask the user to describe what they are building.
+1. Read the design. Find the feature's design file by the procedure in `${CLAUDE_SKILL_DIR}/../design/SKILL.md` → **Finding the design file**. Read every section already filled — `## Problem`, `## Solution`, `## Scope` (or the PRD it points at), `## Experience` and its `### Tokens`, `## Architecture`, `## Structure`, `## Tests`. The cases in `## Tests` become test tasks alongside the implementation work: one task per meaningful assertion, grouped in the "Tests" group below. In a legacy six-file folder, read `DESIGN_BRIEF.md` / `INFORMATION_ARCHITECTURE.md` / `DESIGN_TOKENS.md` / `TEST_PLAN.md` and write `TASKS.md` beside them as before. If nothing exists, ask the user to describe what they are building.
 
 2. Explore the existing codebase to understand what is already built. Scan specifically for:
    - **Component directories**: `components/`, `ui/`, `shared/` and list every component by name
@@ -40,7 +40,7 @@ This skill turns a design into an ordered, buildable task list, written into the
 
 ## What to write in `## Tasks`
 
-Groups, not sub-documents. Use only the groups this feature needs — a four-task change does not need five headings. **Reference the sections above rather than repeating them**: a task names the interaction from `## Experience` or the endpoint from `## Architecture`, it does not re-describe it.
+Groups, not sub-documents. **A checklist, not a table** — `/build` ticks these boxes as it goes, and a table cell has no checkbox. Use only the groups this feature needs — a four-task change does not need five headings. **Reference the sections above rather than repeating them**: a task names the interaction from `## Experience` or the endpoint from `## Architecture`, it does not re-describe it.
 
 ```markdown
 ## Tasks
@@ -64,10 +64,9 @@ _One task per case in `## Tests`, at the level named there. Omit this group when
 - [ ] **[unit] [case name]**: [assertion in one line].
 - [ ] **[integration] [case name]**: [assertion in one line]. _Real dep: [Postgres / Redis / etc]._
 - [ ] **[e2e] [case name]**: [assertion in one line]. _Tooling: Playwright (or Claude Chrome extension for exploratory walk-through)._
-
-### Review
-- [ ] **Design review**: run `/atelier:design-review` against `## Experience`.
 ```
+
+No `### Review` group. `/review` and `/ship` own the design review; a checkbox for it here sits unticked after either one runs, and reads as unfinished work.
 
 ## Rules
 

@@ -23,7 +23,7 @@ This skill runs a structured design review of what has been built, measured agai
 
 ## Process
 
-1. **Read the design.** Find the feature's design file by the procedure in `design/SKILL.md` → **Finding the design file** (glob `.design/*.md`; two legacy folder shapes still read; several matches take the most recent date and say which; reuse the name verbatim; never create a second one). Read `## Experience` for the philosophy and the component list, `## Tokens` for the token roles, and `## Structure` for the routes to visit. If several features are in play, ask the user which to review. If nothing exists, ask the user what the intended design direction was and say in the findings that you reviewed against the codebase rather than a design.
+1. **Read the design.** Find the feature's design file by the procedure in `${CLAUDE_SKILL_DIR}/../design/SKILL.md` → **Finding the design file**. Read `## Experience` for the philosophy and the component list, its `### Tokens` block for the token roles, and `## Structure` for the routes to visit. If several features are in play, ask the user which to review. If nothing exists, ask the user what the intended design direction was and say in the findings that you reviewed against the codebase rather than a design.
 
 2. **Explore the built code.** Examine every component, page, and style file that was created or modified. Scan specifically for:
    - All new or modified components and their relationship to pre-existing components
@@ -229,7 +229,7 @@ Viewed: `/settings` and `/settings/profile` at 375 / 768 / 1280, light and dark.
 ## Done when
 
 - The running app was viewed at mobile, tablet, and desktop — and you said which routes
-- Every finding carries a `DR-n` id and is measured against `## Experience` and `## Tokens`, not against taste
+- Every finding carries a `DR-n` id and is measured against `## Experience` and its `### Tokens`, not against taste
 - **Nothing was written to the repo** — no report, no screenshots. The fix pass records what it fixed in `## Implementation`
 
 **Then hand off.** Say: "Design review done: N findings." Then: "Next: fix the must-fix items with **`/atelier:build`**, then re-run this to confirm." 

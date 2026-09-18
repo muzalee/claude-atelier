@@ -57,7 +57,7 @@ Bootstrap a new project end-to-end. Ask the small handful of things you actually
      New code goes in `src/features/<feature>/`; promote to shared only on the second real consumer.
      ```
 
-   Keep `CLAUDE.md` to what is true on day one — the stack, how to run it, the structure pointer. Do not pad it with aspirations. For auditing and growing it later, point the user at the `claude-md-improver` skill rather than doing that work now; there is nothing to audit in a repo with four files.
+   Keep `CLAUDE.md` to what is true on day one — the stack, how to run it, the structure pointer. Do not pad it with aspirations. For auditing and growing it later, point the user at `claude-md-management:claude-md-improver` — from Anthropic's official `claude-md-management` plugin, installable from the `claude-plugins-official` marketplace — rather than doing that work now; there is nothing to audit in a repo with four files.
 
 5. **`git init`** and make the first commit. Message format: `Initial commit — <one-line purpose>`. **Do NOT add `Co-Authored-By: Claude` trailer.**
 
