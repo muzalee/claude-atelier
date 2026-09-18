@@ -1,0 +1,16 @@
+{
+  "name": "cadence",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "fastify": "^4.28.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": { "typescript": "^5.5.0", "vite": "^5.4.0", "vitest": "^2.0.0" }
+}

@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: build-records-implementation
+description: "A short-form design with one task. After building it, the task is ticked and `## Implementation` has a Built-table row naming the files and nothing the diff already says, committed in the same commit as the code."
+tags: [build]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "implement the design in .design/2026-09-10-settings-link.md — go all, no gates"
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

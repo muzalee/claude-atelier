@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: design-resume-existing-file
+description: "A design file for the feature already exists with Problem and Solution filled. /design must find it, name it, list what is filled, and offer to resume from the next empty section — never mint a second dated file, rename it, or rewrite what is already there. Catches design-brief globbing for folders only."
+tags: [design]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "run the design pipeline for the user settings page"
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]

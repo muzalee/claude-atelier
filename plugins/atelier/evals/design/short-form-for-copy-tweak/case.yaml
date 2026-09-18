@@ -1,0 +1,11 @@
+schema_version: "1.0"
+name: design-short-form-for-copy-tweak
+description: "A one-line copy change. /design must judge the size first and pick the short form out loud, in one line — or say even that is ceremony and offer /atelier:build plus /atelier:code-review. Whatever it writes has no stubbed Scope / Experience / Architecture / Structure / Tests headings."
+tags: [design]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "run the design pipeline for this: change the settings save button label from 'Save changes' to 'Save' (src/components/SaveBar.tsx). I'm away — make the calls you would recommend, and write the design file if you think one is warranted."
+  max_turns: 30
+  timeout_seconds: 900
+  allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
