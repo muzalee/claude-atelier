@@ -10,7 +10,7 @@
       "name": "atelier",
       "source": "./plugins/atelier",
       "description": "Design → build → review pipeline plus writing-craft skills. Stack-agnostic.",
-      "version": "0.6.3",
+      "version": "0.6.4",
       "category": "workflow",
       "keywords": [
         "design",
@@ -23,7 +23,7 @@
       "name": "atelier-typescript",
       "source": "./plugins/atelier-typescript",
       "description": "TypeScript skills: house conventions for React + Fastify, and route scaffolding. Install alongside atelier in a TypeScript codebase.",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "category": "workflow",
       "keywords": [
         "typescript",
@@ -37,7 +37,7 @@
       "name": "atelier-flutter",
       "source": "./plugins/atelier-flutter",
       "description": "Flutter skills: feature-first project structure and house conventions. Install alongside atelier in a Flutter codebase.",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "category": "workflow",
       "keywords": [
         "flutter",
