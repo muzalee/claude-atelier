@@ -114,7 +114,7 @@ review-ready PR behind. It does not design anything — `/design` still comes fi
 
 ## Orchestrators
 
-- `bootstrap` — scaffold a new project: folder, stack starter, the right folder structure for that stack written to `.claude/rules/0001-structure.md` + CLAUDE.md, `.gitignore`, README, LICENSE, git init, optional GitHub repo with topics
+- `bootstrap` — scaffold a new project: folder, stack starter, the right folder structure for that stack written to `.claude/rules/0001-structure.md` + CLAUDE.md, `.claude/settings.json` permissions, `.gitignore`, README, LICENSE, git init, optional GitHub repo with topics
 - `design` — pure-design pipeline: grill-me → brief → backend-design → IA → tokens → test-plan → tasks. Output is one markdown file, `.design/YYYY-MM-DD-<slug>.md` — a short form (Problem, Solution, Tasks, Implementation) for small changes, the full form for features. Invoke as `/atelier:design`.
 - `build` — reads `.design/YYYY-MM-DD-<slug>.md` and implements: materializes the `### Tokens` spec, runs ui-build against `## Tasks`, then backend-build against `## Architecture`, recording what it built in `## Implementation`.
 - `review` — runs code-review + security-review + design-review against the built code, using the design file as the yardstick. Prints findings with stable ids and writes nothing.
