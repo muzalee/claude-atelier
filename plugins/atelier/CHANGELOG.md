@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.5](https://github.com/muzalee/claude-atelier/compare/atelier-v0.6.4...atelier-v0.6.5) (2026-10-07)
+
+
+### Bug Fixes
+
+* **atelier:** give bootstrapped projects a shared .claude/settings.json ([#30](https://github.com/muzalee/claude-atelier/issues/30)) ([77aad49](https://github.com/muzalee/claude-atelier/commit/77aad490f0b3218c508f57f858e100390b59135e))
+
 ## [0.6.4](https://github.com/muzalee/claude-atelier/compare/atelier-v0.6.3...atelier-v0.6.4) (2026-09-18)
 
 
