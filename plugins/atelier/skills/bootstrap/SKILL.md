@@ -1,6 +1,6 @@
 ---
 name: bootstrap
-description: Scaffold a new project from scratch — folder, stack starter, the right folder structure for that stack, CLAUDE.md, `.claude/rules/`, .gitignore, README, LICENSE, git init + first commit, and (if gh is authed) the GitHub repo with description, topics, and visibility. Use when the user says "start a new project", "bootstrap", "new repo", "scaffold X", or asks to set up a fresh codebase.
+description: Scaffold a new project from scratch — folder, stack starter, the right folder structure for that stack, CLAUDE.md, `.claude/rules/`, `.claude/settings.json`, .gitignore, README, LICENSE, git init + first commit, and (if gh is authed) the GitHub repo with description, topics, and visibility. Use when the user says "start a new project", "bootstrap", "new repo", "scaffold X", or asks to set up a fresh codebase.
 ---
 
 Bootstrap a new project end-to-end. Ask the small handful of things you actually need, then build it. Don't over-configure — a bootstrap is a starting point, not a finished template.
@@ -59,15 +59,30 @@ Bootstrap a new project end-to-end. Ask the small handful of things you actually
 
    Keep `CLAUDE.md` to what is true on day one — the stack, how to run it, the structure pointer. Do not pad it with aspirations. For auditing and growing it later, point the user at `claude-md-management:claude-md-improver` — from Anthropic's official `claude-md-management` plugin, installable from the `claude-plugins-official` marketplace — rather than doing that work now; there is nothing to audit in a repo with four files.
 
-5. **`git init`** and make the first commit. Message format: `Initial commit — <one-line purpose>`. **Do NOT add `Co-Authored-By: Claude` trailer.**
+5. **Write `.claude/settings.json`** — project-level permissions, committed so everyone on the repo gets them. Two lists, both from the settings templates below:
+   - **`allow`** — the stack's safe checks (lint, format, type-check, test) so Claude stops prompting for them.
+   - **`deny`** — reads and edits of every file that holds a secret in *this* repo, plus commands that destroy data.
 
-6. **GitHub (if requested)**:
+   ```json
+   {
+     "permissions": {
+       "allow": ["Bash(npm run lint*)", "Bash(npx tsc --noEmit*)"],
+       "deny": ["Read(**/.env)", "Edit(**/.env)", "Read(**/.env.local)"]
+     }
+   }
+   ```
+
+   Only allow commands the starter actually has — no `Bash(npm run lint*)` without a `lint` script. Work out the secret files from the stack and the services the user named — env files, signing keys, store and cloud credentials — not just `.env`; the table below is a floor, not the list. Each one also goes in `.gitignore`. Deny destructive commands only for tools the stack ships.
+
+6. **`git init`** and make the first commit. Message format: `Initial commit — <one-line purpose>`. **Do NOT add `Co-Authored-By: Claude` trailer.**
+
+7. **GitHub (if requested)**:
    - Check `gh auth status` first. If not authed, print the exact `gh auth login` command and skip repo creation.
    - Run `gh repo create <name> --description "<purpose>" --public|--private --source=. --remote=origin --push`
    - Add topics: `gh repo edit --add-topic <topic1> --add-topic <topic2> ...`
    - Print the repo URL.
 
-7. **Summarize** in ~3 lines: what was created, git status, GitHub URL (if made). Nothing more.
+8. **Summarize** in ~3 lines: what was created, git status, GitHub URL (if made). Nothing more.
 
 ## Stack starters
 
@@ -97,11 +112,25 @@ Use `uv init` if `uv` is installed, else `pyproject.toml` by hand.
 `index.html`, `styles.css`, `README.md`. No build step.
 
 ### Empty
-Just `.gitignore` (with `.DS_Store`, `.env`, `node_modules/`), `README.md`, and a `src/` folder if the user wants one.
+Just `.gitignore` (the always-include set plus `node_modules/`), `README.md`, and a `src/` folder if the user wants one.
+
+## Settings templates
+
+Always deny: `Read(**/.env)`, `Edit(**/.env)`, `Read(**/.env.local)`, `Read(**/.env.*.local)`, `Read(**/.env.production)`. Not `.env.*` — that hides `.env.example`.
+
+Add what the services bring: `Read(**/*.pem)` and `Read(**/*.key)` for TLS or SSH keys, the service-account JSON for Google Cloud or Firebase Admin, `Read(**/*.p8)` for Apple push or Sign in with Apple.
+
+| Stack | `allow` | Extra `deny` |
+| ----- | ------- | ------------ |
+| Node / Fastify / Next.js / Vite | `Bash(npm run lint*)`, `Bash(npm run format*)`, `Bash(npx tsc --noEmit*)`, `Bash(npm test*)` — only scripts that exist; with Prisma add `Bash(npx prisma generate*)`, `Bash(npx prisma validate*)`, `Bash(npx prisma format*)` | with Prisma: `Bash(npx prisma migrate reset*)`, `Bash(npx prisma db push*)` |
+| Flutter | `Bash(flutter analyze*)`, `Bash(flutter test*)`, `Bash(flutter pub get*)`, `Bash(dart analyze*)`, `Bash(dart format*)`, `Bash(dart fix --dry-run*)` | `Read(android/key.properties)`, `Edit(android/key.properties)`, `Read(**/*.jks)`, `Read(**/*.keystore)`, `Read(**/*.p8)`, `Read(**/*.p12)`, `Read(**/google-services.json)`, `Read(**/GoogleService-Info.plist)`, `Read(**/agconnect-services.json)`; plus `Read`/`Edit` of the `--dart-define-from-file` keys file, if any |
+| Python | `Bash(uv run ruff*)`, `Bash(uv run pytest*)` — only if installed | |
+| Go | `Bash(go build*)`, `Bash(go test*)`, `Bash(go vet*)`, `Bash(gofmt*)` | |
+| Static / Empty | none | |
 
 ## .gitignore templates
 
-Always include: `.DS_Store`, `.env`, `.env.*`, `*.log`.
+Always include: `.DS_Store`, `.env`, `.env.*`, `!.env.example`, `*.log`, `.claude/settings.local.json`.
 
 Add per stack:
 - **Node/JS/TS**: `node_modules/`, `dist/`, `build/`, `.next/`, `coverage/`, `.turbo/`
@@ -156,6 +185,7 @@ If the user doesn't provide topics, suggest 3–5 based on the stack and purpose
 - The folder exists with the stack starter, `.gitignore`, `README.md`, and `LICENSE` if requested
 - The folder structure for the stack is created, with `.gitkeep` in any empty directory
 - `.claude/rules/0001-structure.md` records the convention, and `CLAUDE.md` points at it
+- `.claude/settings.json` allows the stack's checks and denies secret files and destructive commands
 - `git init` done and the first commit made
 - The GitHub repo exists with description and topics, or you said why it does not
 
